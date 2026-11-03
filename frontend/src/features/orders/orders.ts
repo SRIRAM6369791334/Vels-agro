@@ -97,9 +97,9 @@ const L = (e) => {
 const Ue = (e) => findCustomerById(e.customerId)?.name ?? `Unknown customer`;
 const We = (e) => {
   if (e) {
-    return `#/customers/${e.kind === `stockist` ? `stockists` : `shoppers`}/${e.id}`;
+    return `/customers/${e.kind === `stockist` ? `stockists` : `shoppers`}/${e.id}`;
   }
-  return `#/customers/stockists`;
+  return `/customers/stockists`;
 };
 const R = (e) => ACTIVE_ORDER_STAGES.includes(e.status) && e.shipBy < Date.now();
 const Ge = (t) => `${formatDate(t)}, ${formatTime(t)}`;
@@ -192,7 +192,7 @@ function rt(e) {
     .reverse()
     .map(
       (n, r) =>
-        `<li class="od-hist__item" data-key="h-${e.history.length - r}" style="--c:var(--${L(n.to)})"><i></i><span><b>${n.to === `new` ? `Order placed` : n.to === `cancelled` ? `Cancelled` : `Moved to ${ORDER_STATUS_META[n.to].name}`}</b><small>${escapeHtml(getPendingReturnsCount(n.by) || `Vessa`)} · ${escapeHtml(renderNotificationItem(n.at))}</small></span></li>`
+        `<li class="od-hist__item" data-key="h-${e.history.length - r}" style="--c:var(--${L(n.to)})"><i></i><span><b>${n.to === `new` ? `Order placed` : n.to === `cancelled` ? `Cancelled` : `Moved to ${ORDER_STATUS_META[n.to].name}`}</b><small>${escapeHtml(getPendingReturnsCount(n.by) || `Vels`)} · ${escapeHtml(renderNotificationItem(n.at))}</small></span></li>`
     )
     .join(``);
 }
@@ -280,7 +280,7 @@ function ot(e, t, n, r = 0) {
 }
 function st(e) {
   let t = findOrderById(e);
-  let n = `#/orders/${Re}`;
+  let n = `/orders/${Re}`;
   if (!t) {
     showToast(`That order isn’t in the book any more`, {
       ico: `alert`,
@@ -297,7 +297,7 @@ function st(e) {
           if (B?.kind === `order` && B.id === e) {
             B = null;
           }
-          if (location.hash.startsWith(`${n}/${e}`)) {
+          if ((location.pathname.startsWith(`${n}/${e}`) || location.hash.startsWith(`${n}/${e}`))) {
             history.replaceState(null, ``, n);
           }
         },
@@ -623,7 +623,7 @@ function vt() {
     }
     let n = e_target.closest(`tr[data-open]`);
     if (n) {
-      location.hash = `#/orders/all/${n.dataset.open}`;
+      (window as any).navigateTo(`/orders/all/${n.dataset.open}`)
     }
   });
   F(`o-foot`).addEventListener(`click`, (e) => {
@@ -643,7 +643,7 @@ function vt() {
       openNewTransferModal(t);
       if (t.dataset.act === `new`) {
         openNewOrderModal({}, t, (e) => {
-          location.hash = `#/orders/all/${e.id}`;
+          (window as any).navigateTo(`/orders/all/${e.id}`)
         });
       } else if (t.dataset.act === `export`) {
         exportOrdersCsv();
@@ -712,9 +712,9 @@ function q(n) {
           let r = findCustomerById(n.customerId);
           let i = getOrderTotal(n);
           return `<tr class="is-link${n.status === `cancelled` ? ` is-void` : ``}" data-key="${n.id}" data-open="${n.id}">
-      <td class="a-h"><a class="ref oa-no" href="#/orders/all/${n.id}">${highlightSearchMatch(n.number, a)}</a>${R(n) ? `<span class="oa-late" title="Past its ship-by time">${renderIcon(`alert`)}</span>` : ``}</td>
+      <td class="a-h"><a class="ref oa-no" href="/orders/all/${n.id}">${highlightSearchMatch(n.number, a)}</a>${R(n) ? `<span class="oa-late" title="Past its ship-by time">${renderIcon(`alert`)}</span>` : ``}</td>
       <td class="a-h oa-date">${escapeHtml(formatDate(n.createdAt))}<small>${escapeHtml(formatTime(n.createdAt))}</small></td>
-      <td class="a-t"><span class="cell-person">${renderAvatar(n.customerId, `sm`)}<span><b>${highlightSearchMatch(r?.name ?? `Unknown`, a)}</b><small class="oa-city">${escapeHtml(r ? `${r.city}, ${r.region}` : ``)}</small><small class="oa-sub"><a class="oa-sub__no" href="#/orders/all/${n.id}">${highlightSearchMatch(n.number, a)}</a> · ${escapeHtml(formatDate(n.createdAt))} · ${Ve[n.channel]}</small></span></span></td>
+      <td class="a-t"><span class="cell-person">${renderAvatar(n.customerId, `sm`)}<span><b>${highlightSearchMatch(r?.name ?? `Unknown`, a)}</b><small class="oa-city">${escapeHtml(r ? `${r.city}, ${r.region}` : ``)}</small><small class="oa-sub"><a class="oa-sub__no" href="/orders/all/${n.id}">${highlightSearchMatch(n.number, a)}</a> · ${escapeHtml(formatDate(n.createdAt))} · ${Ve[n.channel]}</small></span></span></td>
       <td class="a-h">${He(n.channel)}</td>
       <td class="a-s"><span class="oa-items">${qe(n)}<small>${pluralize(findBatchByLotNumber(n), `unit`)}</small></span></td>
       <td class="a-r r oa-tot"><b>${formatMoney(i)}</b>${n.tracking && a && n.tracking.toLowerCase().includes(a.toLowerCase()) ? `<small class="mono">${highlightSearchMatch(n.tracking, a)}</small>` : ``}</td>
@@ -829,7 +829,7 @@ function kt() {
         ).join(``)}
         <section class="ob-col ob-col--done" data-lane="delivered" style="--c:var(--sage)" aria-labelledby="lane-delivered">
           <header class="ob-col__head"><span class="ob-col__ico">${renderIcon(`check`)}</span><span class="ob-col__t"><h2 id="lane-delivered">Delivered</h2><small>Today</small></span></header>
-          <div class="ob-done"><b class="num" data-n="delivered">0</b><small>delivered today</small><a class="btn btn--ghost btn--xs" href="#/orders/all">${renderIcon(`list`)}All orders</a><span class="ob-done__drop">${renderIcon(`check`)}Drop to mark delivered</span></div>
+          <div class="ob-done"><b class="num" data-n="delivered">0</b><small>delivered today</small><a class="btn btn--ghost btn--xs" href="/orders/all">${renderIcon(`list`)}All orders</a><span class="ob-done__drop">${renderIcon(`check`)}Drop to mark delivered</span></div>
         </section>
       </div>
     </section>`;
@@ -843,7 +843,7 @@ function kt() {
     if (t) {
       openNewTransferModal(t);
       openNewOrderModal({}, t, (e) => {
-        location.hash = `#/orders/board/${e.id}`;
+        (window as any).navigateTo(`/orders/board/${e.id}`)
       });
     }
   });
@@ -1059,7 +1059,7 @@ function Ft(e) {
       let e = X.card;
       It();
       if (e.isConnected && t.target.closest?.(`.ob-card`) === e) {
-        location.hash = `#/orders/board/${e.dataset.id}`;
+        (window as any).navigateTo(`/orders/board/${e.dataset.id}`)
       }
     }
   });
@@ -1083,7 +1083,7 @@ function Ft(e) {
     }
     if (e.key === `Enter` || e.key === ` `) {
       e.preventDefault();
-      location.hash = `#/orders/board/${n}`;
+      (window as any).navigateTo(`/orders/board/${n}`)
       return;
     }
     if (e.key !== `ArrowRight` && e.key !== `ArrowLeft`) {
@@ -1442,8 +1442,8 @@ function Qt(e, n) {
   let s = Zt(e);
   return `<div class="rt-row" data-key="${e.id}">
     ${r ? renderProductThumb(r, `md`) : ``}
-    <span class="rt-main"><a class="rt-name" href="#/orders/returns/${e.id}">${highlightSearchMatch(r ? formatProductFullName(r) : `Product`, n)}</a>
-      <small><span class="mono">${highlightSearchMatch(e.number, n)}</span> · ${i ? `<a class="ref rt-ord" href="#/orders/all/${i.id}">${highlightSearchMatch(i.number, n)}</a>` : ``} · ${highlightSearchMatch(a?.name ?? ``, n)}</small>
+    <span class="rt-main"><a class="rt-name" href="/orders/returns/${e.id}">${highlightSearchMatch(r ? formatProductFullName(r) : `Product`, n)}</a>
+      <small><span class="mono">${highlightSearchMatch(e.number, n)}</span> · ${i ? `<a class="ref rt-ord" href="/orders/all/${i.id}">${highlightSearchMatch(i.number, n)}</a>` : ``} · ${highlightSearchMatch(a?.name ?? ``, n)}</small>
       <span class="rt-reason">${renderIcon(`info`)}${highlightSearchMatch(e.reason, n)}</span></span>
     <span class="rt-amt"><small>Refund · ${formatInt(e.qty)} ${e.qty === 1 ? `unit` : `units`}</small><b>${formatMoney(e.refund)}</b></span>
     <span class="rt-st">${renderPill(RETURN_STATUS_NAMES[e.status], RETURN_STATUS_TONES[e.status])}<small>${escapeHtml(formatRelativeTime(e.createdAt))}</small></span>
@@ -1664,11 +1664,11 @@ function rn(e) {
     <div class="d-facts">
       <div><small>Quantity</small><b>${formatInt(e.qty)}</b><span>${r?.channel === `wholesale` ? `One inner carton` : `Single unit`}</span></div>
       <div><small>Refund</small><b>${formatMoney(e.refund)}</b><span>${e.status === `refunded` ? `Paid back` : `At the price paid`}</span></div>
-      <div><small>Order</small><b>${r ? `<a class="rd-link mono" href="#/orders/all/${r.id}">${escapeHtml(r.number)}</a>` : `—`}</b><span>${r ? escapeHtml(formatDate(r.createdAt, true)) : ``}</span></div>
+      <div><small>Order</small><b>${r ? `<a class="rd-link mono" href="/orders/all/${r.id}">${escapeHtml(r.number)}</a>` : `—`}</b><span>${r ? escapeHtml(formatDate(r.createdAt, true)) : ``}</span></div>
       <div><small>Requested</small><b>${escapeHtml(formatRelativeTime(e.createdAt))}</b><span>${escapeHtml(renderNotificationItem(e.createdAt))}</span></div>
     </div>
     ${i ? `<section class="d-sec"><h3>Customer</h3><a class="row od-cust" href="${We(i)}">${renderAvatar(i.id, `md`)}<span class="row__txt"><b>${escapeHtml(i.name)}</b><small>${escapeHtml(i.email)}</small></span>${renderIcon(`chevR`, `row__go`)}</a></section>` : ``}
-    ${n ? `<section class="d-sec"><h3>Product</h3><a class="row od-cust" href="#/products/item/${n.id}">${renderProductThumb(n, `md`)}<span class="row__txt"><b>${escapeHtml(n.name)}</b><small>${escapeHtml(n.size)} · <span class="mono">${escapeHtml(n.sku)}</span> · ${formatInt(n.stock.dc ?? 0)} at the DC</small></span>${renderIcon(`chevR`, `row__go`)}</a></section>` : ``}
+    ${n ? `<section class="d-sec"><h3>Product</h3><a class="row od-cust" href="/products/item/${n.id}">${renderProductThumb(n, `md`)}<span class="row__txt"><b>${escapeHtml(n.name)}</b><small>${escapeHtml(n.size)} · <span class="mono">${escapeHtml(n.sku)}</span> · ${formatInt(n.stock.dc ?? 0)} at the DC</small></span>${renderIcon(`chevR`, `row__go`)}</a></section>` : ``}
     <footer class="d-actions" data-ds="acts">${Zt(e, `btn--sm`) || `<p class="od-closed">${renderIcon(`check`)}Nothing left to do on this return.</p>`}</footer>`;
 }
 function an(e) {
@@ -1677,7 +1677,7 @@ function an(e) {
     showToast(`That return isn’t on file`, {
       ico: `alert`,
     });
-    history.replaceState(null, ``, `#/orders/returns`);
+    history.replaceState(null, ``, `/orders/returns`);
     return;
   }
   if (!Ze(`return`, e)) {
@@ -1688,8 +1688,8 @@ function an(e) {
           if (B?.kind === `return` && B.id === e) {
             B = null;
           }
-          if (location.hash.startsWith(`#/orders/returns/${e}`)) {
-            history.replaceState(null, ``, `#/orders/returns`);
+          if (location.pathname.startsWith(`/orders/returns/${e}`)) {
+            history.replaceState(null, ``, `/orders/returns`);
           }
         },
       });

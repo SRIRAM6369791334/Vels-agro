@@ -547,7 +547,7 @@ function yt() {
 }
 const bt = (e, total, prevTotal, canCompare) => {
   if (!canCompare) {
-    return `<span class="an-metric__na">${J === `ytd` ? `First year in Vessa` : `—`}</span>`;
+    return `<span class="an-metric__na">${J === `ytd` ? `First year in Vels` : `—`}</span>`;
   }
   if (e === `margin`) {
     let e = (total - prevTotal) * 100;
@@ -663,7 +663,7 @@ function Z(n) {
   p.toggleAttribute(`disabled`, !c.canCompare);
   p.title = c.canCompare
     ? `Show the previous period as a dashed line`
-    : `Vessa’s records start this January — there’s no last year to compare with yet`;
+    : `Vels’s records start this January — there’s no last year to compare with yet`;
   domQueryAll(`[data-chan]`, P).forEach((e) => {
     e.disabled = q === `stock`;
   });
@@ -922,7 +922,7 @@ function Et(currentTarget) {
     ...(i.canCompare ? [i.prevTotal.toFixed(q === `margin` ? 4 : 2)] : []),
   ]);
   downloadFile(
-    `vessa-${t.label.toLowerCase().replace(/\W+/g, `-`)}-${J === `ytd` ? `ytd` : `${J}d`}-by-${Y}-${new Date(Date.now()).toISOString().slice(0, 10)}.csv`,
+    `Vels-${t.label.toLowerCase().replace(/\W+/g, `-`)}-${J === `ytd` ? `ytd` : `${J}d`}-by-${Y}-${new Date(Date.now()).toISOString().slice(0, 10)}.csv`,
     formatCsvRow(a),
     `text/csv`
   );
@@ -993,7 +993,7 @@ function Dt() {
         fields: [
           {
             name: `goal`,
-            label: `Goal (USD)`,
+            label: `Goal (INR)`,
             type: `number`,
             value: store.settings.goal,
             min: 1000,
@@ -1004,7 +1004,7 @@ function Dt() {
         onSubmit: (e) => {
           let t = Number(e.goal);
           if (!(t >= 1000)) {
-            return `Set a goal of at least $1,000.`;
+            return `Set a goal of at least ₹1,000.`;
           }
           setSalesGoal(t);
           showToast(`Goal set to ${formatMoneyRound(t)}`, {
@@ -1193,7 +1193,7 @@ function Rt() {
       <div class="an-heat__key"><span>Fewer</span><i></i><span>More</span></div>
     </section>
     <section class="card" aria-labelledby="sa-st-t">
-      <header class="card__head"><div><h2 class="card__title" id="sa-st-t">Top stockists</h2><p class="card__sub">Wholesale accounts by revenue</p></div><div class="card__tools"><a class="btn btn--ghost btn--sm" href="#/customers/stockists">${renderIcon(`users`)}All</a></div></header>
+      <header class="card__head"><div><h2 class="card__title" id="sa-st-t">Top stockists</h2><p class="card__sub">Wholesale accounts by revenue</p></div><div class="card__tools"><a class="btn btn--ghost btn--sm" href="/customers/stockists">${renderIcon(`users`)}All</a></div></header>
       <div class="rows" data-k="sa-stockists"></div>
     </section>
   </div>`;
@@ -1340,8 +1340,8 @@ function Ut(t) {
             }
             i = e;
           }
-          return `<tr class="is-link" data-key="${t.p.id}" data-href="#/products/item/${t.p.id}">
-      <td class="a-t"><a class="prod" href="#/products/item/${t.p.id}">${renderProductThumb(t.p, `md`)}<span><b>${highlightSearchMatch(t.p.name, n)}</b><small>${escapeHtml(t.p.size)} · <span class="mono">${highlightSearchMatch(t.p.sku, n)}</span></small></span></a></td>
+          return `<tr class="is-link" data-key="${t.p.id}" data-href="/products/item/${t.p.id}">
+      <td class="a-t"><a class="prod" href="/products/item/${t.p.id}">${renderProductThumb(t.p, `md`)}<span><b>${highlightSearchMatch(t.p.name, n)}</b><small>${escapeHtml(t.p.size)} · <span class="mono">${highlightSearchMatch(t.p.sku, n)}</span></small></span></a></td>
       <td class="r a-p num" data-label="Units">${formatInt(t.units)}</td>
       <td class="r a-r"><b class="num an-ptable__rev">${formatMoneyRound(t.rev)}</b></td>
       <td class="a-s"><span class="an-share"><span class="meter"><span class="meter__fill" style="--c:var(--${r === 0 && !n ? `pine` : CATEGORY_TONES[t.p.category]});transform:scaleX(${Math.max(0.015, t.share / o)})"></span></span><small class="num">${formatPercent(t.share, 1)}</small></span></td>
@@ -1481,7 +1481,7 @@ function Gt() {
         .map(([t, n]) => {
           let r = findCustomerById(t);
           return `<div class="row an-stk" data-key="${t}">
-      ${renderAvatar(t, `md`)}<a class="row__txt" href="#/customers/stockists/${t}"><b>${escapeHtml(r?.name ?? ``)}</b><small>${escapeHtml(r?.city ?? ``)}, ${escapeHtml(r?.region ?? ``)} · ${pluralize(n.n, `order`)} · last ${formatRelativeTime(n.last)}</small></a>
+      ${renderAvatar(t, `md`)}<a class="row__txt" href="/customers/stockists/${t}"><b>${escapeHtml(r?.name ?? ``)}</b><small>${escapeHtml(r?.city ?? ``)}, ${escapeHtml(r?.region ?? ``)} · ${pluralize(n.n, `order`)} · last ${formatRelativeTime(n.last)}</small></a>
       <span class="row__end"><b>${formatMoneyRound(n.rev)}</b></span>
       <button type="button" class="ibtn ibtn--sm" data-reorder="${t}" aria-label="New order for ${escapeHtml(r?.name ?? ``)}" title="New order">${renderIcon(`plus`)}</button>
     </div>`;
@@ -1533,14 +1533,14 @@ function Kt() {
         },
         r,
         (e) => {
-          location.hash = `#/orders/all/${e.id}`;
+          (window as any).navigateTo(`/orders/all/${e.id}`)
         }
       );
       return;
     }
     let i = e_target.closest(`tr[data-href]`);
     if (i && !e_target.closest(`a, button`)) {
-      location.hash = i.dataset.href;
+      (window as any).navigateTo(i.dataset.href)
     }
   });
   let n = I(`sa-heat`);
@@ -1804,7 +1804,7 @@ function cn() {
     </section>
     <div class="an-stack">
       <section class="card an-acc" aria-labelledby="sh-acc-t">
-        <header class="card__head"><div><h2 class="card__title" id="sh-acc-t">Stock accuracy</h2><p class="card__sub">From finished cycle counts</p></div><div class="card__tools"><a class="btn btn--ghost btn--sm" href="#/warehouses/counts">${renderIcon(`clipboard`)}Counts</a></div></header>
+        <header class="card__head"><div><h2 class="card__title" id="sh-acc-t">Stock accuracy</h2><p class="card__sub">From finished cycle counts</p></div><div class="card__tools"><a class="btn btn--ghost btn--sm" href="/warehouses/counts">${renderIcon(`clipboard`)}Counts</a></div></header>
         <div data-k="sh-gauge"></div>
         <div class="rows an-acc__list" data-k="sh-counts"></div>
       </section>
@@ -1824,7 +1824,7 @@ function cn() {
       <div data-k="sh-st"></div><p class="an-cats__foot" data-k="sh-st-foot"></p>
     </section>
     <section class="card an-exp" aria-labelledby="sh-exp-t">
-      <header class="card__head"><div><h2 class="card__title" id="sh-exp-t">Expiry exposure</h2><p class="card__sub" data-k="sh-exp-sub"></p></div><div class="card__tools"><a class="btn btn--ghost btn--sm" href="#/products/batches">${renderIcon(`flask`)}Batches</a></div></header>
+      <header class="card__head"><div><h2 class="card__title" id="sh-exp-t">Expiry exposure</h2><p class="card__sub" data-k="sh-exp-sub"></p></div><div class="card__tools"><a class="btn btn--ghost btn--sm" href="/products/batches">${renderIcon(`flask`)}Batches</a></div></header>
       <div class="an-exp__tiles" data-k="sh-exp"></div>
       <div class="rows an-exp__lots" data-k="sh-lots"></div>
     </section>
@@ -1868,7 +1868,7 @@ function ln(n) {
           let [o, s] = nn[a];
           let c = d === Infinity ? 1 : Math.max(0.015, Math.min(1, d / en));
           return `<div class="an-bar" data-key="${p.id}" style="--c:var(--${s})">
-      <a class="prod" href="#/products/item/${p.id}">${renderProductThumb(p, `sm`)}<span><b>${highlightSearchMatch(p.name, i)}</b><small>${escapeHtml(p.size)} · ${formatInt(getMaterialStock(p))} free · ${formatInt(getRecentOrders(p.id, 30))} sold</small></span></a>
+      <a class="prod" href="/products/item/${p.id}">${renderProductThumb(p, `sm`)}<span><b>${highlightSearchMatch(p.name, i)}</b><small>${escapeHtml(p.size)} · ${formatInt(getMaterialStock(p))} free · ${formatInt(getRecentOrders(p.id, 30))} sold</small></span></a>
       <span class="an-bar__track"><span class="an-bar__fill" style="transform:scaleX(${n ? c : 0})" data-to="${c}"></span></span>
       <span class="an-bar__val"><b class="num">${d === Infinity ? `—` : `${formatInt(d)}<small> ${d === 1 ? `day` : `days`}</small>`}</b><em>${o}</em></span>
       ${a === `bad` || a === `warn` ? `<button type="button" class="btn btn--soft btn--xs" data-make="${p.id}">${renderIcon(`flask`)}Make</button>` : `<span class="an-bar__ok" aria-hidden="true"></span>`}
@@ -1931,7 +1931,7 @@ function un(t) {
           (acc, line) => acc + Math.abs((line.counted ?? line.expected) - line.expected),
           0
         );
-        return `<a class="row" href="#/warehouses/counts/${t.id}">${renderTag(`clipCheck`, n ? `ochre` : `sage`, `sm`)}<span class="row__txt"><b><span class="mono">${escapeHtml(t.number)}</span> · ${escapeHtml(exportDataBackup(t.locId)?.name ?? ``)}</b><small>Zone ${escapeHtml(t.zone)} · ${pluralize(t.lines.length, `line`)} · ${formatRelativeTime(t.at)}</small></span><span class="row__end">${n ? renderPill(`${n} off`, `ochre`) : renderPill(`Exact`, `sage`)}</span></a>`;
+        return `<a class="row" href="/warehouses/counts/${t.id}">${renderTag(`clipCheck`, n ? `ochre` : `sage`, `sm`)}<span class="row__txt"><b><span class="mono">${escapeHtml(t.number)}</span> · ${escapeHtml(exportDataBackup(t.locId)?.name ?? ``)}</b><small>Zone ${escapeHtml(t.zone)} · ${pluralize(t.lines.length, `line`)} · ${formatRelativeTime(t.at)}</small></span><span class="row__end">${n ? renderPill(`${n} off`, `ochre`) : renderPill(`Exact`, `sage`)}</span></a>`;
       })
       .join(``) ||
     renderEmptyState(
@@ -1966,7 +1966,7 @@ function dn(n) {
   I(`sh-locparts`).innerHTML = parts
     .map(
       (t) =>
-        `<li><i class="dot" style="--c:var(--${t.tone})"></i><a href="#/warehouses/locations/${t.id}">${escapeHtml(t.label)}</a><b class="num">${formatMoneyRound(t.value)}</b><small>${formatPercent(t.value / o)}</small></li>`
+        `<li><i class="dot" style="--c:var(--${t.tone})"></i><a href="/warehouses/locations/${t.id}">${escapeHtml(t.label)}</a><b class="num">${formatMoneyRound(t.value)}</b><small>${formatPercent(t.value / o)}</small></li>`
     )
     .join(``);
 }
@@ -2035,7 +2035,7 @@ function pn(n) {
   let expiryWarnDays = store.settings.prefs.expiryWarnDays;
   let o = r.reduce((acc, item) => acc + item.value, 0);
   I(`sh-exp-sub`).innerHTML =
-    `Value at cost of lots that expire soon · alerts at <a href="#/settings/company">${expiryWarnDays} days</a>`;
+    `Value at cost of lots that expire soon · alerts at <a href="/settings/company">${expiryWarnDays} days</a>`;
   I(`sh-exp`).innerHTML = r
     .map(
       (
@@ -2069,7 +2069,7 @@ function pn(n) {
         .map((t) => {
           let n = findProductById(t.productId);
           let r = daysUntilExpiry(t);
-          return `<a class="row" href="#/products/batches/${t.id}">${renderProductThumb(n, `sm`)}<span class="row__txt"><b>${escapeHtml(formatProductFullName(n))}</b><small><span class="mono">${escapeHtml(t.lot)}</span> · ${formatInt(t.left)} left${t.status === `hold` ? ` · on hold` : ``}</small></span><span class="row__end">${renderPill(r <= 0 ? `Expired` : `${r} d`, r <= 30 ? `rose` : r <= 60 ? `ochre` : `sky`)}</span></a>`;
+          return `<a class="row" href="/products/batches/${t.id}">${renderProductThumb(n, `sm`)}<span class="row__txt"><b>${escapeHtml(formatProductFullName(n))}</b><small><span class="mono">${escapeHtml(t.lot)}</span> · ${formatInt(t.left)} left${t.status === `hold` ? ` · on hold` : ``}</small></span><span class="row__end">${renderPill(r <= 0 ? `Expired` : `${r} d`, r <= 30 ? `rose` : r <= 60 ? `ochre` : `sky`)}</span></a>`;
         })
         .join(``)
     : renderEmptyState(
@@ -2088,7 +2088,7 @@ function mn() {
         .map(
           (
             n
-          ) => `<div class="row" data-key="${n.id}">${renderProductThumb(n, `md`)}<a class="row__txt" href="#/products/item/${n.id}"><b>${escapeHtml(formatProductFullName(n))}</b><small>${formatInt(getProductStock(n))} on hand · ${formatMoneyRound(getProductStock(n) * n.cost)} at cost · ${store.locations
+          ) => `<div class="row" data-key="${n.id}">${renderProductThumb(n, `md`)}<a class="row__txt" href="/products/item/${n.id}"><b>${escapeHtml(formatProductFullName(n))}</b><small>${formatInt(getProductStock(n))} on hand · ${formatMoneyRound(getProductStock(n) * n.cost)} at cost · ${store.locations
             .filter((e) => (n.stock[e.id] ?? 0) > 0)
             .map((e) => e.name)
             .join(`, `)}</small></a>

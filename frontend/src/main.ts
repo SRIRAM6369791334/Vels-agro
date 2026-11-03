@@ -1843,7 +1843,7 @@ function ls() {
     `ship`,
     `Shipment dispatched`,
     `${m.filter((e) => e.status === `shipped`).slice(-1)[0]?.number ?? `SO`} left the DC with UPS`,
-    `#/orders/all`,
+    `/orders/all`,
   ),
     ie(
       i - 52 * So,
@@ -1851,7 +1851,7 @@ function ls() {
       `batch`,
       `Batch made`,
       `L2610-172 · 360 × Niacinamide 30 ml into QA`,
-      `#/products/batches`,
+      `/products/batches`,
     ),
     ie(
       i - 95 * So,
@@ -1859,7 +1859,7 @@ function ls() {
       `transfer`,
       `Transfer dispatched`,
       `TR-318 · 54 units to the Studio Shop`,
-      `#/warehouses/transfers`,
+      `/warehouses/transfers`,
     ),
     ie(
       i - 3.2 * Y,
@@ -1867,7 +1867,7 @@ function ls() {
       `return`,
       `Return requested`,
       `${O[0].number} · ${O[0].reason.toLowerCase()}`,
-      `#/orders/returns`,
+      `/orders/returns`,
     ),
     ie(
       i - 5.5 * Y,
@@ -1875,7 +1875,7 @@ function ls() {
       `po`,
       `Purchase order sent`,
       `PO-1193 · 1,200 airless pumps from Kessler Packaging`,
-      `#/purchasing/orders`,
+      `/purchasing/orders`,
     ),
     ie(
       i - 20 * Y,
@@ -1883,7 +1883,7 @@ function ls() {
       `stock`,
       `Stock adjusted`,
       `−3 Camellia Cleansing Oil 100 ml · broken in aisle`,
-      `#/products/item/clo100`,
+      `/products/item/clo100`,
     ),
     ie(
       i - 26 * Y,
@@ -1891,7 +1891,7 @@ function ls() {
       `batch`,
       `Batch made`,
       `L2610-171 · 480 × Barrier Fluid SPF 30 into QA`,
-      `#/products/batches`,
+      `/products/batches`,
     ),
     ie(
       i - 30 * Y,
@@ -1899,7 +1899,7 @@ function ls() {
       `order`,
       `Wholesale order received`,
       `Juniper & Moss Apothecary · 4 lines`,
-      `#/orders/all`,
+      `/orders/all`,
     ),
     ie(
       i - 2.1 * J,
@@ -1907,7 +1907,7 @@ function ls() {
       `batch`,
       `Batch on hold`,
       `Camellia Cleansing Oil 200 ml · sticking pumps`,
-      `#/products/batches`,
+      `/products/batches`,
     ),
     ie(
       i - 3 * J,
@@ -1915,7 +1915,7 @@ function ls() {
       `transfer`,
       `Transfer received`,
       `TR-317 · 140 units into Riverside DC`,
-      `#/warehouses/transfers`,
+      `/warehouses/transfers`,
     ),
     ie(
       i - 7 * J,
@@ -1923,7 +1923,7 @@ function ls() {
       `count`,
       `Cycle count closed`,
       `CC-089 · cool room · 2 lines`,
-      `#/warehouses/counts`,
+      `/warehouses/counts`,
     ),
     ie(
       i - 9 * J,
@@ -1931,7 +1931,7 @@ function ls() {
       `team`,
       `Teammate invited`,
       `Priya Raman joined as Customer care`,
-      `#/settings/team`,
+      `/settings/team`,
     ),
     re.sort((e, t) => t.at - e.at));
   let ae = [
@@ -1939,7 +1939,7 @@ function ls() {
         id: Xo(`n`),
         at: i - 40 * So,
         text: `Barrier Fluid SPF 30 is out of stock at Riverside DC`,
-        href: `#/products/item/bfs50`,
+        href: `/products/item/bfs50`,
         read: !1,
         kind: `stock`,
       },
@@ -1947,7 +1947,7 @@ function ls() {
         id: Xo(`n`),
         at: i - 2 * Y,
         text: `Lot of Calendula Rescue Balm 50 ml expires in 9 days`,
-        href: `#/products/batches`,
+        href: `/products/batches`,
         read: !1,
         kind: `expiry`,
       },
@@ -1955,7 +1955,7 @@ function ls() {
         id: Xo(`n`),
         at: i - 4 * Y,
         text: `Juniper & Moss Apothecary placed a wholesale order`,
-        href: `#/orders/board`,
+        href: `/orders/board`,
         read: !1,
         kind: `order`,
       },
@@ -1963,7 +1963,7 @@ function ls() {
         id: Xo(`n`),
         at: i - 27 * Y,
         text: `Vallée Actives shipped half of PO-1191`,
-        href: `#/purchasing/orders`,
+        href: `/purchasing/orders`,
         read: !0,
         kind: `po`,
       },
@@ -1971,7 +1971,7 @@ function ls() {
         id: Xo(`n`),
         at: i - 2.2 * J,
         text: `Non-nano zinc oxide is below its reorder level`,
-        href: `#/purchasing/materials`,
+        href: `/purchasing/materials`,
         read: !0,
         kind: `stock`,
       },
@@ -2016,7 +2016,7 @@ function ls() {
         phone: `(828) 555-0100`,
         email: `hello@marlowfern.co`,
         taxId: `88-4120795`,
-        currency: `USD`,
+        currency: `INR`,
         timezone: `America/New_York`,
         fiscalStart: `January`,
       },
@@ -2068,12 +2068,15 @@ function ls() {
     settings: ce,
   };
 }
-var us = `vessa:data:v2`;
+var us = `Vels:data:v2`;
 function ds() {
   if (Co) return ls();
   try {
     let e = JSON.parse(localStorage.getItem(us) ?? `null`);
-    if (e && e.version === 1) return e;
+    if (e && e.version === 1) {
+      if (e.settings?.company?.currency === `USD`) e.settings.company.currency = `INR`;
+      return e;
+    }
   } catch {}
   return ls();
 }
@@ -2140,7 +2143,7 @@ var ys = (e) => X.team.find((t) => t.id === e),
   Ts = (e) => X.batches.find((t) => t.id === e),
   Es = (e) => X.pos.find((t) => t.id === e),
   Ds = (e) => (e === `web` ? `Online store` : (ys(e)?.name ?? Cs(e)?.name ?? ``)),
-  Os = (e) => `/vessa/photos/vessa/${e.photo}.jpg`,
+  Os = (e) => `/Vels/photos/Vels/${e.photo}.jpg`,
   ks = (e) => `${e.name} ${e.size}`,
   As = (e, t) => (t ? (e.stock[t] ?? 0) : Object.values(e.stock).reduce((e, t) => e + t, 0));
 function js(e, t) {
@@ -2245,16 +2248,16 @@ var oc = (e) => X.products.reduce((t, n) => t + (n.stock[e] ?? 0), 0),
   cc = (e) => sc.format(Math.round(e)),
   lc = (e, t = 1) => new Intl.NumberFormat(`en-US`, { maximumFractionDigits: t }).format(e),
   uc = (e, t = 0) => `${(e * 100).toFixed(t)}%`,
-  dc = new Intl.NumberFormat(`en-US`, { style: `currency`, currency: `USD` }),
-  fc = new Intl.NumberFormat(`en-US`, {
+  dc = new Intl.NumberFormat(`en-IN`, { style: `currency`, currency: `INR` }),
+  fc = new Intl.NumberFormat(`en-IN`, {
     style: `currency`,
-    currency: `USD`,
+    currency: `INR`,
     maximumFractionDigits: 0,
   }),
   pc = (e) => dc.format(e),
   mc = (e) => fc.format(Math.round(e)),
   hc = (e) =>
-    Math.abs(e) >= 1e3 ? `$${(e / 1e3).toFixed(Math.abs(e) >= 1e4 ? 0 : 1)}k` : `$${Math.round(e)}`,
+    Math.abs(e) >= 1e3 ? `₹${(e / 1e3).toFixed(Math.abs(e) >= 1e4 ? 0 : 1)}k` : `₹${Math.round(e)}`,
   gc = { int: cc, pct: (e) => uc(e), pct1: (e) => uc(e, 1), money: mc, money2: pc, moneyK: hc },
   _c = (e, t = !1) =>
     new Date(e).toLocaleDateString(`en-US`, {
@@ -2998,7 +3001,7 @@ var yl = matchMedia(`(prefers-color-scheme: dark)`),
   xl = () => {
     if (Co) return bl.theme ?? `light`;
     try {
-      return JSON.parse(localStorage.getItem(`vessa:theme`) ?? `"light"`) || `light`;
+      return JSON.parse(localStorage.getItem(`Vels:theme`) ?? `"light"`) || `light`;
     } catch {
       return `light`;
     }
@@ -3010,7 +3013,7 @@ function Tl(e, t) {
   let n = () => {
     if (((bl.theme = e), !Co))
       try {
-        localStorage.setItem(`vessa:theme`, JSON.stringify(e));
+        localStorage.setItem(`Vels:theme`, JSON.stringify(e));
       } catch {}
     Ul();
   };
@@ -3054,7 +3057,7 @@ var Dl = [
   kl = () => {
     if (Co) return Ol(bl.accent);
     try {
-      return Ol(localStorage.getItem(`vessa:accent`));
+      return Ol(localStorage.getItem(`Vels:accent`));
     } catch {
       return `copper`;
     }
@@ -3062,7 +3065,7 @@ var Dl = [
   Al = (e) => {
     if (((bl.accent = e), !Co))
       try {
-        localStorage.setItem(`vessa:accent`, e);
+        localStorage.setItem(`Vels:accent`, e);
       } catch {}
   },
   jl = (e) => {
@@ -3248,7 +3251,7 @@ function ql(e, t, n, r = `Manual adjustment`) {
       `stock`,
       `Stock adjusted`,
       `${s > 0 ? `+` : `−`}${Math.abs(s)} ${ks(i)} · ${bs(t)?.name ?? ``}`,
-      `#/products/item/${i.id}`,
+      `/products/item/${i.id}`,
     ),
     Z(`products`, `moves`, `activity`, `history`),
     $(`${s > 0 ? `Added` : `Removed`} ${Math.abs(s)} × ${ks(i)}`, { ico: `box`, undo: c }),
@@ -3345,7 +3348,7 @@ function Zl(e, t, n = !1) {
       ? `Shipment dispatched`
       : `Order ${i === `delivered` ? `delivered` : `moved to ${i}`}`,
     `${r.number} · ${c?.name ?? ``}`,
-    `#/orders/all/${r.id}`,
+    `/orders/all/${r.id}`,
   ),
     Z(`orders`, `products`, `batches`, `moves`, `activity`, `history`),
     n ||
@@ -3374,7 +3377,7 @@ function $l(e) {
       `order`,
       `Order cancelled`,
       `${t.number} · ${Cs(t.customerId)?.name ?? ``}`,
-      `#/orders/all/${t.id}`,
+      `/orders/all/${t.id}`,
     ),
     Z(`orders`, `activity`),
     $(`${t.number} cancelled — its stock is free again`, { ico: `close`, undo: n }));
@@ -3384,7 +3387,7 @@ function eu(e) {
   !t ||
     t.paid ||
     ((t.paid = !0),
-    _s(`order`, `Payment received`, `${t.number} · ${pc(Gs(t))}`, `#/orders/all/${t.id}`),
+    _s(`order`, `Payment received`, `${t.number} · ${pc(Gs(t))}`, `/orders/all/${t.id}`),
     Z(`orders`, `activity`),
     $(`${t.number} marked paid`, { ico: `dollar` }));
 }
@@ -3485,7 +3488,7 @@ function tu(e = {}, t, n) {
           `order`,
           `Order created`,
           `${o.number} · ${t.name} · ${pc(Gs(o))}`,
-          `#/orders/all/${o.id}`,
+          `/orders/all/${o.id}`,
         ),
         Z(`orders`, `activity`),
         $(`${o.number} created for ${t.name}`, {
@@ -3511,7 +3514,7 @@ function nu(e, t) {
       `return`,
       `Return ${t}`,
       `${n.number} · ${n.qty} × ${i ? ks(i) : ``}${t === `refunded` ? ` · ${pc(n.refund)} back` : ``}`,
-      `#/orders/returns`,
+      `/orders/returns`,
     ),
     Z(`returns`, `products`, `moves`, `activity`, `history`),
     $(`${n.number} ${t}`, {
@@ -3568,7 +3571,7 @@ function au(e = {}, t) {
           `po`,
           `Purchase order drafted`,
           `${a.number} · ${cc(n)} ${t.unit} ${t.name}`,
-          `#/purchasing/orders`,
+          `/purchasing/orders`,
         ),
         Z(`pos`, `activity`),
         $(`${a.number} drafted for ${r.name}`, { ico: `receipt` }));
@@ -3586,7 +3589,7 @@ function ou(e) {
       `po`,
       `Purchase order sent`,
       `${t.number} · ${n.name} · ${mc(t.lines.reduce((e, t) => e + t.qty * t.cost, 0))}`,
-      `#/purchasing/orders`,
+      `/purchasing/orders`,
     ),
     Z(`pos`, `activity`),
     $(`${t.number} sent to ${n.contact}`, { ico: `send` }));
@@ -3612,12 +3615,12 @@ function su(e, t = !1) {
       `po`,
       n.status === `received` ? `Purchase order received` : `Part delivery received`,
       `${n.number} · ${Ss(n.supplierId)?.name ?? ``}`,
-      `#/purchasing/orders`,
+      `/purchasing/orders`,
     ),
     vs(
       `po`,
       `${n.number} ${n.status === `received` ? `received in full` : `part received`}`,
-      `#/purchasing/orders`,
+      `/purchasing/orders`,
     ),
     Z(`pos`, `materials`, `moves`, `activity`, `history`, `notices`),
     $(
@@ -3630,7 +3633,7 @@ function cu(e) {
   if (!t || t.status === `received` || t.status === `cancelled`) return;
   let n = Wl([`pos`, `activity`]);
   ((t.status = `cancelled`),
-    _s(`po`, `Purchase order cancelled`, t.number, `#/purchasing/orders`),
+    _s(`po`, `Purchase order cancelled`, t.number, `/purchasing/orders`),
     Z(`pos`, `activity`),
     $(`${t.number} cancelled`, { ico: `close`, undo: n }));
 }
@@ -3663,7 +3666,7 @@ function lu() {
         `po`,
         `Reorder drafted`,
         `${Cc(r.length, `purchase order`)} from low stock`,
-        `#/purchasing/orders`,
+        `/purchasing/orders`,
       ),
       Z(`pos`, `activity`)),
     r
@@ -3717,7 +3720,7 @@ function pu(e, t) {
   };
   return (
     X.batches.unshift(a),
-    _s(`batch`, `Batch made`, `${a.lot} · ${t} × ${ks(n)} into QA`, `#/products/batches`),
+    _s(`batch`, `Batch made`, `${a.lot} · ${t} × ${ks(n)} into QA`, `/products/batches`),
     Z(`batches`, `materials`, `moves`, `activity`),
     a
   );
@@ -3786,10 +3789,10 @@ function hu(e) {
       `batch`,
       `Batch released`,
       `${t.lot} · ${t.left} × ${ks(n)} into ${bs(t.locId)?.name ?? ``}`,
-      `#/products/batches`,
+      `/products/batches`,
       `m-sato`,
     ),
-    vs(`stock`, `${ks(n)} is back in stock — ${t.left} units released`, `#/products/item/${n.id}`),
+    vs(`stock`, `${ks(n)} is back in stock — ${t.left} units released`, `/products/item/${n.id}`),
     Z(`batches`, `products`, `moves`, `activity`, `history`, `notices`),
     $(`${t.lot} released — +${t.left} ${ks(n)}`, { ico: `shield`, undo: r }));
 }
@@ -3801,7 +3804,7 @@ function gu(e, t) {
   (n.status === `released` && (r.stock[n.locId] = Math.max(0, (r.stock[n.locId] ?? 0) - n.left)),
     (n.status = `hold`),
     (n.note = t),
-    _s(`batch`, `Batch on hold`, `${n.lot} · ${ks(r)} · ${t}`, `#/products/batches`),
+    _s(`batch`, `Batch on hold`, `${n.lot} · ${ks(r)} · ${t}`, `/products/batches`),
     Z(`batches`, `products`, `activity`),
     $(`${n.lot} on hold — its units are off sale`, { ico: `pause`, undo: i }));
 }
@@ -3875,7 +3878,7 @@ function yu(e = {}, t) {
           `transfer`,
           `Transfer planned`,
           `${i.number} · ${t.reduce((e, t) => e + t.qty, 0)} units to ${bs(i.to)?.name}`,
-          `#/warehouses/transfers`,
+          `/warehouses/transfers`,
         ),
         Z(`transfers`, `activity`),
         $(`${i.number} planned`, { ico: `swap` }));
@@ -3899,7 +3902,7 @@ function bu(e) {
         `transfer`,
         `Transfer dispatched`,
         `${t.number} · to ${bs(t.to)?.name}`,
-        `#/warehouses/transfers`,
+        `/warehouses/transfers`,
       ));
   } else
     (t.lines.forEach((e) => {
@@ -3913,7 +3916,7 @@ function bu(e) {
         `transfer`,
         `Transfer received`,
         `${t.number} · into ${bs(t.to)?.name}`,
-        `#/warehouses/transfers`,
+        `/warehouses/transfers`,
       ));
   (Z(`transfers`, `products`, `moves`, `activity`),
     $(`${t.number} ${t.status === `received` ? `received` : `on its way`}`, {
@@ -3972,7 +3975,7 @@ function Cu(e) {
           `count`,
           `Count scheduled`,
           `${o.number} · ${bs(o.locId)?.name} · ${Cc(o.lines.length, `line`)}`,
-          `#/warehouses/counts`,
+          `/warehouses/counts`,
         ),
         Z(`counts`, `activity`),
         $(`${o.number} scheduled for ${_c(o.at)}`, { ico: `clipCheck` }));
@@ -4014,7 +4017,7 @@ function Eu(e) {
       `count`,
       `Cycle count closed`,
       `${t.number} · ${r ? `${r} units corrected` : `no variance`}`,
-      `#/warehouses/counts`,
+      `/warehouses/counts`,
     ),
     Z(`counts`, `products`, `moves`, `activity`, `history`),
     $(
@@ -4075,7 +4078,7 @@ function Du(e, t) {
           `note`,
           `Customer added`,
           n.name,
-          `#/customers/${n.kind === `stockist` ? `stockists` : `shoppers`}/${n.id}`,
+          `/customers/${n.kind === `stockist` ? `stockists` : `shoppers`}/${n.id}`,
         ),
         Z(`customers`, `activity`),
         $(`${n.name} added`, { ico: `userPlus` }),
@@ -4139,7 +4142,7 @@ function Ou(e) {
           since: Date.now(),
         };
       (X.team.push(n),
-        _s(`team`, `Teammate invited`, `${n.name} as ${e.role}`, `#/settings/team`),
+        _s(`team`, `Teammate invited`, `${n.name} as ${e.role}`, `/settings/team`),
         Z(`team`, `activity`),
         $(`Invite sent to ${n.email}`, { ico: `send` }));
     },
@@ -4151,7 +4154,7 @@ function ku(e, t) {
     n.role === t ||
     (n.role !== `owner` &&
       ((n.role = t),
-      _s(`team`, `Role changed`, `${n.name} is now ${t}`, `#/settings/team`),
+      _s(`team`, `Role changed`, `${n.name} is now ${t}`, `/settings/team`),
       Z(`team`, `activity`),
       $(`${n.name} is now ${t[0].toUpperCase()}${t.slice(1)}`, { ico: `shield` })));
 }
@@ -4169,7 +4172,7 @@ async function Au(e) {
     return;
   let n = Wl([`team`, `activity`]);
   ((X.team = X.team.filter((t) => t.id !== e)),
-    _s(`team`, `Teammate removed`, t.name, `#/settings/team`),
+    _s(`team`, `Teammate removed`, t.name, `/settings/team`),
     Z(`team`, `activity`),
     $(`${t.name} removed`, { ico: `user`, undo: n }));
 }
@@ -4195,7 +4198,7 @@ function Mu(e, t, n) {
 var Nu = () => new Date(Date.now()).toISOString().slice(0, 10);
 function Pu() {
   (hl(
-    `vessa-stock-${Nu()}.csv`,
+    `Vels-stock-${Nu()}.csv`,
     gl([
       [
         `SKU`,
@@ -4230,7 +4233,7 @@ function Pu() {
 }
 function Fu() {
   (hl(
-    `vessa-orders-${Nu()}.csv`,
+    `Vels-orders-${Nu()}.csv`,
     gl([
       [`Order`, `Date`, `Customer`, `Channel`, `Status`, `Units`, `Total`, `Paid`],
       ...X.orders.map((e) => [
@@ -4250,7 +4253,7 @@ function Fu() {
 }
 function Iu() {
   (hl(
-    `vessa-movements-${Nu()}.csv`,
+    `Vels-movements-${Nu()}.csv`,
     gl([
       [`When`, `Item`, `Location`, `Qty`, `Kind`, `Reference`, `Value`],
       ...X.moves.map((e) => [
@@ -4269,7 +4272,7 @@ function Iu() {
 }
 var Lu = `modulepreload`,
   Ru = function (e) {
-    return `/vessa/` + e;
+    return `/Vels/` + e;
   },
   zu = {},
   Bu = function (e, t, n) {
@@ -4407,6 +4410,13 @@ var Lu = `modulepreload`,
         [`tickets`, `My tickets`],
       ],
     },
+    login: {
+      label: `Login`,
+      icon: `help`,
+      subs: [
+        [``, `Sign in`],
+      ],
+    },
   },
   Hu = Object.keys(Vu),
   Uu = [`purchasing`, `analytics`, `customers`, `settings`, `help`],
@@ -4420,9 +4430,11 @@ var Lu = `modulepreload`,
     customers: () => import(`./features/customers/customers.ts`),
     settings: () => import(`./features/settings/settings.ts`),
     help: () => import(`./features/help/help.ts`),
+    login: () => import(`./features/login/login.ts`),
   };
 function Gu(e) {
-  let [t, ...n] = e.replace(/^#\/?/, ``).split(`/`).filter(Boolean).map(decodeURIComponent);
+  let [t, ...n] = e.replace(/^#?\/?/, ``).split(`/`).filter(Boolean).map(decodeURIComponent);
+  if (t === `login`) return { name: `login`, params: [] };
   if (!Hu.includes(t)) return { name: `dashboard`, params: [`overview`] };
   let r = Vu[t],
     i = r.subs.some(([e]) => e === n[0]) || (t === `products` && n[0] === `item`);
@@ -4449,7 +4461,7 @@ Ju.innerHTML = K(`.nav__item`, qu)
 var Yu = matchMedia(`(max-width: 760px)`),
   Xu = () =>
     io(`.nav__track > .nav__item[aria-current="page"]`, qu) ??
-    (Yu.matches && Uu.includes(Gu(location.hash).name) ? G(`.nav__more`, qu) : null),
+    (Yu.matches && Uu.includes(Gu(location.pathname).name) ? G(`.nav__more`, qu) : null),
   Zu = (e) => {
     let t = Xu();
     Hc(
@@ -4518,11 +4530,15 @@ var $u = Object.assign(document.createElement(`span`), { className: `rail-tip` }
 var ed = G(`#tabs`),
   td = null;
 function nd(e, t, n) {
+  if (e === `login`) {
+    if (ed) ed.innerHTML = ``;
+    return;
+  }
   let r = Vu[e],
     i = e === `products` && t === `item` ? `catalog` : t;
   (td !== e &&
     ((td = e),
-    (ed.innerHTML = `<span class="tabs__pill" aria-hidden="true"></span>${r.subs.map(([t, n], i) => `<a class="tab" href="#/${e}/${t}" data-sub="${t}">${i === 0 ? `<span class="tab__sec">${q(r.label)}</span>` : ``}<span>${q(n)}</span></a>`).join(``)}`),
+    (ed.innerHTML = `<span class="tabs__pill" aria-hidden="true"></span>${r.subs.map(([t, n], i) => `<a class="tab" href="/${e}/${t}" data-sub="${t}">${i === 0 ? `<span class="tab__sec">${q(r.label)}</span>` : ``}<span>${q(n)}</span></a>`).join(``)}`),
     n && co(K(`.tab`, ed), { y: -8, stagger: 0.05 })),
     K(`.tab`, ed).forEach((e) =>
       e.dataset.sub === i
@@ -4549,9 +4565,24 @@ var rd = new Map(),
   ad,
   od = 0;
 async function sd(e = !1) {
-  let t = location.hash,
-    { name: n, params: r } = Gu(t),
-    i = `#/${n}/${r.map(encodeURIComponent).join(`/`)}`;
+  if (location.hash && location.hash.startsWith('#/')) {
+    let clean = location.hash.slice(1);
+    history.replaceState(null, '', clean);
+  }
+  let t = location.pathname;
+  let isSignedOut = !1;
+  try {
+    isSignedOut = localStorage.getItem(`Vels:signedout`) === `1`;
+  } catch {}
+  if (isSignedOut && !t.startsWith(`/login`)) {
+    history.replaceState(null, ``, `/login`);
+    t = `/login`;
+  } else if (!isSignedOut && (t === `/login` || t === `/login/`)) {
+    history.replaceState(null, ``, `/dashboard/overview`);
+    t = `/dashboard/overview`;
+  }
+  let { name: n, params: r } = Gu(t),
+    i = n === `login` ? `/login` : `/${n}/${r.map(encodeURIComponent).join(`/`)}`;
   t !== i && history.replaceState(null, ``, i);
   let a = ++od;
   (Kc(), ul() && ll());
@@ -4639,9 +4670,35 @@ async function sd(e = !1) {
 }
 function cd(e, t) {
   let n = typeof e.title == `function` ? e.title(t) : e.title;
-  document.title = `${n} · Vessa`;
+  document.title = `${n} · Vels Agro`;
 }
-window.addEventListener(`hashchange`, () => sd());
+function navigateTo(url) {
+  let path = (url || '').replace(/^#/, '');
+  if (!path.startsWith('/')) path = '/' + path;
+  if (location.pathname !== path) {
+    history.pushState(null, '', path);
+  }
+  sd();
+}
+window.navigateTo = navigateTo;
+window.addEventListener(`popstate`, () => sd());
+window.addEventListener(`hashchange`, () => {
+  if (location.hash && location.hash.startsWith('#/')) {
+    navigateTo(location.hash.slice(1));
+  }
+});
+document.addEventListener('click', (e) => {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  let a = e.target.closest('a');
+  if (!a) return;
+  let href = a.getAttribute('href');
+  if (!href) return;
+  if (href.startsWith('#') && !href.startsWith('#/')) return;
+  if (a.target === '_blank' || a.hasAttribute('download') || a.getAttribute('rel') === 'external') return;
+  if (/^(https?:|mailto:|tel:)/i.test(href)) return;
+  e.preventDefault();
+  navigateTo(href);
+});
 var ld = G(`#finder`),
   ud = G(`#finder-q`),
   dd = G(`#finder-list`),
@@ -4662,7 +4719,7 @@ function md(e) {
           group: `Pages`,
           label: e.full,
           meta: `Go to page`,
-          href: `#/${e.r}/${e.sub}`,
+          href: `/${e.r}/${e.sub}`,
           lead: `<span class="lead">${Tc(Vu[e.r].icon)}</span>`,
         }),
       ),
@@ -4674,7 +4731,7 @@ function md(e) {
           group: `Products`,
           label: ks(e),
           meta: `${e.sku} · ${Object.values(e.stock).reduce((e, t) => e + t, 0)} on hand`,
-          href: `#/products/item/${e.id}`,
+          href: `/products/item/${e.id}`,
           lead: `<span class="lead lead--img">${Mc(e, `sm`)}</span>`,
         }),
       ),
@@ -4687,7 +4744,7 @@ function md(e) {
             group: `Orders`,
             label: `${e.number} · ${Cs(e.customerId)?.name ?? ``}`,
             meta: `${Oo[e.status].name} · ${jo[e.channel]} · ${pc(Gs(e))}`,
-            href: `#/orders/all/${e.id}`,
+            href: `/orders/all/${e.id}`,
             lead: `<span class="lead">${Tc(`orders`)}</span>`,
           }),
         ),
@@ -4700,7 +4757,7 @@ function md(e) {
             group: `Batches`,
             label: `${e.lot} · ${t ? ks(t) : ``}`,
             meta: `${e.left} left`,
-            href: `#/products/batches/${e.id}`,
+            href: `/products/batches/${e.id}`,
             lead: `<span class="lead">${Tc(`flask`)}</span>`,
           });
         }),
@@ -4712,7 +4769,7 @@ function md(e) {
             group: `Customers`,
             label: e.name,
             meta: `${e.kind === `stockist` ? `Stockist` : `Shopper`} · ${e.city}, ${e.region}`,
-            href: `#/customers/${e.kind === `stockist` ? `stockists` : `shoppers`}/${e.id}`,
+            href: `/customers/${e.kind === `stockist` ? `stockists` : `shoppers`}/${e.id}`,
             lead: Oc(e.id, `md`),
           }),
         ),
@@ -4724,7 +4781,7 @@ function md(e) {
             group: `Suppliers`,
             label: e.name,
             meta: e.supplies,
-            href: `#/purchasing/suppliers/${e.id}`,
+            href: `/purchasing/suppliers/${e.id}`,
             lead: `<span class="lead">${Tc(`truck`)}</span>`,
           }),
         ),
@@ -4736,7 +4793,7 @@ function md(e) {
             group: `Materials`,
             label: e.name,
             meta: `${e.code} · ${e.onHand} ${e.unit} · ${Ss(e.supplierId)?.name ?? ``}`,
-            href: `#/purchasing/materials/${e.id}`,
+            href: `/purchasing/materials/${e.id}`,
             lead: `<span class="lead">${Tc(`drop`)}</span>`,
           }),
         ),
@@ -4748,7 +4805,7 @@ function md(e) {
             group: `Purchase orders`,
             label: `${e.number} · ${Ss(e.supplierId)?.name ?? ``}`,
             meta: e.lines.map((e) => xs(e.materialId)?.name).join(`, `),
-            href: `#/purchasing/orders/${e.id}`,
+            href: `/purchasing/orders/${e.id}`,
             lead: `<span class="lead">${Tc(`receipt`)}</span>`,
           }),
         )),
@@ -4809,7 +4866,7 @@ function _d() {
 }
 function vd(e) {
   let t = fd[e];
-  t && (_d(), (location.hash = t.href));
+  t && (_d(), navigateTo(t.href));
 }
 (ud.addEventListener(`input`, () => {
   ((pd = 0), hd());
@@ -4886,7 +4943,7 @@ function xd() {
         })
         .join(``) || `<p class="empty">You’re all caught up.</p>`
     }</div>
-    <a class="pop__foot" href="#/dashboard/alerts">See every alert ${Tc(`chevR`)}</a>`,
+    <a class="pop__foot" href="/dashboard/alerts">See every alert ${Tc(`chevR`)}</a>`,
       { label: `Notifications`, cls: `pop--wide` },
     );
     n &&
@@ -4914,7 +4971,7 @@ function Sd(e) {
       label: `Sales order`,
       icon: `orders`,
       onSelect: () => {
-        let t = Gu(location.hash);
+        let t = Gu(location.pathname);
         tu(
           t.name === `customers` && t.params[1]
             ? { customerId: t.params[1] }
@@ -4923,7 +4980,7 @@ function Sd(e) {
               : {},
           e,
           (e) => {
-            location.hash = `#/orders/all/${e.id}`;
+            navigateTo(`/orders/all/${e.id}`);
           },
         );
       },
@@ -4934,7 +4991,7 @@ function Sd(e) {
       icon: `flask`,
       onSelect: () =>
         mu(void 0, e, () => {
-          location.hash = `#/products/batches`;
+          navigateTo(`/products/batches`);
         }),
     },
     { label: `Move stock`, icon: `swap`, onSelect: () => yu({}, e) },
@@ -4954,7 +5011,7 @@ function Sd(e) {
             : `Everything low is already on order`,
           { ico: `truck` },
         ),
-          e.length && (location.hash = `#/purchasing/orders`));
+          e.length && navigateTo('/purchasing/orders'));
       },
     },
   ]);
@@ -4971,9 +5028,9 @@ function Sd(e) {
         Uu.map((e) => ({
           label: Vu[e].label,
           icon: Vu[e].icon,
-          checked: Gu(location.hash).name === e ? !0 : void 0,
+          checked: Gu(location.pathname).name === e ? !0 : void 0,
           onSelect: () => {
-            location.hash = `#/${e}`;
+            navigateTo(`/${e}/${Vu[e].subs[0][0]}`);
           },
         })),
         { align: `end` },
@@ -5014,7 +5071,7 @@ function Dd() {
   let e = () => {
       Ku.classList.toggle(`side-open`);
       try {
-        localStorage.setItem(`vessa:side`, Ku.classList.contains(`side-open`) ? `1` : `0`);
+        localStorage.setItem(`Vels:side`, Ku.classList.contains(`side-open`) ? `1` : `0`);
       } catch {}
       (Ed(), Zu(!1), wd(!1), H.set($u, { autoAlpha: 0 }));
     },
@@ -5050,7 +5107,7 @@ function kd() {
           label: `Account settings`,
           icon: `user`,
           onSelect: () => {
-            location.hash = `#/settings/account`;
+            navigateTo(`/settings/account`);
           },
         },
         { label: `Keyboard shortcuts`, icon: `command`, onSelect: jd },
@@ -5088,7 +5145,7 @@ function kd() {
 function Ad(e) {
   let t = qc(
     e,
-    `<div class="accent-pop"><p class="accent-pop__t">Accent colour</p><p class="accent-pop__s">Pick a colour for buttons, links and highlights.</p>${Bl()}<p class="accent-pop__name">Now: <b data-an>${q(Vl())}</b> · <a href="#/settings/account" data-more>More in Settings</a></p></div>`,
+    `<div class="accent-pop"><p class="accent-pop__t">Accent colour</p><p class="accent-pop__s">Pick a colour for buttons, links and highlights.</p>${Bl()}<p class="accent-pop__name">Now: <b data-an>${q(Vl())}</b> · <a href="/settings/account" data-more>More in Settings</a></p></div>`,
     { label: `Accent colour`, align: `end` },
   );
   t &&
@@ -5121,88 +5178,21 @@ function jd() {
     { label: `Keyboard shortcuts` },
   );
 }
-var Md = G(`#signin`);
 async function Nd() {
   if (
-    await tl(`Sign out of Vessa?`, `You can sign back in with the demo account.`, `Sign out`, !1)
+    await tl(`Sign out of Vels Agro?`, `You will be redirected to the admin login page.`, `Sign out`, !1)
   ) {
     try {
-      localStorage.setItem(`vessa:signedout`, `1`);
+      localStorage.setItem(`Vels:signedout`, `1`);
+      localStorage.removeItem(`Vels:active_user`);
     } catch {}
-    (Kc(),
-      H.set($u, { autoAlpha: 0 }),
-      H.to(`.app`, {
-        opacity: 0,
-        scale: 0.985,
-        duration: W(0.35),
-        ease: `power2.in`,
-        onComplete: Pd,
-      }));
+    Kc();
+    navigateTo(`/login`);
   }
 }
-function Pd() {
-  (Ku.classList.add(`signed-out`),
-    (Md.hidden = !1),
-    H.set(`.app`, { clearProps: `opacity,transform` }),
-    H.fromTo(
-      `.signin__card`,
-      { opacity: 0, y: 30, scale: 0.97 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: W(0.7),
-        ease: `back.out(1.5)`,
-        clearProps: `transform`,
-      },
-    ),
-    co(K(`.signin__card > *`), { y: 10, stagger: 0.05, delay: 0.1 }));
-}
-(G(`#btn-out`).addEventListener(`click`, (e) => {
+G(`#btn-out`).addEventListener(`click`, (e) => {
   (go(e.currentTarget), Nd());
-}),
-  G(`#signin-form`).addEventListener(`submit`, (e) => {
-    e.preventDefault();
-    let t = G(`#si-email`).value.trim(),
-      n = G(`#si-pass`).value,
-      r = G(`#si-err`);
-    if (!/^\S+@\S+\.\S+$/.test(t)) {
-      ((r.textContent = `Enter your work email.`),
-        H.fromTo(
-          `.signin__card`,
-          { x: -8 },
-          { x: 0, duration: W(0.5), ease: `elastic.out(1, 0.3)` },
-        ));
-      return;
-    }
-    if (n.length < 6) {
-      ((r.textContent = `That password is too short.`),
-        H.fromTo(
-          `.signin__card`,
-          { x: -8 },
-          { x: 0, duration: W(0.5), ease: `elastic.out(1, 0.3)` },
-        ));
-      return;
-    }
-    r.textContent = ``;
-    try {
-      localStorage.removeItem(`vessa:signedout`);
-    } catch {}
-    H.to(`.signin__card`, {
-      opacity: 0,
-      y: -16,
-      scale: 0.98,
-      duration: W(0.3),
-      ease: `power2.in`,
-      onComplete: () => {
-        if (((Md.hidden = !0), Ku.classList.remove(`signed-out`), !zd)) {
-          Bd();
-          return;
-        }
-        Rd(!0);
-      },
-    });
-  }));
+});
 var Fd = 0,
   Id = {
     d: `dashboard`,
@@ -5229,7 +5219,7 @@ var Fd = 0,
   }
   let n = e.key.toLowerCase();
   if (Fd && Date.now() - Fd < 1200 && Id[n]) {
-    ((location.hash = `#/${Id[n]}`), (Fd = 0));
+    ((navigateTo(`/${Id[n]}/${Vu[Id[n]].subs[0][0]}`)), (Fd = 0));
     return;
   }
   ((Fd = 0),
@@ -5278,10 +5268,10 @@ function Ld() {
           `order`,
           `Online order`,
           `${i.number} · ${e.name} · ${pc(Gs(i))}`,
-          `#/orders/all/${i.id}`,
+          `/orders/all/${i.id}`,
           `web`,
         ),
-        vs(`order`, `New online order from ${e.name} — ${pc(Gs(i))}`, `#/orders/all/${i.id}`),
+        vs(`order`, `New online order from ${e.name} — ${pc(Gs(i))}`, `/orders/all/${i.id}`),
         Z(`orders`, `activity`, `notices`),
         $(`New online order — ${e.name}, ${pc(Gs(i))}`, { ico: `cart` }));
     }, no(32e3));
@@ -5338,20 +5328,29 @@ function Rd(e = !1) {
   kd(),
   xd(),
   _o(),
-  (!location.hash || location.hash === `#` || location.hash === `#/`) &&
-    history.replaceState(null, ``, `#/dashboard/overview`));
+  (() => {
+  let isSignedOut = !1;
+  try {
+    isSignedOut = localStorage.getItem(`Vels:signedout`) === `1`;
+  } catch {}
+  if (isSignedOut) {
+    history.replaceState(null, ``, `/login`);
+  } else if (!location.pathname || location.pathname === `/` || location.hash === `#` || location.hash === `#/`) {
+    history.replaceState(null, ``, `/dashboard/overview`);
+  }
+  if (location.hash && location.hash.startsWith(`#/`)) {
+    history.replaceState(null, ``, location.hash.slice(1));
+  }
+})());
 var zd = !1;
 function Bd() {
   if (!zd) {
-    if (Ku.classList.contains(`signed-out`)) {
-      (Ku.classList.add(`is-ready`), Pd());
-      return;
-    }
-    ((zd = !0), Rd());
+    zd = !0;
+    Rd();
   }
 }
 Co
-  ? (window.VESSA = {
+  ? (window.Vels = {
       enter: Bd,
       drive(e) {
         let t = H.ticker.time,
@@ -5368,7 +5367,7 @@ Co
         return id?.name ?? ``;
       },
       get hash() {
-        return location.hash;
+        return location.pathname;
       },
     })
   : (document.fonts?.ready ?? Promise.resolve()).then(Bd);

@@ -219,7 +219,7 @@ test.describe('Adversarial Overlay & Interaction Suite', () => {
       await expect(sideBtn).toHaveAttribute('aria-pressed', 'true');
 
       // Check localStorage
-      const sideStorageOpen = await page.evaluate(() => localStorage.getItem('vessa:side'));
+      const sideStorageOpen = await page.evaluate(() => localStorage.getItem('Vels:side'));
       expect(sideStorageOpen).toBe('1');
 
       // Second click: collapses/closes
@@ -227,7 +227,7 @@ test.describe('Adversarial Overlay & Interaction Suite', () => {
       await expect(html).not.toHaveClass(/side-open/);
       await expect(sideBtn).toHaveAttribute('aria-pressed', 'false');
 
-      const sideStorageClosed = await page.evaluate(() => localStorage.getItem('vessa:side'));
+      const sideStorageClosed = await page.evaluate(() => localStorage.getItem('Vels:side'));
       expect(sideStorageClosed).toBe('0');
     });
 

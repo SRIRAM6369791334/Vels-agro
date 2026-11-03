@@ -1,6 +1,6 @@
 # 🧠 Lessons Learned & Engineering Postmortems
 
-This document tracks technical incidents, build quirks, deobfuscation hurdles, and architectural decisions discovered during the engineering lifecycle of Vessa Skincare Inventory.
+This document tracks technical incidents, build quirks, deobfuscation hurdles, and architectural decisions discovered during the engineering lifecycle of Vels Skincare Inventory.
 
 ---
 

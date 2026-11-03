@@ -3,35 +3,35 @@ import { test, expect } from '@playwright/test';
 test.describe('Challenger 1: State & Navigation Stress Suite', () => {
 
   const primaryRoutes = [
-    { hash: '#/dashboard/overview', expectedTitle: 'Dashboard · Vessa', selector: 'text=Units on hand' },
-    { hash: '#/products/catalog', expectedTitle: 'Catalog · Vessa', selector: 'text=Showing 12 of 12 products' },
-    { hash: '#/orders/board', expectedTitle: 'Order board · Vessa', selector: 'text=Pick' },
-    { hash: '#/purchasing/orders', expectedTitle: 'Purchase orders · Vessa', selector: 'text=Purchase orders' },
-    { hash: '#/warehouses/locations', expectedTitle: 'Locations · Vessa', selector: 'text=Riverside DC' },
-    { hash: '#/analytics/overview', expectedTitle: 'Reports · Vessa', selector: 'text=Annual Gross Revenue' },
-    { hash: '#/customers/stockists', expectedTitle: 'Stockists · Vessa', selector: 'text=Stockists' },
-    { hash: '#/settings/account', expectedTitle: 'Account · Vessa', selector: 'text=User Account' },
-    { hash: '#/help/center', expectedTitle: 'Help center · Vessa', selector: 'text=Help center' },
+    { hash: '#/dashboard/overview', expectedTitle: 'Dashboard · Vels', selector: 'text=Units on hand' },
+    { hash: '#/products/catalog', expectedTitle: 'Catalog · Vels', selector: 'text=Showing 12 of 12 products' },
+    { hash: '#/orders/board', expectedTitle: 'Order board · Vels', selector: 'text=Pick' },
+    { hash: '#/purchasing/orders', expectedTitle: 'Purchase orders · Vels', selector: 'text=Purchase orders' },
+    { hash: '#/warehouses/locations', expectedTitle: 'Locations · Vels', selector: 'text=Riverside DC' },
+    { hash: '#/analytics/overview', expectedTitle: 'Reports · Vels', selector: 'text=Annual Gross Revenue' },
+    { hash: '#/customers/stockists', expectedTitle: 'Stockists · Vels', selector: 'text=Stockists' },
+    { hash: '#/settings/account', expectedTitle: 'Account · Vels', selector: 'text=User Account' },
+    { hash: '#/help/center', expectedTitle: 'Help center · Vels', selector: 'text=Help center' },
   ];
 
   const subtabRoutes = [
-    { hash: '#/dashboard/activity', expectedTitle: 'Activity · Vessa' },
-    { hash: '#/dashboard/alerts', expectedTitle: 'Alerts · Vessa' },
-    { hash: '#/products/batches', expectedTitle: 'Batches · Vessa' },
-    { hash: '#/orders/all', expectedTitle: 'All orders · Vessa' },
-    { hash: '#/orders/returns', expectedTitle: 'Returns · Vessa' },
-    { hash: '#/purchasing/suppliers', expectedTitle: 'Suppliers · Vessa' },
-    { hash: '#/purchasing/materials', expectedTitle: 'Materials · Vessa' },
-    { hash: '#/warehouses/transfers', expectedTitle: 'Transfers · Vessa' },
-    { hash: '#/warehouses/counts', expectedTitle: 'Counts · Vessa' },
-    { hash: '#/analytics/sales', expectedTitle: 'Sales · Vessa' },
-    { hash: '#/analytics/stock', expectedTitle: 'Stock health · Vessa' },
-    { hash: '#/customers/shoppers', expectedTitle: 'Shoppers · Vessa' },
-    { hash: '#/settings/company', expectedTitle: 'Company · Vessa' },
-    { hash: '#/settings/team', expectedTitle: 'Team & roles · Vessa' },
-    { hash: '#/settings/billing', expectedTitle: 'Billing · Vessa' },
-    { hash: '#/settings/notifications', expectedTitle: 'Notifications · Vessa' },
-    { hash: '#/help/tickets', expectedTitle: 'My tickets · Vessa' },
+    { hash: '#/dashboard/activity', expectedTitle: 'Activity · Vels' },
+    { hash: '#/dashboard/alerts', expectedTitle: 'Alerts · Vels' },
+    { hash: '#/products/batches', expectedTitle: 'Batches · Vels' },
+    { hash: '#/orders/all', expectedTitle: 'All orders · Vels' },
+    { hash: '#/orders/returns', expectedTitle: 'Returns · Vels' },
+    { hash: '#/purchasing/suppliers', expectedTitle: 'Suppliers · Vels' },
+    { hash: '#/purchasing/materials', expectedTitle: 'Materials · Vels' },
+    { hash: '#/warehouses/transfers', expectedTitle: 'Transfers · Vels' },
+    { hash: '#/warehouses/counts', expectedTitle: 'Counts · Vels' },
+    { hash: '#/analytics/sales', expectedTitle: 'Sales · Vels' },
+    { hash: '#/analytics/stock', expectedTitle: 'Stock health · Vels' },
+    { hash: '#/customers/shoppers', expectedTitle: 'Shoppers · Vels' },
+    { hash: '#/settings/company', expectedTitle: 'Company · Vels' },
+    { hash: '#/settings/team', expectedTitle: 'Team & roles · Vels' },
+    { hash: '#/settings/billing', expectedTitle: 'Billing · Vels' },
+    { hash: '#/settings/notifications', expectedTitle: 'Notifications · Vels' },
+    { hash: '#/help/tickets', expectedTitle: 'My tickets · Vels' },
   ];
 
   test('SN-01: Deep-linking direct load on all 9 primary routes', async ({ page }) => {
@@ -56,7 +56,7 @@ test.describe('Challenger 1: State & Navigation Stress Suite', () => {
       await expect(page).toHaveTitle(r.expectedTitle);
       const title = await page.title();
       expect(title).toContain('\u00B7');
-      expect(title.endsWith(' · Vessa')).toBeTruthy();
+      expect(title.endsWith(' · Vels')).toBeTruthy();
     }
   });
 
@@ -83,11 +83,11 @@ test.describe('Challenger 1: State & Navigation Stress Suite', () => {
 
   test('SN-04: Browser History traversal (Back & Forward) across routes', async ({ page }) => {
     const sequence = [
-      { hash: '#/dashboard/overview', expectedTitle: 'Dashboard · Vessa' },
-      { hash: '#/products/catalog', expectedTitle: 'Catalog · Vessa' },
-      { hash: '#/orders/board', expectedTitle: 'Order board · Vessa' },
-      { hash: '#/warehouses/locations', expectedTitle: 'Locations · Vessa' },
-      { hash: '#/settings/account', expectedTitle: 'Account · Vessa' },
+      { hash: '#/dashboard/overview', expectedTitle: 'Dashboard · Vels' },
+      { hash: '#/products/catalog', expectedTitle: 'Catalog · Vels' },
+      { hash: '#/orders/board', expectedTitle: 'Order board · Vels' },
+      { hash: '#/warehouses/locations', expectedTitle: 'Locations · Vels' },
+      { hash: '#/settings/account', expectedTitle: 'Account · Vels' },
     ];
 
     // Navigate sequentially
@@ -138,7 +138,7 @@ test.describe('Challenger 1: State & Navigation Stress Suite', () => {
 
     // Settle on orders board
     await page.evaluate(() => { window.location.hash = '#/orders/board'; });
-    await expect(page).toHaveTitle('Order board · Vessa');
+    await expect(page).toHaveTitle('Order board · Vels');
     await expect(page.locator('text=Pick')).toBeVisible();
 
     expect(errors).toHaveLength(0);
@@ -155,7 +155,7 @@ test.describe('Challenger 1: State & Navigation Stress Suite', () => {
     await expect(html).toHaveAttribute('data-theme', 'dark');
 
     // Verify localStorage format (JSON-stringified as per vanilla spec)
-    const storedDark = await page.evaluate(() => localStorage.getItem('vessa:theme'));
+    const storedDark = await page.evaluate(() => localStorage.getItem('Vels:theme'));
     expect(storedDark).toBe('"dark"');
 
     // Full page reload to test cold-boot persistence from localStorage
@@ -166,7 +166,7 @@ test.describe('Challenger 1: State & Navigation Stress Suite', () => {
     await lightBtn.click();
     await expect(html).toHaveAttribute('data-theme', 'light');
 
-    const storedLight = await page.evaluate(() => localStorage.getItem('vessa:theme'));
+    const storedLight = await page.evaluate(() => localStorage.getItem('Vels:theme'));
     expect(storedLight).toBe('"light"');
 
     // Full page reload to verify light persistence
@@ -180,7 +180,7 @@ test.describe('Challenger 1: State & Navigation Stress Suite', () => {
     const page = await context.newPage();
 
     await page.addInitScript(() => {
-      localStorage.setItem('vessa:theme', JSON.stringify('dark'));
+      localStorage.setItem('Vels:theme', JSON.stringify('dark'));
     });
 
     await page.goto('http://localhost:5173/#/dashboard/overview');
@@ -199,16 +199,16 @@ test.describe('Challenger 1: State & Navigation Stress Suite', () => {
 
     // Seed invalid unparseable JSON into localStorage
     await page.addInitScript(() => {
-      localStorage.setItem('vessa:theme', '{invalid-json:');
-      localStorage.setItem('vessa:side', 'invalid-boolean');
-      localStorage.setItem('vessa:accent', '#invalid');
+      localStorage.setItem('Vels:theme', '{invalid-json:');
+      localStorage.setItem('Vels:side', 'invalid-boolean');
+      localStorage.setItem('Vels:accent', '#invalid');
     });
 
     await page.goto('http://localhost:5173/#/dashboard/overview');
     
     // Page must remain functional and not crash
     await expect(page.locator('.top .brand')).toBeVisible();
-    await expect(page).toHaveTitle(/Dashboard · Vessa/);
+    await expect(page).toHaveTitle(/Dashboard · Vels/);
 
     expect(errors).toHaveLength(0);
     await context.close();
@@ -225,7 +225,7 @@ test.describe('Challenger 1: State & Navigation Stress Suite', () => {
     // Click collapse toggle
     await sideBtn.click();
     await expect(html).toHaveClass(/side-open/);
-    const sideStored = await page.evaluate(() => localStorage.getItem('vessa:side'));
+    const sideStored = await page.evaluate(() => localStorage.getItem('Vels:side'));
     expect(sideStored).toBe('1');
 
     // Reload page
@@ -235,14 +235,14 @@ test.describe('Challenger 1: State & Navigation Stress Suite', () => {
     // Toggle back
     await sideBtn.click();
     await expect(html).not.toHaveClass(/side-open/);
-    const sideClosed = await page.evaluate(() => localStorage.getItem('vessa:side'));
+    const sideClosed = await page.evaluate(() => localStorage.getItem('Vels:side'));
     expect(sideClosed).toBe('0');
   });
 
   test('SN-10: Adversarial unknown route inspection redirects to dashboard overview', async ({ page }) => {
     await page.goto('#/unknown-route-404');
     await expect(page).toHaveURL(/#\/dashboard\/overview/);
-    await expect(page).toHaveTitle(/Vessa/);
+    await expect(page).toHaveTitle(/Vels/);
   });
 
 });

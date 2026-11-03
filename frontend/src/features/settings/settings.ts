@@ -163,7 +163,7 @@ let V = [
   {
     id: `s-iphone`,
     device: `iPhone 16`,
-    app: `Vessa for iOS`,
+    app: `Vels for iOS`,
     where: `Asheville, NC`,
     at: Date.now() - 2 * 3600000,
     ico: `mobile`,
@@ -268,7 +268,7 @@ function We() {
         .join(``)}</div>
       <div class="st-accent">
         <div class="st-accent__head"><b>Accent colour</b><small data-k="ac-accent-name">${escapeHtml(getCurrentAccentName())}</small></div>
-        <p class="st-accent__sub">Buttons, links, the active page and chart highlights. Pick one, or choose any colour — Vessa tunes it so text stays readable in light and dark.</p>
+        <p class="st-accent__sub">Buttons, links, the active page and chart highlights. Pick one, or choose any colour — Vels tunes it so text stays readable in light and dark.</p>
         <div data-k="ac-accents">${renderAccentPickerHtml()}</div>
       </div>
     </section>
@@ -569,7 +569,7 @@ function et() {
   let company = store.settings.company;
   let prefs = store.settings.prefs;
   return `${renderPageHeader({
-    eyebrow: `The business behind Vessa`,
+    eyebrow: `The business behind Vels`,
     title: `Company`,
   })}
   <div class="st-grid st-grid--company">
@@ -612,6 +612,7 @@ function et() {
           ph: `00-0000000`,
         })}
         ${He(`currency`, `Currency`, company.currency, [
+          [`INR`, `Indian rupee (INR)`],
           [`USD`, `US dollar (USD)`],
           [`CAD`, `Canadian dollar (CAD)`],
           [`EUR`, `Euro (EUR)`],
@@ -628,7 +629,7 @@ function et() {
       </form>
     </section>
     <section class="card st-data" aria-labelledby="co-x-t">
-      <header class="card__head"><div><h2 class="card__title" id="co-x-t">Your data</h2><p class="card__sub">Everything Vessa holds, as CSV</p></div></header>
+      <header class="card__head"><div><h2 class="card__title" id="co-x-t">Your data</h2><p class="card__sub">Everything Vels holds, as CSV</p></div></header>
       <div class="st-exports">
         <button type="button" class="st-export" data-export="stock">${renderTag(`boxes`, `pine`, `sm`)}<span><b>Stock</b><small>Every product by location</small></span>${renderIcon(`download`)}</button>
         <button type="button" class="st-export" data-export="orders">${renderTag(`orders`, `sky`, `sm`)}<span><b>Orders</b><small>${pluralize(store.orders.length, `sales order`)}</small></span>${renderIcon(`download`)}</button>
@@ -687,7 +688,7 @@ function et() {
       </div>
     </section>
     <section class="card st-locs" aria-labelledby="co-l-t">
-      <header class="card__head"><div><h2 class="card__title" id="co-l-t">Locations</h2><p class="card__sub">${pluralize(store.locations.length, `site`)} holding stock</p></div><div class="card__tools"><a class="btn btn--ghost btn--sm" href="#/warehouses/locations">${renderIcon(`warehouse`)}Manage</a></div></header>
+      <header class="card__head"><div><h2 class="card__title" id="co-l-t">Locations</h2><p class="card__sub">${pluralize(store.locations.length, `site`)} holding stock</p></div><div class="card__tools"><a class="btn btn--ghost btn--sm" href="/warehouses/locations">${renderIcon(`warehouse`)}Manage</a></div></header>
       <div class="rows" data-k="co-locs"></div>
     </section>
     </div>
@@ -722,7 +723,7 @@ function rt(t) {
       let r = getLocationStockUnits(n.id);
       let i = Math.min(1, r / n.capacity);
       let a = n.kind === `dc` ? `pine` : n.kind === `lab` ? `ocean` : `ochre`;
-      return `<a class="row st-loc" href="#/warehouses/locations/${n.id}">${renderTag(n.kind === `dc` ? `warehouse` : n.kind === `lab` ? `flask` : `store`, a)}<span class="row__txt"><b>${escapeHtml(n.name)}</b><small>${escapeHtml(n.address)}, ${escapeHtml(n.city)} · ${escapeHtml(findMemberById(n.managerId)?.name ?? ``)}</small><span class="meter"><span class="meter__fill" style="--c:var(--${a});transform:scaleX(${t ? 0 : i})" data-to="${Math.max(0.02, i)}"></span></span></span><span class="row__end"><b>${formatInt(r)}</b>of ${formatInt(n.capacity)}</span></a>`;
+      return `<a class="row st-loc" href="/warehouses/locations/${n.id}">${renderTag(n.kind === `dc` ? `warehouse` : n.kind === `lab` ? `flask` : `store`, a)}<span class="row__txt"><b>${escapeHtml(n.name)}</b><small>${escapeHtml(n.address)}, ${escapeHtml(n.city)} · ${escapeHtml(findMemberById(n.managerId)?.name ?? ``)}</small><span class="meter"><span class="meter__fill" style="--c:var(--${a});transform:scaleX(${t ? 0 : i})" data-to="${Math.max(0.02, i)}"></span></span></span><span class="row__end"><b>${formatInt(r)}</b>of ${formatInt(n.capacity)}</span></a>`;
     })
     .join(``);
   if (t) {
@@ -918,7 +919,7 @@ let H = `all`;
 const U = () => store.team.filter((e) => e.status !== `invited`).length;
 function dt() {
   return `${renderPageHeader({
-    eyebrow: `Who works in Vessa and what they can do`,
+    eyebrow: `Who works in Vels and what they can do`,
     title: `Team & roles`,
     actions: `<button type="button" class="btn btn--primary magnetic" data-k="tm-invite">${renderIcon(`userPlus`)}Invite teammate</button>`,
     stats: [
@@ -976,7 +977,7 @@ function dt() {
       <span class="meter st-seats__meter"><span class="meter__fill" data-k="tm-meter" style="--c:var(--pine)"></span><span class="meter__fill st-seats__inv" data-k="tm-meter-inv" style="--c:var(--sky)"></span></span>
       <ul class="st-seats__key"><li><i class="dot" style="--c:var(--pine)"></i>Active and away</li><li><i class="dot" style="--c:var(--sky)"></i>Invited, not joined yet</li></ul>
       <p class="st-seats__note" data-k="tm-note"></p>
-      <a class="btn btn--ghost btn--sm" href="#/settings/billing">${renderIcon(`card`)}Change seats</a>
+      <a class="btn btn--ghost btn--sm" href="/settings/billing">${renderIcon(`card`)}Change seats</a>
     </section>
   </div>`;
 }
@@ -1111,7 +1112,7 @@ const gt = (since) => {
 function _t(t) {
   let n = findMemberById(t);
   if (!n) {
-    history.replaceState(null, ``, `#/settings/team`);
+    history.replaceState(null, ``, `/settings/team`);
     return;
   }
   let [r, i] = lt[n.status];
@@ -1126,8 +1127,8 @@ function _t(t) {
     {
       label: n.name,
       onClose: () => {
-        if (location.hash.startsWith(`#/settings/team/`)) {
-          history.replaceState(null, ``, `#/settings/team`);
+        if (location.pathname.startsWith(`/settings/team/`)) {
+          history.replaceState(null, ``, `/settings/team`);
         }
       },
       onMount: (e) => {
@@ -1206,7 +1207,7 @@ function team() {
     }
     let s = t_target.closest(`[data-open]`);
     if (s && !t_target.closest(`select, button, a`)) {
-      location.hash = `#/settings/team/${s.dataset.open}`;
+      (window as any).navigateTo(`/settings/team/${s.dataset.open}`)
     }
   });
   let t = domQuery(`.st-matrix`, e);
@@ -1371,7 +1372,7 @@ function bt() {
       <div class="st-seatrow" data-k="bi-seatrow">${ONE_MIN_MS(`seats`, billing.seats, `seats`, U())}<div><b class="num" data-k="bi-seat-cost"></b><small data-k="bi-seat-note"></small></div></div>
       <span class="meter"><span class="meter__fill" data-k="bi-seat-meter" style="--c:var(--sky)"></span></span>
       <p class="st-seats__note" data-k="bi-seat-help"></p>
-      <div class="st-holders"><small>Who holds a seat</small><div class="st-holders__row"><span data-k="bi-holders"></span><a class="btn btn--ghost btn--sm" href="#/settings/team">${renderIcon(`users`)}Manage team</a></div></div>
+      <div class="st-holders"><small>Who holds a seat</small><div class="st-holders__row"><span data-k="bi-holders"></span><a class="btn btn--ghost btn--sm" href="/settings/team">${renderIcon(`users`)}Manage team</a></div></div>
     </section>
   </div>
   <section class="card st-inv tcard" aria-labelledby="bi-i-t">
@@ -1428,7 +1429,7 @@ function J(t) {
         .map(
           (t) => `<tr class="is-link" data-key="${t.id}" data-inv="${t.id}">
       <td class="a-t"><b class="mono">${escapeHtml(t.id)}</b><small class="st-sub">${formatDate(t.at, true)}</small></td>
-      <td class="a-s">Vessa ${escapeHtml(Ct(t.amount))} · ${new Date(t.at).toLocaleDateString(
+      <td class="a-s">Vels ${escapeHtml(Ct(t.amount))} · ${new Date(t.at).toLocaleDateString(
         `en-US`,
         {
           month: `long`,
@@ -1702,7 +1703,7 @@ function Ot(from) {
 function kt(t) {
   let r = store.settings.billing.invoices.find((e) => e.id === t);
   if (!r) {
-    history.replaceState(null, ``, `#/settings/billing`);
+    history.replaceState(null, ``, `/settings/billing`);
     return;
   }
   let company = store.settings.company;
@@ -1710,8 +1711,8 @@ function kt(t) {
   openDrawer(
     `<div class="d-head">${renderTag(`receipt`, r.status === `paid` ? `sage` : `ochre`)}<div><h2 class="mono">${escapeHtml(r.id)}</h2><small>Issued ${formatDate(r.at, true)}</small></div></div>
     <div class="d-pills">${renderPill(r.status === `paid` ? `Paid` : `Due`, r.status === `paid` ? `sage` : `ochre`)}</div>
-    <div class="d-facts"><div><small>Amount</small><b>${formatMoney(r.amount)}</b><span>USD, tax included</span></div><div><small>Paid with</small><b>${escapeHtml(card.brand)} •• ${escapeHtml(card.last4)}</b><span>${r.status === `paid` ? `on ${formatDate(r.at + ONE_DAY_MS)}` : `Pending`}</span></div></div>
-    <div class="d-sec"><h3>Lines</h3><ul class="bom"><li><span>Vessa ${escapeHtml(Ct(r.amount))} plan</span><small>${new Date(
+    <div class="d-facts"><div><small>Amount</small><b>${formatMoney(r.amount)}</b><span>INR, tax included</span></div><div><small>Paid with</small><b>${escapeHtml(card.brand)} •• ${escapeHtml(card.last4)}</b><span>${r.status === `paid` ? `on ${formatDate(r.at + ONE_DAY_MS)}` : `Pending`}</span></div></div>
+    <div class="d-sec"><h3>Lines</h3><ul class="bom"><li><span>Vels ${escapeHtml(Ct(r.amount))} plan</span><small>${new Date(
       r.at
     ).toLocaleDateString(`en-US`, {
       month: `long`,
@@ -1722,8 +1723,8 @@ function kt(t) {
     {
       label: `Invoice ${r.id}`,
       onClose: () => {
-        if (location.hash.startsWith(`#/settings/billing/`)) {
-          history.replaceState(null, ``, `#/settings/billing`);
+        if (location.pathname.startsWith(`/settings/billing/`)) {
+          history.replaceState(null, ``, `/settings/billing`);
         }
       },
       onMount: (e) =>
@@ -1740,11 +1741,11 @@ function At(e, t) {
     downloadFile(
       `${r.id}.csv`,
       formatCsvRow([
-        [`Invoice`, `Date`, `Description`, `Amount (USD)`, `Status`],
+        [`Invoice`, `Date`, `Description`, `Amount (INR)`, `Status`],
         [
           r.id,
           new Date(r.at).toISOString().slice(0, 10),
-          `Vessa ${Ct(r.amount)} plan`,
+          `Vels ${Ct(r.amount)} plan`,
           r.amount.toFixed(2),
           r.status,
         ],
@@ -1804,7 +1805,7 @@ function billing() {
     }
     let a = t_target.closest(`[data-inv]`);
     if (a && !t_target.closest(`button, a`)) {
-      location.hash = `#/settings/billing/${a.dataset.inv}`;
+      (window as any).navigateTo(`/settings/billing/${a.dataset.inv}`)
     }
   });
 }
@@ -1885,7 +1886,7 @@ const X = [
   {
     key: `orders`,
     title: `New orders`,
-    text: () => `Every wholesale order, and online orders over $100.`,
+    text: () => `Every wholesale order, and online orders over ₹100.`,
     ico: `orders`,
     tone: `sky`,
   },
@@ -1910,7 +1911,7 @@ const Nt = (t, n, r) =>
 function Pt() {
   let notify = store.settings.notify;
   return `${renderPageHeader({
-    eyebrow: `What Vessa tells you, and where`,
+    eyebrow: `What Vels tells you, and where`,
     title: `Notifications`,
     actions: `<button type="button" class="btn btn--ghost" data-k="nt-test">${renderIcon(`bell`)}Send a test</button>`,
   })}
@@ -1934,7 +1935,7 @@ function Pt() {
         <header class="card__head"><div><h2 class="card__title" id="nt-c-t">Where they go</h2><p class="card__sub">${escapeHtml(store.settings.me.email)}</p></div></header>
         <div class="st-nlist">
           <div class="st-nrow" data-row="email">${renderTag(`mail`, `sky`, `sm`)}<span class="st-nrow__txt"><b>Email</b><small>To ${escapeHtml(store.settings.me.email)}</small></span>${B}${Nt(`email`, notify.email, `Email notifications`)}</div>
-          <div class="st-nrow" data-row="push">${renderTag(`mobile`, `pine`, `sm`)}<span class="st-nrow__txt"><b>Push</b><small>On the iPhone with Vessa installed</small></span>${B}${Nt(`push`, notify.push, `Push notifications`)}</div>
+          <div class="st-nrow" data-row="push">${renderTag(`mobile`, `pine`, `sm`)}<span class="st-nrow__txt"><b>Push</b><small>On the iPhone with Vels installed</small></span>${B}${Nt(`push`, notify.push, `Push notifications`)}</div>
         </div>
       </section>
       <section class="card st-digest" aria-labelledby="nt-d-t">
@@ -1980,7 +1981,7 @@ function Q(t) {
     : renderEmptyState(
         Z === `on` ? `Every alert is off` : `Every alert is on`,
         Z === `on`
-          ? `Vessa won’t tell you about anything. Turn on the ones you need.`
+          ? `Vels won’t tell you about anything. Turn on the ones you need.`
           : `Nothing is muted. Turn off what you don’t need to hear.`,
         `bell`,
         `<button type="button" class="btn btn--ghost btn--sm" data-k="nt-all">Show all alerts</button>`
@@ -2062,8 +2063,8 @@ function notifications() {
       }
       addNotification(
         `stock`,
-        `Test alert — this is how Vessa tells you something needs a hand`,
-        `#/settings/notifications`
+        `Test alert — this is how Vels tells you something needs a hand`,
+        `/settings/notifications`
       );
       notifyStoreSubscribers(`notices`);
       showToast(

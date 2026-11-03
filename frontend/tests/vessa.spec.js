@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Vessa Skincare Lab - Full E2E & Functionality Suite', () => {
+test.describe('Vels Skincare Lab - Full E2E & Functionality Suite', () => {
 
   test('1. Shell & Dashboard loads with KPI metrics', async ({ page }) => {
     await page.goto('/#/dashboard/overview');
-    await expect(page).toHaveTitle(/Vessa/);
+    await expect(page).toHaveTitle(/Vels/);
 
     // Verify Brand
     const brand = page.locator('.top .brand');
     await expect(brand).toBeVisible();
-    await expect(brand).toContainText('Vessa');
+    await expect(brand).toContainText('Vels');
     await expect(brand).toContainText('Marlow & Fern');
 
     // Verify KPI Cards in Welcome section
@@ -27,44 +27,44 @@ test.describe('Vessa Skincare Lab - Full E2E & Functionality Suite', () => {
   test('2. Navigation across all main sections & subtabs', async ({ page }) => {
     // Products
     await page.goto('/#/products/catalog');
-    await expect(page).toHaveTitle(/Catalog · Vessa/);
+    await expect(page).toHaveTitle(/Catalog · Vels/);
     await expect(page.locator('text=Showing 12 of 12 products')).toBeVisible();
 
     // Batches
     await page.goto('/#/products/batches');
-    await expect(page).toHaveTitle(/Batches · Vessa/);
+    await expect(page).toHaveTitle(/Batches · Vels/);
 
     // Orders All
     await page.goto('/#/orders/all');
-    await expect(page).toHaveTitle(/All orders · Vessa/);
+    await expect(page).toHaveTitle(/All orders · Vels/);
 
     // Orders Board
     await page.goto('/#/orders/board');
-    await expect(page).toHaveTitle(/Order board · Vessa/);
+    await expect(page).toHaveTitle(/Order board · Vels/);
 
     // Purchasing Orders
     await page.goto('/#/purchasing/orders');
-    await expect(page).toHaveTitle(/Purchase orders · Vessa/);
+    await expect(page).toHaveTitle(/Purchase orders · Vels/);
 
     // Warehouses Locations
     await page.goto('/#/warehouses/locations');
-    await expect(page).toHaveTitle(/Locations · Vessa/);
+    await expect(page).toHaveTitle(/Locations · Vels/);
 
     // Analytics Overview
     await page.goto('/#/analytics/overview');
-    await expect(page).toHaveTitle(/Reports · Vessa/);
+    await expect(page).toHaveTitle(/Reports · Vels/);
 
     // Customers Stockists
     await page.goto('/#/customers/stockists');
-    await expect(page).toHaveTitle(/Stockists · Vessa/);
+    await expect(page).toHaveTitle(/Stockists · Vels/);
 
     // Settings Account
     await page.goto('/#/settings/account');
-    await expect(page).toHaveTitle(/Account · Vessa/);
+    await expect(page).toHaveTitle(/Account · Vels/);
 
     // Help Center
     await page.goto('/#/help/center');
-    await expect(page).toHaveTitle(/Help center · Vessa/);
+    await expect(page).toHaveTitle(/Help center · Vels/);
   });
 
   test('3. Theme toggle between Light and Dark mode', async ({ page }) => {

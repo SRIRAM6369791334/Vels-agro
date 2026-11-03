@@ -93,7 +93,7 @@ server {
 ## 4. GitHub Actions CI/CD Pipeline (`.github/workflows/ci.yml`)
 
 ```yaml
-name: Vessa Frontend CI/CD
+name: Vels Frontend CI/CD
 
 on:
   push:

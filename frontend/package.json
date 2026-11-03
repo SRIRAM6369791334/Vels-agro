@@ -1,7 +1,7 @@
 {
-  "name": "vessa-skincare-inventory",
+  "name": "Vels-skincare-inventory",
   "version": "1.0.0",
-  "description": "Vessa - Stock and supply for a skincare lab. Complete editable clone.",
+  "description": "Vels - Admin Panel. Complete editable clone.",
   "type": "module",
   "scripts": {
     "dev": "vite",

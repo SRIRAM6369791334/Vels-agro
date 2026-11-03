@@ -26,7 +26,7 @@ test.describe('Final Adversarial Challenger: Deep Stress & Mutation Oracle', () 
       // Validate download filename
       const filename = download.suggestedFilename();
       console.log('Observed downloaded filename:', filename);
-      expect(filename).toMatch(/^vessa-stock-\d{4}-\d{2}-\d{2}\.csv$/);
+      expect(filename).toMatch(/^Vels-stock-\d{4}-\d{2}-\d{2}\.csv$/);
 
       // Verify popover closed after action
       await expect(popover).not.toBeVisible();
@@ -67,7 +67,7 @@ test.describe('Final Adversarial Challenger: Deep Stress & Mutation Oracle', () 
         // Verify state persisted in localStorage (debounced by 250ms in DataContext)
         await expect.poll(async () => {
           return await page.evaluate(() => {
-            const raw = localStorage.getItem('vessa:data:v2');
+            const raw = localStorage.getItem('Vels:data:v2');
             const data = raw ? JSON.parse(raw) : null;
             return data?.notices ? data.notices.some((n) => !n.read) : true;
           });

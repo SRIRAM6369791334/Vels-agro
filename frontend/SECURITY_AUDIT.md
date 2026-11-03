@@ -2,7 +2,7 @@
 
 ## 1. Security Overview
 
-Vessa manages sensitive cosmetic formulation batches, commercial pricing, wholesale customer identities, and physical warehouse inventory. The frontend adheres to strict client-side security standards to prevent Cross-Site Scripting (XSS), data exfiltration, and unauthorized privilege escalation.
+Vels manages sensitive cosmetic formulation batches, commercial pricing, wholesale customer identities, and physical warehouse inventory. The frontend adheres to strict client-side security standards to prevent Cross-Site Scripting (XSS), data exfiltration, and unauthorized privilege escalation.
 
 ---
 
@@ -45,7 +45,7 @@ The system enforces 5 distinct authorization tiers:
 ## 4. XSS Sanitization Standard
 
 Dynamic HTML string concatenation in Vanilla TypeScript is vulnerable to injection if unescaped strings reach `.innerHTML`.
-In Vessa, direct interpolation of user or API input without `escapeHtml()` is prohibited:
+In Vels, direct interpolation of user or API input without `escapeHtml()` is prohibited:
 
 ```typescript
 // ❌ INSECURE: Dangerous innerHTML injection

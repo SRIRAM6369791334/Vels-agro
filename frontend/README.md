@@ -1,4 +1,4 @@
-# 🌿 Vessa — Skincare Lab Inventory & Supply Management System
+# 🌿 Vels — Skincare Lab Inventory & Supply Management System
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF.svg)](https://vitejs.dev/)
@@ -6,7 +6,7 @@
 [![Playwright](https://img.shields.io/badge/Playwright-E2E-45ba4b.svg)](https://playwright.dev/)
 [![Clean Architecture](https://img.shields.io/badge/Architecture-Feature--First-orange.svg)]()
 
-> **Vessa** is an enterprise-grade inventory, production batch tracking, sales order fulfillment (Pick-Pack-Ship), purchasing, and multi-location warehouse management system designed for specialized cosmetic and skincare laboratories.
+> **Vels** is an enterprise-grade inventory, production batch tracking, sales order fulfillment (Pick-Pack-Ship), purchasing, and multi-location warehouse management system designed for specialized cosmetic and skincare laboratories.
 
 ---
 
@@ -93,10 +93,10 @@ frontend/
 │
 ├── public/                     # Static media & assets
 │   ├── favicon.ico, favicon.svg, apple-touch-icon.png
-│   └── photos/vessa/           # Skincare product photography
+│   └── photos/Vels/           # Skincare product photography
 │
 ├── tests/                      # Playwright E2E suites
-│   └── vessa.spec.js           # 7 master test suites
+│   └── Vels.spec.js           # 7 master test suites
 │
 └── src/                        # 🏛️ TypeScript Source
     ├── core/                   # Motion engine & reduced-motion helpers

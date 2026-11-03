@@ -123,9 +123,9 @@ function renderDashboardOverviewTemplate() {
         <button type="button" class="btn btn--ghost btn--sm" data-act="batch">${renderIcon(`flask`)}Make a batch</button>
       </div>
     </section>
-    <a class="kpi" href="#/products/catalog" data-lift data-k="kpi-units"></a>
-    <a class="kpi" href="#/analytics/stock" data-lift data-k="kpi-value"></a>
-    <a class="kpi" href="#/dashboard/alerts" data-lift data-k="kpi-low"></a>
+    <a class="kpi" href="/products/catalog" data-lift data-k="kpi-units"></a>
+    <a class="kpi" href="/analytics/stock" data-lift data-k="kpi-value"></a>
+    <a class="kpi" href="/dashboard/alerts" data-lift data-k="kpi-low"></a>
   </div>
   <div class="db-mid">
     <section class="card db-inv" aria-labelledby="inv-t">
@@ -146,7 +146,7 @@ function renderDashboardOverviewTemplate() {
       <div data-k="fan"></div>
       <dl class="db-sales__figs">
         <div><dt>Number of sales</dt><dd><b class="num" data-k="n-sales">0</b></dd></div>
-        <div><dt>Total sales</dt><dd><b class="num" data-k="t-sales">$0</b></dd></div>
+        <div><dt>Total sales</dt><dd><b class="num" data-k="t-sales">₹0</b></dd></div>
       </dl>
       <p class="db-sales__goal" data-k="goal-line"></p>
     </section>
@@ -168,7 +168,7 @@ function renderDashboardOverviewTemplate() {
   <div class="db-tail">
     <section class="card db-ship" aria-labelledby="ship-t">
       <header class="card__head"><div><h2 class="card__title" id="ship-t">Ships today</h2><p class="card__sub" data-k="ship-sub"></p></div>
-        <div class="card__tools"><a class="btn btn--ghost btn--sm" href="#/orders/board">${renderIcon(`board`)}Open board</a></div></header>
+        <div class="card__tools"><a class="btn btn--ghost btn--sm" href="/orders/board">${renderIcon(`board`)}Open board</a></div></header>
       <div class="db-ship__meter"><span class="meter"><span class="meter__fill" data-k="ship-fill" style="--c:var(--teal)"></span></span><b class="num" data-k="ship-pct">0%</b></div>
       <div class="rows" data-k="ship"></div>
     </section>
@@ -411,7 +411,7 @@ const tt = {
 };
 const nt = (e) => {
   let [n, r] = tt[e.kind];
-  return `<a class="row" href="${e.href ?? `#/dashboard/activity`}" data-key="${e.id}">${renderTag(n, r)}<span class="row__txt"><b>${escapeHtml(e.title)}</b><small>${escapeHtml(e.text)}</small></span><span class="row__end">${formatRelativeTime(e.at)}</span></a>`;
+  return `<a class="row" href="${e.href ?? `/dashboard/activity`}" data-key="${e.id}">${renderTag(n, r)}<span class="row__txt"><b>${escapeHtml(e.title)}</b><small>${escapeHtml(e.text)}</small></span><span class="row__end">${formatRelativeTime(e.at)}</span></a>`;
 };
 function rt(e) {
   let t = dataKeyQuery(`acts`);
@@ -441,7 +441,7 @@ function it() {
       text: e.length
         ? `${pluralize(e.length, `product`)} out at Riverside DC`
         : `Nothing is out of stock`,
-      href: `#/dashboard/alerts`,
+      href: `/dashboard/alerts`,
       n: e.length,
     },
     {
@@ -452,7 +452,7 @@ function it() {
       text: n.length
         ? `${pluralize(n.length, `lot`)} expire within ${store.settings.prefs.expiryWarnDays} days`
         : `No lots near expiry`,
-      href: `#/products/batches`,
+      href: `/products/batches`,
       n: n.length,
     },
     {
@@ -461,7 +461,7 @@ function it() {
       ico: `alert`,
       title: `Low stock alert`,
       text: `${pluralize(t.length + getLowStockMaterials().length, `item`)} running low`,
-      href: `#/dashboard/alerts`,
+      href: `/dashboard/alerts`,
       n: t.length + getLowStockMaterials().length,
     },
     {
@@ -470,7 +470,7 @@ function it() {
       ico: `hourglass`,
       title: `Pending orders`,
       text: `${pluralize(a.length, `order`)} waiting to ship`,
-      href: `#/orders/board`,
+      href: `/orders/board`,
       n: a.length,
     },
     {
@@ -479,7 +479,7 @@ function it() {
       ico: `flask`,
       title: `Batches in QA`,
       text: `${pluralize(o.length, `batch`, `batches`)} waiting for release`,
-      href: `#/products/batches`,
+      href: `/products/batches`,
       n: o.length,
     },
   ];
@@ -499,7 +499,7 @@ function at() {
     e
       .map(
         (e) =>
-          `<a class="row db-top__row" href="#/products/item/${e.product.id}" data-key="${e.product.id}">${renderProductThumb(e.product, `lg`)}<span class="row__txt"><b>${escapeHtml(e.product.name)}</b><small>${escapeHtml(e.product.size)} · <span class="mono">${escapeHtml(e.product.sku)}</span></small></span><span class="row__end"><b>${formatMoneyRound(e.revenue)}</b>${pluralize(e.orders, `order`)}</span></a>`
+          `<a class="row db-top__row" href="/products/item/${e.product.id}" data-key="${e.product.id}">${renderProductThumb(e.product, `lg`)}<span class="row__txt"><b>${escapeHtml(e.product.name)}</b><small>${escapeHtml(e.product.size)} · <span class="mono">${escapeHtml(e.product.sku)}</span></small></span><span class="row__end"><b>${formatMoneyRound(e.revenue)}</b>${pluralize(e.orders, `order`)}</span></a>`
       )
       .join(``) ||
     renderEmptyState(`No sales yet`, `Top sellers appear after the first orders.`, `chart`);
@@ -547,7 +547,7 @@ function ct(e) {
       .map((e) => {
         let n = findCustomerById(e.customerId);
         return `<div class="row db-ship__row" data-key="${e.id}">
-    ${renderAvatar(e.customerId, `md`)}<a class="row__txt" href="#/orders/all/${e.id}"><b>${escapeHtml(n?.name ?? ``)}</b><small><span class="mono">${e.number}</span> · ${pluralize(
+    ${renderAvatar(e.customerId, `md`)}<a class="row__txt" href="/orders/all/${e.id}"><b>${escapeHtml(n?.name ?? ``)}</b><small><span class="mono">${e.number}</span> · ${pluralize(
       e.lines.reduce((acc, line) => acc + line.qty, 0),
       `unit`
     )} · ${formatMoney(getOrderTotal(e))}</small></a>
@@ -570,7 +570,7 @@ function lt(e) {
     .map((n) => {
       let r = getLocationStockUnits(n.id);
       let i = Math.min(1, r / n.capacity);
-      return `<a class="db-loc" href="#/warehouses/locations/${n.id}" data-lift>
+      return `<a class="db-loc" href="/warehouses/locations/${n.id}" data-lift>
       ${renderTag(n.kind === `dc` ? `warehouse` : n.kind === `lab` ? `flask` : `store`, n.kind === `dc` ? `pine` : n.kind === `lab` ? `ocean` : `ochre`)}
       <span class="db-loc__txt"><b>${escapeHtml(n.name)}</b><small>${escapeHtml(n.city)}</small></span>
       <span class="db-loc__fig"><b class="num" data-lu="${n.id}">${formatInt(r)}</b><small>of ${formatInt(n.capacity)}</small></span>
@@ -701,7 +701,7 @@ function ut() {
             fields: [
               {
                 name: `goal`,
-                label: `Goal (USD)`,
+                label: `Goal (INR)`,
                 type: `number`,
                 value: store.settings.goal,
                 min: 1000,
@@ -712,7 +712,7 @@ function ut() {
             onSubmit: (e) => {
               let t = Number(e.goal);
               if (!(t >= 1000)) {
-                return `Set a goal of at least $1,000.`;
+                return `Set a goal of at least ₹1,000.`;
               }
               setSalesGoal(t);
               showToast(`Goal set to ${formatMoneyRound(t)}`, {
@@ -725,7 +725,7 @@ function ut() {
         label: `Sales analytics`,
         icon: `chart`,
         onSelect: () => {
-          location.hash = `#/analytics/sales`;
+          (window as any).navigateTo(`/analytics/sales`)
         },
       },
     ]);
@@ -736,14 +736,14 @@ function ut() {
         label: `All activity`,
         icon: `list`,
         onSelect: () => {
-          location.hash = `#/dashboard/activity`;
+          (window as any).navigateTo(`/dashboard/activity`)
         },
       },
       {
         label: `Stock ledger`,
         icon: `layers`,
         onSelect: () => {
-          location.hash = `#/dashboard/activity`;
+          (window as any).navigateTo(`/dashboard/activity`)
         },
       },
     ])
@@ -754,14 +754,14 @@ function ut() {
         label: `Every alert`,
         icon: `bell`,
         onSelect: () => {
-          location.hash = `#/dashboard/alerts`;
+          (window as any).navigateTo(`/dashboard/alerts`)
         },
       },
       {
         label: `Alert settings`,
         icon: `gear`,
         onSelect: () => {
-          location.hash = `#/settings/notifications`;
+          (window as any).navigateTo(`/settings/notifications`)
         },
       },
     ])
@@ -772,14 +772,14 @@ function ut() {
         label: `Full catalog`,
         icon: `box`,
         onSelect: () => {
-          location.hash = `#/products/catalog`;
+          (window as any).navigateTo(`/products/catalog`)
         },
       },
       {
         label: `Sales by product`,
         icon: `chart`,
         onSelect: () => {
-          location.hash = `#/analytics/sales`;
+          (window as any).navigateTo(`/analytics/sales`)
         },
       },
     ])
@@ -791,7 +791,7 @@ function ut() {
       openNewTransferModal(n);
       if (n.dataset.act === `order`) {
         openNewOrderModal({}, n, (e) => {
-          location.hash = `#/orders/all/${e.id}`;
+          (window as any).navigateTo(`/orders/all/${e.id}`)
         });
       } else if (n.dataset.act === `batch`) {
         openMakeBatchModal(undefined, n);
@@ -890,7 +890,7 @@ const mt = [
 function ht() {
   let e = subtabQuery(`activity`);
   e.innerHTML = `<header class="head"><div class="head__lead"><div class="head__text"><p class="head__eyebrow">Everything that happened in the stockroom</p><h1 class="head__title" tabindex="-1">Activity</h1></div></div>
-      <div class="head__actions"><a class="btn btn--ghost" href="#/dashboard/overview">${renderIcon(`back`)}Overview</a></div></header>
+      <div class="head__actions"><a class="btn btn--ghost" href="/dashboard/overview">${renderIcon(`back`)}Overview</a></div></header>
     <div class="db-actgrid">
       <section class="card" aria-label="Activity log">
         <div class="toolbar"><div class="chips" data-k="a-kinds">${mt.map(([e, n]) => `<button type="button" class="chip" data-kind="${e}" aria-pressed="${e === ft}">${escapeHtml(n)}</button>`).join(``)}</div>
@@ -942,7 +942,7 @@ function Q(i) {
           let a = i === l ? `` : `<h3 class="tl__day" data-key="d-${i}">${escapeHtml(i)}</h3>`;
           l = i;
           let [o, s] = tt[r.kind];
-          return `${a}<a class="tl__item" href="${r.href ?? `#/dashboard/activity`}" data-key="${r.id}">${renderTag(o, s, `sm`)}<span class="tl__txt"><b>${escapeHtml(r.title)}</b><span>${escapeHtml(r.text)}</span><small>${renderAvatar(r.who, `xs`)}${escapeHtml(findMemberById(r.who)?.name ?? (r.who === `web` ? `Online store` : ``))} · ${formatTime(r.at)}</small></span></a>`;
+          return `${a}<a class="tl__item" href="${r.href ?? `/dashboard/activity`}" data-key="${r.id}">${renderTag(o, s, `sm`)}<span class="tl__txt"><b>${escapeHtml(r.title)}</b><span>${escapeHtml(r.text)}</span><small>${renderAvatar(r.who, `xs`)}${escapeHtml(findMemberById(r.who)?.name ?? (r.who === `web` ? `Online store` : ``))} · ${formatTime(r.at)}</small></span></a>`;
         })
         .join(``)
     : renderEmptyState(`No activity matches`, `Try another filter or clear the search.`, `search`);
@@ -1203,7 +1203,7 @@ function $(e) {
       ico: `clock`,
       items: p.map(
         (e) =>
-          `<a class="row al-item" href="#/orders/all/${e.id}" data-key="t-${e.id}">${renderAvatar(e.customerId, `md`)}<span class="row__txt"><b>${escapeHtml(findCustomerById(e.customerId)?.name ?? ``)}</b><small><span class="mono">${e.number}</span> · due ${formatRelativeTime(e.shipBy)} · ${ORDER_STATUS_META[e.status].name}</small></span>${renderIcon(`chevR`, `row__go`)}</a>`
+          `<a class="row al-item" href="/orders/all/${e.id}" data-key="t-${e.id}">${renderAvatar(e.customerId, `md`)}<span class="row__txt"><b>${escapeHtml(findCustomerById(e.customerId)?.name ?? ``)}</b><small><span class="mono">${e.number}</span> · due ${formatRelativeTime(e.shipBy)} · ${ORDER_STATUS_META[e.status].name}</small></span>${renderIcon(`chevR`, `row__go`)}</a>`
       ),
     },
     {
@@ -1217,7 +1217,7 @@ function $(e) {
         .slice(0, 8)
         .map(
           (e) =>
-            `<a class="row al-item" href="#/orders/all/${e.id}" data-key="p-${e.id}">${renderAvatar(e.customerId, `md`)}<span class="row__txt"><b>${escapeHtml(findCustomerById(e.customerId)?.name ?? ``)}</b><small><span class="mono">${e.number}</span> · ship by ${formatRelativeDay(e.shipBy).toLowerCase()} · ${formatMoney(getOrderTotal(e))}</small></span>${renderOrderStatusBadge(e.status)}</a>`
+            `<a class="row al-item" href="/orders/all/${e.id}" data-key="p-${e.id}">${renderAvatar(e.customerId, `md`)}<span class="row__txt"><b>${escapeHtml(findCustomerById(e.customerId)?.name ?? ``)}</b><small><span class="mono">${e.number}</span> · ship by ${formatRelativeDay(e.shipBy).toLowerCase()} · ${formatMoney(getOrderTotal(e))}</small></span>${renderOrderStatusBadge(e.status)}</a>`
         ),
     },
   ].filter((e) => (vt === `all` || e.tab === vt) && e.items.length);

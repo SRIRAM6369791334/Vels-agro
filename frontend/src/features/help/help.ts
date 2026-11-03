@@ -82,8 +82,8 @@ const I = [
     id: `batch-to-shelf`,
     cat: `batches`,
     q: `How does a batch get from the lab onto the shelf?`,
-    a: `Make a batch from Products › Batches or from a product’s page. Vessa checks the bill of materials, takes the ingredients and packaging out of the Weaverville Lab’s stock and books the lot In QA. Its units don’t count as available until someone allowed to release batches opens the lot and presses Release — then they land at Riverside DC and show up in the ledger.`,
-    link: [`#/products/batches`, `Open batches`],
+    a: `Make a batch from Products › Batches or from a product’s page. Vels checks the bill of materials, takes the ingredients and packaging out of the Weaverville Lab’s stock and books the lot In QA. Its units don’t count as available until someone allowed to release batches opens the lot and presses Release — then they land at Riverside DC and show up in the ledger.`,
+    link: [`/products/batches`, `Open batches`],
   },
   {
     id: `hold-lot`,
@@ -94,30 +94,30 @@ const I = [
   {
     id: `expiry`,
     cat: `batches`,
-    q: `When does Vessa warn me that a lot is about to expire?`,
+    q: `When does Vels warn me that a lot is about to expire?`,
     a: `A lot’s expiry date is its make date plus the product’s shelf life. Once a released lot with stock left is inside the warning window — 90 days unless you change it — it raises an “Expiring soon” alert. Set the window to 30, 60, 90 or 120 days in Settings › Company › Stock preferences; the alerts, the dashboard and Stock health all follow at once.`,
-    link: [`#/settings/company`, `Change the window`],
+    link: [`/settings/company`, `Change the window`],
   },
   {
     id: `transfer`,
     cat: `stock`,
     q: `How do I move stock between the DC, the lab and the shop?`,
     a: `Use New › Transfer, or Move stock on the dashboard. Pick where it comes from, where it goes and the lines. A transfer goes Planned → In transit → Received: the units leave the source when it ships and arrive at the destination when someone receives it, and both moves are written to the stock ledger.`,
-    link: [`#/warehouses/transfers`, `Open transfers`],
+    link: [`/warehouses/transfers`, `Open transfers`],
   },
   {
     id: `counts`,
     cat: `stock`,
     q: `How do cycle counts work?`,
-    a: `Schedule a count for one zone from Warehouses › Counts. When it starts, Vessa snapshots what it expects on each shelf; the counter enters what is really there, line by line, then finishes the count. Any difference is booked as a count variance in the ledger, and the Stock accuracy dial in Analytics updates. To split aisles between two people, schedule one count per zone.`,
-    link: [`#/warehouses/counts`, `Open counts`],
+    a: `Schedule a count for one zone from Warehouses › Counts. When it starts, Vels snapshots what it expects on each shelf; the counter enters what is really there, line by line, then finishes the count. Any difference is booked as a count variance in the ledger, and the Stock accuracy dial in Analytics updates. To split aisles between two people, schedule one count per zone.`,
+    link: [`/warehouses/counts`, `Open counts`],
   },
   {
     id: `reorder-point`,
     cat: `stock`,
     q: `What is a reorder point, and why is a product marked low?`,
     a: `Every product has a reorder point and a run size. It is marked low when the stock you can sell at Riverside DC — what’s on hand minus what open orders have reserved — is at or under that point. Analytics › Stock health shows days of cover too: how long that stock lasts at the last 30 days’ rate.`,
-    link: [`#/analytics/stock`, `See days of cover`],
+    link: [`/analytics/stock`, `See days of cover`],
   },
   {
     id: `adjust`,
@@ -130,55 +130,55 @@ const I = [
     cat: `orders`,
     q: `How are wholesale orders different from online orders?`,
     a: `Wholesale orders are for stockists, priced at wholesale and packed in cases of six. They ship within three days and can be on Net 30 terms, so they stay unpaid until you mark them paid. Online orders are priced at retail and ship the next working day. Both move New → Picking → Packed → Shipped → Delivered on the board.`,
-    link: [`#/orders/board`, `Open the board`],
+    link: [`/orders/board`, `Open the board`],
   },
   {
     id: `returns`,
     cat: `orders`,
     q: `How do I handle a return?`,
     a: `Open it from Orders › Returns. Mark it Received when the parcel arrives, then either Restock it — the units go back on the shelf at Riverside DC — or Refund it. Items that leaked, were opened or caused a reaction should be refunded, never restocked. You can also Reject a request.`,
-    link: [`#/orders/returns`, `Open returns`],
+    link: [`/orders/returns`, `Open returns`],
   },
   {
     id: `goal`,
     cat: `orders`,
     q: `How do I change the monthly sales goal?`,
     a: `On the dashboard, open the ⋯ menu on Sales overview and choose Edit monthly goal, or press Edit goal under the chart in Analytics › Reports. The goal covers every channel together, before tax.`,
-    link: [`#/analytics/overview`, `Open reports`],
+    link: [`/analytics/overview`, `Open reports`],
   },
   {
     id: `reorder-materials`,
     cat: `buying`,
     q: `How do I reorder materials that are running low?`,
     a: `Dashboard › Alerts has Draft every reorder: it writes one draft purchase order per supplier for every low material, at its reorder quantity. Check the drafts and Send them. When the delivery arrives, Receive all of it or just the part that came, and the lab’s stock goes up.`,
-    link: [`#/purchasing/orders`, `Purchase orders`],
+    link: [`/purchasing/orders`, `Purchase orders`],
   },
   {
     id: `roles`,
     cat: `team`,
     q: `What can each role do?`,
     a: `Viewers can see stock, orders and reports. Staff can also pick, pack, ship, adjust stock and run counts. Managers can also release batches and send purchase orders. Admins can also change prices and costs and invite people. Only the owner sees billing. Change someone’s role in Settings › Team & roles.`,
-    link: [`#/settings/team`, `Team & roles`],
+    link: [`/settings/team`, `Team & roles`],
   },
   {
     id: `export`,
     cat: `team`,
     q: `How do I export my data as CSV?`,
     a: `Settings › Company › Your data exports stock by location, every sales order and the full stock ledger. Analytics › Reports exports whatever report is on screen, row by row, and each invoice in Billing downloads on its own.`,
-    link: [`#/settings/company`, `Your data`],
+    link: [`/settings/company`, `Your data`],
   },
   {
     id: `heatmap`,
     cat: `orders`,
     q: `When do most orders come in?`,
     a: `Analytics › Sales has a heatmap of orders by day of the week and hour. Hover a square to see how many orders landed then and what they were worth; the busiest hour is named above it. Plan picking shifts around it.`,
-    link: [`#/analytics/sales`, `Open the heatmap`],
+    link: [`/analytics/sales`, `Open the heatmap`],
   },
   {
     id: `keys`,
     cat: `keys`,
     q: `What keyboard shortcuts are there?`,
-    a: `Most of Vessa works from the keyboard. Press ? anywhere to see this list.`,
+    a: `Most of Vels works from the keyboard. Press ? anywhere to see this list.`,
     keys: [
       [[`⌘`, `K`], `Search everything`],
       [[`g`, `d`], `Go to the dashboard (g then p, o, u, w, a, c, s or h for the others)`],
@@ -196,7 +196,7 @@ let B = ``;
 function V() {
   return `<section class="hp-hero" aria-labelledby="hp-hero-t">
       <div class="hp-hero__txt"><p class="head__eyebrow">Help center</p><h1 class="head__title" id="hp-hero-t" tabindex="-1">How can we help?</h1>
-        <p class="hp-hero__sub">Answers about batches, stock, orders and the team — written by the people who run Vessa.</p></div>
+        <p class="hp-hero__sub">Answers about batches, stock, orders and the team — written by the people who run Vels.</p></div>
       <label class="hp-search">${renderIcon(`search`)}<input type="search" placeholder="Search the help center…" aria-label="Search the help center" aria-controls="hp-faq" data-k="hp-q" autocomplete="off" /><kbd data-k="hp-n"></kbd></label>
       <div class="hp-popular"><span>Popular:</span>${[`expiry`, `transfer`, `count`, `return`, `shortcuts`].map((t) => `<button type="button" class="chip" data-pop="${t}">${escapeHtml(t)}</button>`).join(``)}</div>
     </section>
@@ -216,9 +216,9 @@ function V() {
         <section class="card hp-stuck" aria-labelledby="hp-st-t">
           ${renderTag(`chat`, `pine`)}
           <h2 class="card__title" id="hp-st-t">Still stuck?</h2>
-          <p>Write to the Vessa team. A person — not a bot — replies, usually within three working hours.</p>
+          <p>Write to the Vels team. A person — not a bot — replies, usually within three working hours.</p>
           <ul class="hp-stuck__facts"><li>${renderIcon(`clock`)}Mon–Fri, 8 am–6 pm Eastern</li><li>${renderIcon(`chat`)}<span data-k="hp-open"></span></li></ul>
-          <a class="btn btn--primary magnetic" href="#/help/tickets" data-k="hp-ask">${renderIcon(`send`)}Open a ticket</a>
+          <a class="btn btn--primary magnetic" href="/help/tickets" data-k="hp-ask">${renderIcon(`send`)}Open a ticket</a>
         </section>
         <section class="card hp-keys" aria-labelledby="hp-k-t">
           <header class="card__head"><h2 class="card__title" id="hp-k-t">Quick keys</h2></header>
@@ -269,7 +269,7 @@ function H(e) {
           ? `Try another word — “lot”, “stock”, “ship” — or ask the team, who reply within a working day.`
           : `This topic has no answers yet.`,
         `search`,
-        `<span class="hp-empty__acts"><button type="button" class="btn btn--ghost btn--sm" data-k="hp-clear">Clear search</button><a class="btn btn--primary btn--sm" href="#/help/tickets" data-k="hp-ask2">${renderIcon(`send`)}Ask the team</a></span>`
+        `<span class="hp-empty__acts"><button type="button" class="btn btn--ghost btn--sm" data-k="hp-clear">Clear search</button><a class="btn btn--primary btn--sm" href="/help/tickets" data-k="hp-ask2">${renderIcon(`send`)}Ask the team</a></span>`
       );
   if (e) {
     bindModalDismiss(r, () => {
@@ -354,17 +354,17 @@ function U(e, t) {
       },
     });
   }
-  if (a && location.hash !== `#/help/center/${faq}`) {
-    history.replaceState(null, ``, `#/help/center/${faq}`);
-  } else if (!a && location.hash === `#/help/center/${faq}`) {
-    history.replaceState(null, ``, `#/help/center`);
+  if (a && location.pathname !== `/help/center/${faq}`) {
+    history.replaceState(null, ``, `/help/center/${faq}`);
+  } else if (!a && location.pathname === `/help/center/${faq}`) {
+    history.replaceState(null, ``, `/help/center`);
   }
 }
 function W(e) {
   let t = queryOne(`[data-faq="${CSS.escape(e)}"]`, O);
   if (!t) {
     if (!I.some((t) => t.id === e)) {
-      history.replaceState(null, ``, `#/help/center`);
+      history.replaceState(null, ``, `/help/center`);
       return;
     }
     L = ``;
@@ -448,7 +448,7 @@ function ae() {
       n.innerHTML =
         e === `yes`
           ? `<span class="hp-help__done">${renderIcon(`check`)}Thanks — glad it helped</span>`
-          : `<span class="hp-help__done">Sorry about that. <a href="#/help/tickets" data-ask-about="${t}">Ask the team</a></span>`;
+          : `<span class="hp-help__done">Sorry about that. <a href="/help/tickets" data-ask-about="${t}">Ask the team</a></span>`;
       animatePop(n.firstElementChild, {
         from: 0.8,
       });
@@ -466,9 +466,9 @@ function G() {
   let r = queryOne(`[data-k="hp-open"]`, O);
   if (r) {
     r.innerHTML = length
-      ? `<a href="#/help/tickets">${pluralize(length, `ticket`)} waiting on the team</a>`
+      ? `<a href="/help/tickets">${pluralize(length, `ticket`)} waiting on the team</a>`
       : length_1
-        ? `<a href="#/help/tickets">${pluralize(length_1, `reply`, `replies`)} to read in your tickets</a>`
+        ? `<a href="/help/tickets">${pluralize(length_1, `reply`, `replies`)} to read in your tickets</a>`
         : `You have no open tickets`;
   }
 }
@@ -543,9 +543,9 @@ const Y = new Set();
 let X = ``;
 function ce() {
   return `${renderPageHeader({
-    eyebrow: `Questions you’ve sent the Vessa team`,
+    eyebrow: `Questions you’ve sent the Vels team`,
     title: `My tickets`,
-    actions: `<a class="btn btn--ghost" href="#/help/center">${renderIcon(`book`)}Help center</a>`,
+    actions: `<a class="btn btn--ghost" href="/help/center">${renderIcon(`book`)}Help center</a>`,
     stats: [
       {
         key: `open`,
@@ -584,7 +584,7 @@ function ce() {
       <form class="hp-form" data-k="tk-form" novalidate>
         <label class="field"><span class="field__label">Subject</span><input name="subject" maxlength="90" placeholder="Barcode labels print off-centre" autocomplete="off" /><span class="hp-err" role="alert"></span></label>
         <label class="field"><span class="field__label">Topic</span><select name="topic">${se.map((t) => `<option>${escapeHtml(t)}</option>`).join(``)}</select></label>
-        <label class="field"><span class="field__label">What happened?</span><textarea name="body" rows="6" maxlength="1200" placeholder="What you did, what you expected and what Vessa did instead. Lot numbers and order numbers help."></textarea><span class="hp-count"><span class="hp-err" role="alert"></span><small data-k="tk-count">0 / 1200</small></span></label>
+        <label class="field"><span class="field__label">What happened?</span><textarea name="body" rows="6" maxlength="1200" placeholder="What you did, what you expected and what Vels did instead. Lot numbers and order numbers help."></textarea><span class="hp-count"><span class="hp-err" role="alert"></span><small data-k="tk-count">0 / 1200</small></span></label>
         <div class="hp-form__foot"><span class="hp-form__note">${renderIcon(`clock`)}Replies within three working hours</span><button type="submit" class="btn btn--primary">${renderIcon(`send`)}Send ticket</button></div>
       </form>
     </section>
@@ -605,7 +605,7 @@ function le(t, n) {
       ${renderPill(i, r)}<i class="hp-q__chev">${renderIcon(`down`)}</i></button>
     <div class="hp-ticket__body" id="tk-${t.id}" ${a ? `` : `hidden`}><div class="hp-a__in">
       <div class="hp-msg hp-msg--me"><span class="hp-msg__who">You · ${formatDate(t.at, true)}</span><p>${highlightSearchMatch(t.body, n)}</p></div>
-      ${t.reply ? `<div class="hp-msg hp-msg--team"><span class="hp-msg__who">${renderIcon(`logo`)}Vessa support</span><p>${escapeHtml(t.reply)}</p></div>` : `<p class="hp-wait">${renderIcon(`hourglass`)}Waiting for the team — usually within three working hours.</p>`}
+      ${t.reply ? `<div class="hp-msg hp-msg--team"><span class="hp-msg__who">${renderIcon(`logo`)}Vels support</span><p>${escapeHtml(t.reply)}</p></div>` : `<p class="hp-wait">${renderIcon(`hourglass`)}Waiting for the team — usually within three working hours.</p>`}
       <div class="hp-ticket__acts">${t.status === `answered` ? `<button type="button" class="btn btn--soft btn--xs" data-solve="${t.id}">${renderIcon(`check`)}That solved it</button>` : ``}${t.status === `closed` ? `<button type="button" class="btn btn--ghost btn--xs" data-reopen="${t.id}">${renderIcon(`refresh`)}Reopen</button>` : ``}</div>
     </div></div>
   </div>`;
@@ -638,7 +638,7 @@ function Z(e) {
         )
       : renderEmptyState(
           `No tickets yet`,
-          `When something in Vessa doesn’t work the way you expect, ask here — the answer lands in this list.`,
+          `When something in Vels doesn’t work the way you expect, ask here — the answer lands in this list.`,
           `chat`
         );
   let s = N(`tk-list`);
@@ -730,16 +730,16 @@ function Q(e, t) {
     });
   }
   if (a) {
-    history.replaceState(null, ``, `#/help/tickets/${n}`);
-  } else if (location.hash.startsWith(`#/help/tickets/`)) {
-    history.replaceState(null, ``, `#/help/tickets`);
+    history.replaceState(null, ``, `/help/tickets/${n}`);
+  } else if (location.pathname.startsWith(`/help/tickets/`)) {
+    history.replaceState(null, ``, `/help/tickets`);
   }
 }
 function ue(e) {
   let t = queryOne(`[data-tk="${CSS.escape(e)}"]`, O);
   if (!t) {
     if (!store.tickets.some((t) => t.id === e)) {
-      history.replaceState(null, ``, `#/help/tickets`);
+      history.replaceState(null, ``, `/help/tickets`);
       return;
     }
     q = `all`;

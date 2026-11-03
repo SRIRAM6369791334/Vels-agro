@@ -2,7 +2,7 @@
 
 ## 1. Quality Assurance Philosophy
 
-In Vessa Frontend, **objective verification supersedes self-assessment**. No pull request, architectural refactoring, or feature addition is considered complete without passing automated browser tests and static type-checking.
+In Vels Frontend, **objective verification supersedes self-assessment**. No pull request, architectural refactoring, or feature addition is considered complete without passing automated browser tests and static type-checking.
 
 ```
        ▲
@@ -48,11 +48,11 @@ In Vessa Frontend, **objective verification supersedes self-assessment**. No pul
 
 ---
 
-## 3. Playwright E2E Master Test Suites (`tests/vessa.spec.js`)
+## 3. Playwright E2E Master Test Suites (`tests/Vels.spec.js`)
 
 | Test Case | Scope & User Journey | Critical Assertions |
 | :--- | :--- | :--- |
-| **1. Shell & Dashboard** | Initial boot, layout render, Welcome KPI section | - Title matches `/Vessa/<br>- Brand reads `Vessa · Marlow & Fern`<br>- KPIs visible: Units on hand, Total stock value, Low stock items<br>- Sections: Inventory statistics, Sales overview, Top sellers |
+| **1. Shell & Dashboard** | Initial boot, layout render, Welcome KPI section | - Title matches `/Vels/<br>- Brand reads `Vels · Marlow & Fern`<br>- KPIs visible: Units on hand, Total stock value, Low stock items<br>- Sections: Inventory statistics, Sales overview, Top sellers |
 | **2. Navigation** | Deep-linking and section switching across all 9 primary features | - Catalog (`#/products/catalog`): 12 SKUs<br>- Batches (`#/products/batches`)<br>- Orders All & Board (`#/orders/all`, `#/orders/board`)<br>- Purchasing, Warehouses, Analytics, Customers, Settings, Help |
 | **3. Theme Switcher** | Immediate color scheme toggling (Light ⇄ Dark) | - Clicking `button[data-theme-to="dark"]` sets `html[data-theme="dark"]`<br>- Clicking `button[data-theme-to="light"]` resets attribute<br>- Zero layout shifts or page reloads |
 | **4. Command Palette** | ⌘K / Ctrl+K search filter & modal lifecycle | - Clicking `#btn-find` opens `#finder` dialog<br>- Auto-focuses on `#finder-q`<br>- Typing `'Balm'` renders `'Calendula Rescue Balm'`<br>- Pressing `Escape` closes palette |

@@ -185,7 +185,7 @@ function Le(e) {
     sub: `${formatInt(t)} units${r}`,
     units: t,
     fill: Math.min(1, t / n),
-    href: `#/products/item/${e.id}`,
+    href: `/products/item/${e.id}`,
     p: e,
   });
   store.products.forEach((t, i) => {
@@ -224,7 +224,7 @@ function Le(e) {
         sub: `${e.onHand} ${e.unit} · ${e.code}`,
         units: e.onHand,
         fill: Math.min(1, e.onHand / (e.reorderAt + e.reorderQty)),
-        href: `#/purchasing/materials/${e.id}`,
+        href: `/purchasing/materials/${e.id}`,
         ico: t === `Ingredient` ? `drop` : t === `Shipping` ? `box` : `layers`,
         tone: t === `Ingredient` ? `teal` : `ocean`,
       })
@@ -242,7 +242,7 @@ function Le(e) {
           sub: `Lot ${e.lot} · ${formatInt(e.left)} units · ${e.status === `hold` ? `on hold` : `in QA`}`,
           units: e.left,
           fill: Math.min(1, e.left / 600),
-          href: `#/products/batches/${e.id}`,
+          href: `/products/batches/${e.id}`,
           p: i,
         });
       }
@@ -488,7 +488,7 @@ function W(e) {
         .map(({ p, on, res }) => {
           let o = on - res;
           return `<tr data-key="${p.id}">
-      <td class="a-t"><a class="prod" href="#/products/item/${p.id}">${renderProductThumb(p, `sm`)}<span><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.size)} · <span class="mono">${a(p)}</span></small></span></a></td>
+      <td class="a-t"><a class="prod" href="/products/item/${p.id}">${renderProductThumb(p, `sm`)}<span><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.size)} · <span class="mono">${a(p)}</span></small></span></a></td>
       <td class="a-r r"><b class="num">${formatInt(on)}</b></td>
       <td class="a-s r"><span class="num ${res ? `` : `wh-dim`}">${res ? formatInt(res) : `—`}</span></td>
       <td class="a-p r"><b class="num ${o <= 0 ? `wh-bad` : o <= p.reorderAt / (n.kind === `dc` ? 1 : 6) ? `wh-warn` : ``}">${formatInt(o)}</b></td></tr>`;
@@ -686,7 +686,7 @@ function Ze() {
     if (n) {
       K();
       if (isHoverCapable.matches && n.items.length === 1 && n.items[0]) {
-        location.hash = n.items[0].href;
+        (window as any).navigateTo(n.items[0].href)
         return;
       }
       Xe(t);
@@ -698,7 +698,7 @@ function Ze() {
     if (n) {
       openNewTransferModal(n);
       if (n.dataset.loc !== from) {
-        location.hash = `#/warehouses/locations/${n.dataset.loc}`;
+        (window as any).navigateTo(`/warehouses/locations/${n.dataset.loc}`)
       }
       return;
     }
@@ -835,7 +835,7 @@ function rt(n) {
       .map((e) => {
         let n = findProductById(e.productId);
         if (n) {
-          return `<li><a href="#/products/item/${n.id}">${renderProductThumb(n, `sm`)}<span><b>${escapeHtml(n.name)}</b><small>${escapeHtml(n.size)}</small></span><em class="num">× ${formatInt(e.qty)}</em></a></li>`;
+          return `<li><a href="/products/item/${n.id}">${renderProductThumb(n, `sm`)}<span><b>${escapeHtml(n.name)}</b><small>${escapeHtml(n.size)}</small></span><em class="num">× ${formatInt(e.qty)}</em></a></li>`;
         }
         return ``;
       })
@@ -1180,8 +1180,8 @@ function _t(n) {
     n.status === `scheduled`
       ? `<button type="button" class="btn btn--soft btn--xs" data-start="${n.id}">${renderIcon(`play`)}Start count</button>`
       : n.status === `counting`
-        ? `<a class="btn btn--primary btn--xs" href="#/warehouses/counts/${n.id}">${renderIcon(`clipboard`)}Count sheet</a>`
-        : `<a class="btn btn--ghost btn--xs" href="#/warehouses/counts/${n.id}">Results${renderIcon(`chevR`)}</a>`;
+        ? `<a class="btn btn--primary btn--xs" href="/warehouses/counts/${n.id}">${renderIcon(`clipboard`)}Count sheet</a>`
+        : `<a class="btn btn--ghost btn--xs" href="/warehouses/counts/${n.id}">Results${renderIcon(`chevR`)}</a>`;
   return `<tr class="is-link" data-key="${n.id}" data-ct="${n.id}" tabindex="0" aria-label="${escapeHtml(n.number)}">
     <td class="a-t"><span class="wh-ctname">${Ae(i, `sm`)}<span><b class="mono">${escapeHtml(n.number)}</b><small>${escapeHtml(i?.name ?? ``)} · ${escapeHtml(mt(n))}</small></span></span></td>
     <td class="a-s"><span class="wh-who">${renderAvatar(n.byId, `xs`)}<span>${escapeHtml(findMemberById(n.byId)?.name ?? ``)}<small class="wh-stackonly"> · ${escapeHtml(formatRelativeDay(n.at))}</small></span></span></td>
@@ -1266,7 +1266,7 @@ function vt() {
       showToast(`Count started — the sheet is open`, {
         ico: `clipboard`,
       });
-      location.hash = `#/warehouses/counts/${r.dataset.start}`;
+      (window as any).navigateTo(`/warehouses/counts/${r.dataset.start}`)
       return;
     }
     if (e_target.closest(`a, button`)) {
@@ -1274,14 +1274,14 @@ function vt() {
     }
     let i = e_target.closest(`[data-ct]`);
     if (i) {
-      location.hash = `#/warehouses/counts/${i.dataset.ct}`;
+      (window as any).navigateTo(`/warehouses/counts/${i.dataset.ct}`)
     }
   });
   e.addEventListener(`keydown`, (e) => {
     let t = e.target.closest?.(`tr[data-ct]`);
     if (t && e.target === t && (e.key === `Enter` || e.key === ` `)) {
       e.preventDefault();
-      location.hash = `#/warehouses/counts/${t.dataset.ct}`;
+      (window as any).navigateTo(`/warehouses/counts/${t.dataset.ct}`)
     }
   });
 }
@@ -1344,7 +1344,7 @@ function xt(n) {
     ${c ? `` : `<label class="wh-reveal"><span><b>Show expected quantities</b><small>Counting blind keeps the count honest — reveal once you’re done.</small></span><button type="button" class="switch" role="switch" aria-checked="${Z}" data-reveal aria-label="Show expected quantities"></button></label>`}
     <section class="d-sec"><h3>Count sheet</h3><div class="rows wh-sheet">${u}</div></section>
     <p class="note note--warn wh-err" data-err hidden>${renderIcon(`alert`)}<span></span></p>
-    <div class="d-actions">${l ? `<button type="button" class="btn btn--primary btn--sm" data-sheet="start">${renderIcon(`play`)}Start count</button>` : c ? `<a class="btn btn--ghost btn--sm" href="#/warehouses/locations/${n.locId}">${renderIcon(`warehouse`)}${escapeHtml(i?.name ?? `Location`)}</a>` : `<button type="button" class="btn btn--primary btn--sm" data-sheet="finish">${renderIcon(`check`)}Finish count</button><span class="wh-dim wh-hint" data-left>${n.lines.length - a ? `${pluralize(n.lines.length - a, `line`)} to go` : `Every line counted`}</span>`}</div>`;
+    <div class="d-actions">${l ? `<button type="button" class="btn btn--primary btn--sm" data-sheet="start">${renderIcon(`play`)}Start count</button>` : c ? `<a class="btn btn--ghost btn--sm" href="/warehouses/locations/${n.locId}">${renderIcon(`warehouse`)}${escapeHtml(i?.name ?? `Location`)}</a>` : `<button type="button" class="btn btn--primary btn--sm" data-sheet="finish">${renderIcon(`check`)}Finish count</button><span class="wh-dim wh-hint" data-left>${n.lines.length - a ? `${pluralize(n.lines.length - a, `line`)} to go` : `Every line counted`}</span>`}</div>`;
 }
 function St(e) {
   let t = store.counts.find((t) => t.id === e);
@@ -1352,7 +1352,7 @@ function St(e) {
     showToast(`That count isn’t here any more`, {
       ico: `info`,
     });
-    history.replaceState(null, ``, `#/warehouses/counts`);
+    history.replaceState(null, ``, `/warehouses/counts`);
     return;
   }
   if (X === e && queryOne(`#drawer`)?.hasAttribute(`open`)) {
@@ -1369,8 +1369,8 @@ function St(e) {
     },
     onClose: () => {
       X = null;
-      if (location.hash.startsWith(`#/warehouses/counts/`)) {
-        history.replaceState(null, ``, `#/warehouses/counts`);
+      if (location.pathname.startsWith(`/warehouses/counts/`)) {
+        history.replaceState(null, ``, `/warehouses/counts`);
       }
     },
   });
@@ -1635,7 +1635,7 @@ export const page = {
           showToast(`That location isn’t on file`, {
             ico: `info`,
           });
-          history.replaceState(null, ``, `#/warehouses/locations`);
+          history.replaceState(null, ``, `/warehouses/locations`);
         }
       }
       if (same && P === `locations` && F.has(`locations`)) {

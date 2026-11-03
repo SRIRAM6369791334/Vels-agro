@@ -8,7 +8,7 @@
 @import "./features/settings/settings.css";
 @import "./features/help/help.css";
 
-/*! Vessa — stock and supply for a skincare lab — © 2026 Hasib (OVERSHOOT). All rights reserved. Licensed, not sold: see LICENSE.md. */
+/*! Vels — Admin Panel — © 2026 Hasib (OVERSHOOT). All rights reserved. Licensed, not sold: see LICENSE.md. */
 :root {
   --font: "Urbanist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: var(--font);

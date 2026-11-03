@@ -254,7 +254,7 @@ function gt(e, from) {
 }
 function _t(e) {
   if (e.status === `quarantine`) {
-    return `<a class="btn btn--primary btn--xs" href="#/products/batches/${e.id}">${renderIcon(`shield`)}QA &amp; release</a>`;
+    return `<a class="btn btn--primary btn--xs" href="/products/batches/${e.id}">${renderIcon(`shield`)}QA &amp; release</a>`;
   }
   if (e.status === `hold`) {
     return `<button type="button" class="btn btn--soft btn--xs" data-rel="${e.id}">${renderIcon(`shield`)}Release</button>`;
@@ -373,8 +373,8 @@ function Dt(t) {
   let a = formatProductFullName(t);
   let o = bt.trim();
   return `<article class="pcard" data-key="${t.id}" data-id="${t.id}">
-    <a class="pcard__photo" href="#/products/item/${t.id}" tabindex="-1" aria-hidden="true">${renderProductThumb(t, `xl`)}<span class="pcard__flag" data-f="flag" data-s="${F(t)}">${ft(t)}</span></a>
-    <div class="pcard__name"><a href="#/products/item/${t.id}"><b>${highlightSearchMatch(t.name, o)}</b></a><small>${escapeHtml(t.size)} · <span class="mono">${highlightSearchMatch(t.sku, o)}</span></small>
+    <a class="pcard__photo" href="/products/item/${t.id}" tabindex="-1" aria-hidden="true">${renderProductThumb(t, `xl`)}<span class="pcard__flag" data-f="flag" data-s="${F(t)}">${ft(t)}</span></a>
+    <div class="pcard__name"><a href="/products/item/${t.id}"><b>${highlightSearchMatch(t.name, o)}</b></a><small>${escapeHtml(t.size)} · <span class="mono">${highlightSearchMatch(t.sku, o)}</span></small>
       <span class="tag pcard__cat" style="--c:var(--${CATEGORY_TONES[t.category]})">${escapeHtml(t.category)}</span><span class="pcard__nflag" data-f="flag" data-s="${F(t)}">${ft(t)}</span></div>
     <div class="pcard__locs" role="list" aria-label="Stock by location">${store.locations.map((e) => `<div class="pcard__loc" role="listitem"><span>${ot(e)}</span><span class="meter">${I(getProductStock(t, e.id) / i, rt[e.kind], `data-m="${e.id}"`)}</span><b class="num" data-f="loc-${e.id}">${formatInt(getProductStock(t, e.id))}</b></div>`).join(``)}</div>
     <div class="pcard__avail"><span><b class="num" data-f="avail">${formatInt(getMaterialStock(t))}</b> available</span><span><b class="num" data-f="res">${formatInt(getActiveOrdersForLocation(t.id))}</b> reserved</span></div>
@@ -496,7 +496,7 @@ function Ot() {
     }
     let s = e_target.closest(`.pcard`);
     if (s && !e_target.closest(`a, button, input, label`)) {
-      location.hash = `#/products/item/${s.dataset.id}`;
+      (window as any).navigateTo(`/products/item/${s.dataset.id}`)
     }
   });
   let n = N(`grid`);
@@ -845,10 +845,10 @@ function Gt(t) {
   let ee = (t.wholesale - t.cost) / t.wholesale;
   let l = Math.max(1, getProductStock(t));
   return `${renderPageHeader({
-    back: `#/products/catalog`,
+    back: `/products/catalog`,
     title: escapeHtml(t.name),
     eyebrow: `${escapeHtml(t.category)} · ${escapeHtml(t.line)} line · ${escapeHtml(t.size)}`,
-    actions: `<span class="pi-nav" role="group" aria-label="Browse products"><a class="ibtn ibtn--sm" href="#/products/item/${o.id}" data-dir="-1" aria-label="Previous: ${escapeHtml(formatProductFullName(o))}" title="Previous: ${escapeHtml(formatProductFullName(o))}">${renderIcon(`chevL`)}</a><span class="pi-pos">${i + 1} of ${n_length}</span><a class="ibtn ibtn--sm" href="#/products/item/${s.id}" data-dir="1" aria-label="Next: ${escapeHtml(formatProductFullName(s))}" title="Next: ${escapeHtml(formatProductFullName(s))}">${renderIcon(`chevR`)}</a></span>
+    actions: `<span class="pi-nav" role="group" aria-label="Browse products"><a class="ibtn ibtn--sm" href="/products/item/${o.id}" data-dir="-1" aria-label="Previous: ${escapeHtml(formatProductFullName(o))}" title="Previous: ${escapeHtml(formatProductFullName(o))}">${renderIcon(`chevL`)}</a><span class="pi-pos">${i + 1} of ${n_length}</span><a class="ibtn ibtn--sm" href="/products/item/${s.id}" data-dir="1" aria-label="Next: ${escapeHtml(formatProductFullName(s))}" title="Next: ${escapeHtml(formatProductFullName(s))}">${renderIcon(`chevR`)}</a></span>
       <button type="button" class="btn btn--ghost" data-do="order">${renderIcon(`orders`)}<span>New order</span></button><button type="button" class="btn btn--ghost" data-do="move">${renderIcon(`swap`)}<span>Move stock</span></button><button type="button" class="btn btn--primary magnetic" data-do="batch">${renderIcon(`flask`)}<span>Make a batch</span></button>`,
   })}
   <div class="pi-grid">
@@ -908,7 +908,7 @@ function Gt(t) {
       </section>
       <div class="pi-pair">
         <section class="card" aria-labelledby="pib-t"><header class="card__head"><div><h2 class="card__title" id="pib-t">Batches</h2><p class="card__sub" data-i="batches-sub"></p></div>
-          <div class="card__tools"><a class="btn btn--ghost btn--xs" href="#/products/batches">${renderIcon(`layers`)}All lots</a></div></header><div class="rows" data-i="batches"></div></section>
+          <div class="card__tools"><a class="btn btn--ghost btn--xs" href="/products/batches">${renderIcon(`layers`)}All lots</a></div></header><div class="rows" data-i="batches"></div></section>
         <section class="card" aria-labelledby="pio-t"><header class="card__head"><div><h2 class="card__title" id="pio-t">Open orders</h2><p class="card__sub" data-i="orders-sub"></p></div>
           <div class="card__tools"><button type="button" class="btn btn--ghost btn--xs" data-do="order">${renderIcon(`plus`)}New order</button></div></header><div class="rows" data-i="orders"></div></section>
       </div>
@@ -926,7 +926,7 @@ function Kt(n) {
       .map((n) => {
         let r = R(n);
         let i = daysUntilExpiry(n);
-        return `<div class="row pi-batch" data-key="${n.id}"><a class="row__txt" href="#/products/batches/${n.id}"><b class="mono">${escapeHtml(n.lot)}</b><small>${
+        return `<div class="row pi-batch" data-key="${n.id}"><a class="row__txt" href="/products/batches/${n.id}"><b class="mono">${escapeHtml(n.lot)}</b><small>${
           i > 0 && i <= 90
             ? `Expires ${formatDate(n.expiresAt)} · <span class="pb-d pb-d--${vt(n)}">${i} d left</span>`
             : i <= 0
@@ -957,7 +957,7 @@ function qt(t) {
         let i = r.lines
           .filter((e) => e.productId === t.id)
           .reduce((acc, item) => acc + item.qty, 0);
-        return `<a class="row" href="#/orders/all/${r.id}" data-key="${r.id}">${renderAvatar(r.customerId, `md`)}<span class="row__txt"><b>${escapeHtml(findCustomerById(r.customerId)?.name ?? ``)}</b><small><span class="mono">${escapeHtml(r.number)}</span> · ${pluralize(i, `unit`)} · ship by ${formatRelativeDay(r.shipBy).toLowerCase()}</small></span>${renderOrderStatusBadge(r.status)}</a>`;
+        return `<a class="row" href="/orders/all/${r.id}" data-key="${r.id}">${renderAvatar(r.customerId, `md`)}<span class="row__txt"><b>${escapeHtml(findCustomerById(r.customerId)?.name ?? ``)}</b><small><span class="mono">${escapeHtml(r.number)}</span> · ${pluralize(i, `unit`)} · ship by ${formatRelativeDay(r.shipBy).toLowerCase()}</small></span>${renderOrderStatusBadge(r.status)}</a>`;
       })
       .join(``);
   }
@@ -995,7 +995,7 @@ function Yt(t) {
         }
         let i = t.per > 0 ? Math.floor(r.onHand / t.per) : Infinity;
         let a = i === n;
-        return `<a class="row pi-bom${a ? ` is-limit` : ``}" href="#/purchasing/materials/${r.id}" data-key="${r.id}">${renderTag(r.kind === `Ingredient` ? `drop` : `box`, r.kind === `Ingredient` ? `teal` : `ocean`, `sm`)}<span class="row__txt"><b>${escapeHtml(r.name)}</b><small><span class="mono">${escapeHtml(r.code)}</span> · ${Vt(t.per, r.unit)} a unit</small></span>
+        return `<a class="row pi-bom${a ? ` is-limit` : ``}" href="/purchasing/materials/${r.id}" data-key="${r.id}">${renderTag(r.kind === `Ingredient` ? `drop` : `box`, r.kind === `Ingredient` ? `teal` : `ocean`, `sm`)}<span class="row__txt"><b>${escapeHtml(r.name)}</b><small><span class="mono">${escapeHtml(r.code)}</span> · ${Vt(t.per, r.unit)} a unit</small></span>
       <span class="row__end"><b class="num">${formatNumber(r.onHand)} ${escapeHtml(r.unit)}</b>${isFinite(i) ? `${a ? `limits at ` : `enough for `}${formatInt(i)}` : ``}</span></a>`;
       })
       .join(``);
@@ -1123,10 +1123,10 @@ function Xt(e) {
   Lt = null;
   if (!n) {
     t.innerHTML = `${renderPageHeader({
-      back: `#/products/catalog`,
+      back: `/products/catalog`,
       eyebrow: `Products`,
       title: `Product not found`,
-    })}<section class="card">${renderEmptyState(`That product isn’t in the catalog`, `It may have been removed. Pick another from the catalog.`, `box`, `<a class="btn btn--ghost btn--sm" href="#/products/catalog">${renderIcon(`back`)}Back to the catalog</a>`)}</section>`;
+    })}<section class="card">${renderEmptyState(`That product isn’t in the catalog`, `It may have been removed. Pick another from the catalog.`, `box`, `<a class="btn btn--ghost btn--sm" href="/products/catalog">${renderIcon(`back`)}Back to the catalog</a>`)}</section>`;
     return;
   }
   t.innerHTML = Gt(n);
@@ -1373,7 +1373,7 @@ function an(n) {
   let c = findMemberById(n.chemistId);
   return `<tr class="is-link" data-key="${n.id}" data-open="${n.id}">
     <td class="a-t"><span class="prod">${renderProductThumb(r, `sm`)}<span><b>${highlightSearchMatch(r.name, o)}</b><small>${escapeHtml(r.size)}</small></span></span></td>
-    <td class="a-s"><a class="mono pb-lot" href="#/products/batches/${n.id}">${highlightSearchMatch(n.lot, o)}</a><small class="pb-made-s">Made ${formatDate(n.madeAt)}</small></td>
+    <td class="a-s"><a class="mono pb-lot" href="/products/batches/${n.id}">${highlightSearchMatch(n.lot, o)}</a><small class="pb-made-s">Made ${formatDate(n.madeAt)}</small></td>
     <td class="a-h pb-made">${formatDate(n.madeAt, true)}</td>
     <td class="a-m"><span class="pb-exp"><span><b>${formatDate(n.expiresAt, true)}</b><small class="pb-d pb-d--${i === `expired` ? `rose` : vt(n)}">${a <= 0 ? `Expired` : `${formatInt(a)} d left`}</small></span><span class="meter">${I(a / s, i === `expired` ? `rose` : vt(n))}</span></span></td>
     <td class="a-p r"><span class="pb-qty"><span><b class="num">${formatInt(n.left)}</b> of ${formatInt(n.qty)}</span><span class="meter">${I(n.left / Math.max(1, n.qty), `teal`)}</span></span></td>
@@ -1454,7 +1454,7 @@ function on() {
     }
     let o = e_target.closest(`tr[data-open]`);
     if (o) {
-      location.hash = `#/products/batches/${o.dataset.open}`;
+      (window as any).navigateTo(`/products/batches/${o.dataset.open}`)
     }
   });
 }
@@ -1628,7 +1628,7 @@ function _n(t) {
 }
 function vn(e, t) {
   let n = R(e);
-  let r = `<a class="btn btn--ghost" href="#/products/item/${t.id}">${renderIcon(`box`)}Open product</a>`;
+  let r = `<a class="btn btn--ghost" href="/products/item/${t.id}">${renderIcon(`box`)}Open product</a>`;
   if (n === `quarantine`) {
     let n = fn(t);
     let i = n.filter(([t]) => dn(e.id).has(t)).length;
@@ -1658,7 +1658,7 @@ function bn(e) {
     showToast(`That lot isn’t on file any more`, {
       ico: `info`,
     });
-    history.replaceState(null, ``, `#/products/batches`);
+    history.replaceState(null, ``, `/products/batches`);
     return;
   }
   $ = e;
@@ -1667,8 +1667,8 @@ function bn(e) {
     label: `Lot ${t.lot}`,
     onClose: () => {
       $ = ``;
-      if (location.hash.startsWith(`#/products/batches/`)) {
-        history.replaceState(null, ``, `#/products/batches`);
+      if (location.pathname.startsWith(`/products/batches/`)) {
+        history.replaceState(null, ``, `/products/batches`);
       }
     },
   });
@@ -1967,7 +1967,7 @@ export const page = {
       if (t) {
         Ft = e.key === `ArrowLeft` ? -1 : 1;
         openNewTransferModal(t);
-        location.hash = t.getAttribute(`href`);
+        (window as any).navigateTo(t.getAttribute(`href`))
       }
     });
   },
@@ -1981,7 +1981,7 @@ export const page = {
         $t(params[1], !same);
         return;
       }
-      history.replaceState(null, ``, `#/products/catalog`);
+      history.replaceState(null, ``, `/products/catalog`);
       Tn(`catalog`, !same || A !== `catalog` || !j.has(`catalog`));
       return;
     }

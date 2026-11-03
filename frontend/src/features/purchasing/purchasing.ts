@@ -146,7 +146,7 @@ function Le(kind, id) {
         ico: `info`,
       }
     );
-    history.replaceState(null, ``, `#/purchasing/${kind}`);
+    history.replaceState(null, ``, `/purchasing/${kind}`);
     return;
   }
   if (!(B && B.kind === kind && B.id === id && queryOne(`#drawer`)?.hasAttribute(`open`))) {
@@ -162,8 +162,8 @@ function Le(kind, id) {
       },
       onClose: () => {
         B = null;
-        if (location.hash.startsWith(`#/purchasing/${kind}/`)) {
-          history.replaceState(null, ``, `#/purchasing/${kind}`);
+        if (location.pathname.startsWith(`/purchasing/${kind}/`)) {
+          history.replaceState(null, ``, `/purchasing/${kind}`);
         }
       },
     });
@@ -276,7 +276,7 @@ function Ue() {
   );
   if (e.length && N !== `orders`) {
     setTimeout(() => {
-      location.hash = `#/purchasing/orders`;
+      (window as any).navigateTo(`/purchasing/orders`)
     }, 350);
   }
 }
@@ -479,7 +479,7 @@ function nt(e, t = false) {
   if (t) {
     return ``;
   }
-  return `<a class="btn btn--ghost ${n}" href="#/purchasing/orders/${e.id}">Details${renderIcon(`chevR`)}</a>`;
+  return `<a class="btn btn--ghost ${n}" href="/purchasing/orders/${e.id}">Details${renderIcon(`chevR`)}</a>`;
 }
 function rt(t, n) {
   let r = findSupplierById(t.supplierId);
@@ -491,7 +491,7 @@ function rt(t, n) {
   let d = t.status === `draft` || V.includes(t.status);
   return `<article class="card pu-po${u ? ` is-late` : ``}${t.status === `cancelled` ? ` is-off` : ``}" data-key="${t.id}" data-po="${t.id}" style="--c:var(--${TRANSFER_STATUS_NAMES[t.status] === `faint` ? `slate` : TRANSFER_STATUS_NAMES[t.status]})">
     <header class="pu-po__head">${L(r)}
-      <a class="pu-po__who" href="#/purchasing/orders/${t.id}"><b>${highlightSearchMatch(r?.name ?? ``, n)}</b><small><span class="mono">${highlightSearchMatch(t.number, n)}</span> · ${t.status === `draft` ? `drafted ${formatRelativeTime(t.createdAt)}` : `sent ${formatDate(t.sentAt ?? t.createdAt)}`}</small></a>
+      <a class="pu-po__who" href="/purchasing/orders/${t.id}"><b>${highlightSearchMatch(r?.name ?? ``, n)}</b><small><span class="mono">${highlightSearchMatch(t.number, n)}</span> · ${t.status === `draft` ? `drafted ${formatRelativeTime(t.createdAt)}` : `sent ${formatDate(t.sentAt ?? t.createdAt)}`}</small></a>
       ${u ? renderPill(`Late`, `rose`, `clock`) : renderPill(PO_STATUS_NAMES[t.status], TRANSFER_STATUS_NAMES[t.status])}
     </header>
     ${$e(t)}
@@ -553,7 +553,7 @@ function q(e) {
     ? a.map((e) => rt(e, G.trim())).join(``)
     : store.pos.length
       ? `<div class="card pu-empty">${renderEmptyState(G ? `No purchase orders match “${G}”` : `No ${PO_STATUS_NAMES[W]?.toLowerCase() ?? ``} purchase orders`, `Try another status or clear the search.`, `search`, `<button type="button" class="btn btn--ghost btn--sm" data-clear="po">Clear filters</button>`)}</div>`
-      : `<div class="card pu-empty">${renderEmptyState(`No purchase orders yet`, `Draft one for a material, or let Vessa draft every reorder that’s due.`, `receipt`, `<button type="button" class="btn btn--primary btn--sm" data-act="newpo">${renderIcon(`plus`)}New PO</button>`)}</div>`;
+      : `<div class="card pu-empty">${renderEmptyState(`No purchase orders yet`, `Draft one for a material, or let Vels draft every reorder that’s due.`, `receipt`, `<button type="button" class="btn btn--primary btn--sm" data-act="newpo">${renderIcon(`plus`)}New PO</button>`)}</div>`;
   let c = F(`po-list`);
   if (e) {
     bindModalDismiss(c, () => {
@@ -630,7 +630,7 @@ function ot() {
           label: `Open details`,
           icon: `receipt`,
           onSelect: () => {
-            location.hash = `#/purchasing/orders/${e.id}`;
+            (window as any).navigateTo(`/purchasing/orders/${e.id}`)
           },
         },
         {
@@ -661,7 +661,7 @@ function ot() {
     }
     let a = e_target.closest(`[data-po]`);
     if (a) {
-      location.hash = `#/purchasing/orders/${a.dataset.po}`;
+      (window as any).navigateTo(`/purchasing/orders/${a.dataset.po}`)
     }
   });
 }
@@ -778,7 +778,7 @@ function ct(t) {
       .map((t) => {
         let n = findMaterialById(t.materialId);
         let r = t.qty ? t.received / t.qty : 0;
-        return `<a class="row pu-dline" href="#/purchasing/materials/${t.materialId}">${renderTag(n?.kind === `Ingredient` ? `drop` : n?.kind === `Shipping` ? `box` : `layers`, n?.kind === `Ingredient` ? `teal` : n?.kind === `Shipping` ? `sky` : `ocean`, `sm`)}
+        return `<a class="row pu-dline" href="/purchasing/materials/${t.materialId}">${renderTag(n?.kind === `Ingredient` ? `drop` : n?.kind === `Shipping` ? `box` : `layers`, n?.kind === `Ingredient` ? `teal` : n?.kind === `Shipping` ? `sky` : `ocean`, `sm`)}
         <span class="row__txt"><b>${escapeHtml(n?.name ?? t.materialId)}</b><small><span class="mono">${escapeHtml(n?.code ?? ``)}</span> · ${formatMoney(t.cost)} / ${escapeHtml(n?.unit === `pcs` ? `piece` : (n?.unit ?? `unit`))}</small>
           <span class="pu-dline__m"><span class="meter"><span class="meter__fill" style="--c:var(--sage);transform:scaleX(${r.toFixed(4)})"></span></span><small class="num">${formatNumber(t.received, 2)} / ${formatNumber(t.qty, 2)} ${escapeHtml(n?.unit ?? ``)}</small></span></span>
         <span class="row__end"><b class="num">${formatMoneyRound(t.qty * t.cost)}</b>${r >= 1 ? `in full` : r > 0 ? `part in` : `due`}</span></a>`;
@@ -790,7 +790,7 @@ function ct(t) {
       <div class="pu-contact">${L(a, `md`)}<span><b>${escapeHtml(a?.contact ?? ``)}</b><small>${escapeHtml(a?.name ?? ``)}</small></span>
         <a class="ibtn ibtn--sm" href="mailto:${escapeHtml(a?.email ?? ``)}?subject=${encodeURIComponent(i.number)}" aria-label="Email ${escapeHtml(a?.contact ?? ``)}" title="${escapeHtml(a?.email ?? ``)}">${renderIcon(`mail`)}</a>
         <a class="ibtn ibtn--sm" href="tel:${escapeHtml((a?.phone ?? ``).replace(/[^\d+]/g, ``))}" aria-label="Call ${escapeHtml(a?.contact ?? ``)}" title="${escapeHtml(a?.phone ?? ``)}">${renderIcon(`phone`)}</a></div>
-      <a class="pu-link" href="#/purchasing/suppliers/${i.supplierId}">Supplier profile${renderIcon(`chevR`)}</a>
+      <a class="pu-link" href="/purchasing/suppliers/${i.supplierId}">Supplier profile${renderIcon(`chevR`)}</a>
     </section>
     <section class="d-sec"><h3>Timeline</h3><ol class="pu-tl">${f.map((t) => `<li class="${t.future ? `is-future` : ``}" style="--c:var(--${t.tone})"><span class="pu-tl__dot">${renderIcon(t.ico)}</span><span><b>${escapeHtml(t.title)}</b><small>${escapeHtml(t.text)}${t.text ? ` · ` : ``}${t.future ? formatDate(t.at) : `${formatDate(t.at)} · ${formatRelativeTime(t.at)}`}</small></span></li>`).join(``)}</ol></section>
     ${ee ? `<div class="d-actions">${ee}</div>` : ``}`;
@@ -922,7 +922,7 @@ function vt(e, t) {
     .filter(isMaterialLowStock).length;
   return `<article class="card pu-sup" data-key="${e.id}" data-sup="${e.id}" data-lift style="--c:var(--${e.tone})">
     <header class="pu-sup__head">${L(e, `lg`)}
-      <a class="pu-sup__name" href="#/purchasing/suppliers/${e.id}"><b>${highlightSearchMatch(e.name, t)}</b><small>${renderIcon(`map`)}${highlightSearchMatch(`${e.city}, ${e.country}`, t)}</small></a>
+      <a class="pu-sup__name" href="/purchasing/suppliers/${e.id}"><b>${highlightSearchMatch(e.name, t)}</b><small>${renderIcon(`map`)}${highlightSearchMatch(`${e.city}, ${e.country}`, t)}</small></a>
       <button type="button" class="ibtn ibtn--sm pu-fav" data-act="fav" data-id="${e.id}" aria-pressed="${e.favorite}" aria-label="${e.favorite ? `Remove from` : `Add to`} favourites" title="Favourite">${renderIcon(`star`)}</button>
     </header>
     <p class="pu-sup__supplies">${highlightSearchMatch(e.supplies, t)}</p>
@@ -1031,7 +1031,7 @@ function yt() {
     }
     let a = t_target.closest(`[data-sup]`);
     if (a) {
-      location.hash = `#/purchasing/suppliers/${a.dataset.sup}`;
+      (window as any).navigateTo(`/purchasing/suppliers/${a.dataset.sup}`)
     }
   });
 }
@@ -1093,7 +1093,7 @@ function xt(t) {
       </div>
     </section>
     <section class="d-sec"><h3>What they supply <span class="pu-count">${i.length}</span></h3>
-      <div class="rows">${i.map((t) => `<a class="row" href="#/purchasing/materials/${t.id}">${renderTag(t.kind === `Ingredient` ? `drop` : t.kind === `Shipping` ? `box` : `layers`, isMaterialLowStock(t) ? `ochre` : `teal`, `sm`)}<span class="row__txt"><b>${escapeHtml(t.name)}</b><small><span class="mono">${escapeHtml(t.code)}</span> · ${formatNumber(t.onHand, 2)} ${escapeHtml(t.unit)} on hand${findCustomerByEmail(t.id) ? ` · ${formatNumber(findCustomerByEmail(t.id), 2)} on order` : ``}</small></span>${isMaterialLowStock(t) ? renderPill(`Low`, `ochre`) : `<span class="row__end">${formatMoney(t.cost)}</span>`}</a>`).join(``) || renderEmptyState(`Nothing on file`, `No materials list this supplier yet.`, `drop`)}</div>
+      <div class="rows">${i.map((t) => `<a class="row" href="/purchasing/materials/${t.id}">${renderTag(t.kind === `Ingredient` ? `drop` : t.kind === `Shipping` ? `box` : `layers`, isMaterialLowStock(t) ? `ochre` : `teal`, `sm`)}<span class="row__txt"><b>${escapeHtml(t.name)}</b><small><span class="mono">${escapeHtml(t.code)}</span> · ${formatNumber(t.onHand, 2)} ${escapeHtml(t.unit)} on hand${findCustomerByEmail(t.id) ? ` · ${formatNumber(findCustomerByEmail(t.id), 2)} on order` : ``}</small></span>${isMaterialLowStock(t) ? renderPill(`Low`, `ochre`) : `<span class="row__end">${formatMoney(t.cost)}</span>`}</a>`).join(``) || renderEmptyState(`Nothing on file`, `No materials list this supplier yet.`, `drop`)}</div>
     </section>
     <section class="d-sec"><h3>Purchase orders <span class="pu-count">${a.length}</span></h3>
       <div class="rows">${
@@ -1101,7 +1101,7 @@ function xt(t) {
           .slice(0, 8)
           .map(
             (t) =>
-              `<a class="row" href="#/purchasing/orders/${t.id}"><span class="row__txt"><b class="mono">${escapeHtml(t.number)}</b><small>${formatDate(t.createdAt, true)} · ${pluralize(t.lines.length, `line`)}</small></span>${U(t) ? renderPill(`Late`, `rose`) : renderPill(PO_STATUS_NAMES[t.status], TRANSFER_STATUS_NAMES[t.status])}<span class="row__end"><b class="num">${formatMoneyRound(getPoTotalCost(t))}</b></span></a>`
+              `<a class="row" href="/purchasing/orders/${t.id}"><span class="row__txt"><b class="mono">${escapeHtml(t.number)}</b><small>${formatDate(t.createdAt, true)} · ${pluralize(t.lines.length, `line`)}</small></span>${U(t) ? renderPill(`Late`, `rose`) : renderPill(PO_STATUS_NAMES[t.status], TRANSFER_STATUS_NAMES[t.status])}<span class="row__end"><b class="num">${formatMoneyRound(getPoTotalCost(t))}</b></span></a>`
           )
           .join(``) ||
         renderEmptyState(`No purchase orders yet`, `Draft the first one below.`, `receipt`)
@@ -1306,14 +1306,14 @@ function kt() {
     }
     let i = e_target.closest(`[data-mat]`);
     if (i) {
-      location.hash = `#/purchasing/materials/${i.dataset.mat}`;
+      (window as any).navigateTo(`/purchasing/materials/${i.dataset.mat}`)
     }
   });
   e.addEventListener(`keydown`, (e) => {
     let t = e.target.closest?.(`tr[data-mat]`);
     if (t && e.target === t && (e.key === `Enter` || e.key === ` `)) {
       e.preventDefault();
-      location.hash = `#/purchasing/materials/${t.dataset.mat}`;
+      (window as any).navigateTo(`/purchasing/materials/${t.dataset.mat}`)
     }
   });
 }
@@ -1365,10 +1365,10 @@ function jt(t) {
       <div><small>Unit cost</small><b class="num">${formatMoney(n.cost)}</b><span>per ${escapeHtml(n.unit === `pcs` ? `piece` : n.unit)}</span></div>
       <div><small>Value on hand</small><b class="num">${formatMoneyRound(n.onHand * n.cost)}</b><span>at cost</span></div>
       <div><small>On order</small><b class="num">${a ? `${formatNumber(a, 2)} ${escapeHtml(n.unit)}` : `—`}</b><span>${a ? `sent, not yet in` : `nothing open`}</span></div>
-      <div><small>Supplier</small><b><a href="#/purchasing/suppliers/${n.supplierId}" class="pu-link">${escapeHtml(i?.name ?? ``)}</a></b><span>${i ? `${i.leadDays}-day lead` : ``}</span></div>
+      <div><small>Supplier</small><b><a href="/purchasing/suppliers/${n.supplierId}" class="pu-link">${escapeHtml(i?.name ?? ``)}</a></b><span>${i ? `${i.leadDays}-day lead` : ``}</span></div>
     </div>
     <section class="d-sec"><h3>Used in <span class="pu-count">${d.length}</span></h3>
-      <div class="rows">${d.map((t) => `<a class="row" href="#/products/item/${t.p.id}">${renderProductThumb(t.p, `sm`)}<span class="row__txt"><b>${escapeHtml(formatProductFullName(t.p))}</b><small>${formatNumber(t.b.per, 3)} ${escapeHtml(n.unit)} per unit</small></span><span class="row__end"><b class="num${t.makes < t.p.reorderQty ? ` pu-warn` : ``}">${formatInt(t.makes)}</b>units it could make</span></a>`).join(``) || renderEmptyState(`Not in any formula`, `No product’s bill of materials uses this yet.`, `flask`)}</div>
+      <div class="rows">${d.map((t) => `<a class="row" href="/products/item/${t.p.id}">${renderProductThumb(t.p, `sm`)}<span class="row__txt"><b>${escapeHtml(formatProductFullName(t.p))}</b><small>${formatNumber(t.b.per, 3)} ${escapeHtml(n.unit)} per unit</small></span><span class="row__end"><b class="num${t.makes < t.p.reorderQty ? ` pu-warn` : ``}">${formatInt(t.makes)}</b>units it could make</span></a>`).join(``) || renderEmptyState(`Not in any formula`, `No product’s bill of materials uses this yet.`, `flask`)}</div>
     </section>
     <section class="d-sec"><h3>Purchase history <span class="pu-count">${f.length}</span></h3>
       <div class="rows">${
@@ -1376,14 +1376,14 @@ function jt(t) {
           .slice(0, 8)
           .map((t) => {
             let r = t.lines.find((e) => e.materialId === n.id);
-            return `<a class="row" href="#/purchasing/orders/${t.id}"><span class="row__txt"><b class="mono">${escapeHtml(t.number)}</b><small>${formatDate(t.createdAt, true)} · ${formatNumber(r.received, 2)} of ${formatNumber(r.qty, 2)} ${escapeHtml(n.unit)} in</small></span>${U(t) ? renderPill(`Late`, `rose`) : renderPill(PO_STATUS_NAMES[t.status], TRANSFER_STATUS_NAMES[t.status])}<span class="row__end"><b class="num">${formatMoneyRound(r.qty * r.cost)}</b></span></a>`;
+            return `<a class="row" href="/purchasing/orders/${t.id}"><span class="row__txt"><b class="mono">${escapeHtml(t.number)}</b><small>${formatDate(t.createdAt, true)} · ${formatNumber(r.received, 2)} of ${formatNumber(r.qty, 2)} ${escapeHtml(n.unit)} in</small></span>${U(t) ? renderPill(`Late`, `rose`) : renderPill(PO_STATUS_NAMES[t.status], TRANSFER_STATUS_NAMES[t.status])}<span class="row__end"><b class="num">${formatMoneyRound(r.qty * r.cost)}</b></span></a>`;
           })
           .join(``) ||
         renderEmptyState(`Never ordered`, `Its first purchase order will show here.`, `receipt`)
       }</div>
     </section>
     <div class="d-actions"><button type="button" class="btn btn--primary btn--sm" data-act="order" data-id="${n.id}">${renderIcon(`cart`)}Order ${escapeHtml(n.unit === `pcs` ? `more` : `${formatNumber(n.reorderQty, 2)} ${n.unit}`)}</button>
-      <a class="btn btn--ghost btn--sm" href="#/purchasing/suppliers/${n.supplierId}">${renderIcon(`building`)}Supplier</a></div>`;
+      <a class="btn btn--ghost btn--sm" href="/purchasing/suppliers/${n.supplierId}">${renderIcon(`building`)}Supplier</a></div>`;
 }
 function Mt(e) {
   N = e;

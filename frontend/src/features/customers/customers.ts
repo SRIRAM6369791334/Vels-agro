@@ -132,7 +132,7 @@ let H = `all`;
 let U = `revenue`;
 let W = `grid`;
 try {
-  W = localStorage.getItem(`vessa:stockist-view`) === `list` ? `list` : `grid`;
+  W = localStorage.getItem(`Vels:stockist-view`) === `list` ? `list` : `grid`;
 } catch {}
 function Ce() {
   let e = store.customers.filter((e) => e.kind === `stockist`);
@@ -184,7 +184,7 @@ function Ce() {
 }
 function we(t, n, r) {
   let i = n.monthly.some((e) => e > 0);
-  return `<a class="cs-card" href="#/customers/stockists/${t.id}" data-key="${t.id}" data-lift>
+  return `<a class="cs-card" href="/customers/stockists/${t.id}" data-key="${t.id}" data-lift>
     <span class="cs-card__id">${renderAvatar(t.id, `lg`)}<span class="cs-card__name"><b>${highlightSearchMatch(t.name, r)}</b><small>${highlightSearchMatch(t.contact, r)}</small></span></span>
     <span class="cs-card__loc">${renderIcon(`map`)}${highlightSearchMatch(`${t.city}, ${t.region}`, r)}</span>
     <span class="cs-card__tags">${t.tags.map(R).join(``) || `<span class="cs-none">No tags</span>`}</span>
@@ -249,7 +249,7 @@ function Te() {
       openNewTransferModal(n);
       W = n.dataset.view;
       try {
-        localStorage.setItem(`vessa:stockist-view`, W);
+        localStorage.setItem(`Vels:stockist-view`, W);
       } catch {}
       domQueryAll(`[data-view]`, e).forEach((e) => e.setAttribute(`aria-pressed`, String(e === n)));
       Ee();
@@ -261,7 +261,7 @@ function Te() {
       openNewTransferModal(n);
       if (n.dataset.act === `new`) {
         openNewCustomerModal(n, (e) => {
-          location.hash = `#/customers/${e.kind === `stockist` ? `stockists` : `shoppers`}/${e.id}`;
+          (window as any).navigateTo(`/customers/${e.kind === `stockist` ? `stockists` : `shoppers`}/${e.id}`)
         });
       } else if (n.dataset.act === `sclear`) {
         V = ``;
@@ -536,7 +536,7 @@ function Me() {
     }
     let n = e_target.closest(`tr[data-open]`);
     if (n) {
-      location.hash = `#/customers/shoppers/${n.dataset.open}`;
+      (window as any).navigateTo(`/customers/shoppers/${n.dataset.open}`)
     }
   });
   L(`p-foot`).addEventListener(`click`, (e) => {
@@ -551,7 +551,7 @@ function Me() {
       openNewTransferModal(n);
       if (n.dataset.act === `new`) {
         openNewCustomerModal(n, (e) => {
-          location.hash = `#/customers/${e.kind === `stockist` ? `stockists` : `shoppers`}/${e.id}`;
+          (window as any).navigateTo(`/customers/${e.kind === `stockist` ? `stockists` : `shoppers`}/${e.id}`)
         });
       } else if (n.dataset.act === `pclear`) {
         ke = ``;
@@ -621,7 +621,7 @@ function X(n) {
     ? S.map((t) => {
         let n = y(t);
         return `<tr class="is-link" data-key="${t.id}" data-open="${t.id}">
-      <td class="a-t"><span class="cell-person">${renderAvatar(t.id, `md`)}<span><a class="sh-name" href="#/customers/shoppers/${t.id}">${highlightSearchMatch(t.name, r)}</a><small>${highlightSearchMatch(t.email, r)}</small></span></span></td>
+      <td class="a-t"><span class="cell-person">${renderAvatar(t.id, `md`)}<span><a class="sh-name" href="/customers/shoppers/${t.id}">${highlightSearchMatch(t.name, r)}</a><small>${highlightSearchMatch(t.email, r)}</small></span></span></td>
       <td class="a-s sh-city">${renderIcon(`map`)}${highlightSearchMatch(`${t.city}, ${t.region}`, r)}</td>
       <td class="a-h r"><b>${formatInt(n.n)}</b></td>
       <td class="a-r r sh-spend"><b>${formatMoneyRound(n.revenue)}</b><small class="sh-n">${pluralize(n.n, `order`)}</small></td>
@@ -687,11 +687,11 @@ function Ie(t) {
         .slice(0, Fe)
         .map(
           (t) =>
-            `<a class="row cd-ord" href="#/orders/all/${t.id}" data-key="${t.id}"><span class="row__txt"><b class="mono">${escapeHtml(t.number)}</b><small>${escapeHtml(formatDate(t.createdAt, true))} · ${pluralize(findBatchByLotNumber(t), `unit`)}</small></span>${renderOrderStatusBadge(t.status)}<b class="cd-ord__tot">${formatMoneyRound(getOrderTotal(t))}</b></a>`
+            `<a class="row cd-ord" href="/orders/all/${t.id}" data-key="${t.id}"><span class="row__txt"><b class="mono">${escapeHtml(t.number)}</b><small>${escapeHtml(formatDate(t.createdAt, true))} · ${pluralize(findBatchByLotNumber(t), `unit`)}</small></span>${renderOrderStatusBadge(t.status)}<b class="cd-ord__tot">${formatMoneyRound(getOrderTotal(t))}</b></a>`
         )
         .join(``) +
       (t.orders.length > Fe
-        ? `<p class="cd-more">${pluralize(t.orders.length - Fe, `older order`)} — <a href="#/orders/all">see the order book</a></p>`
+        ? `<p class="cd-more">${pluralize(t.orders.length - Fe, `older order`)} — <a href="/orders/all">see the order book</a></p>`
         : ``)
     );
   }
@@ -735,7 +735,7 @@ function Re(t) {
         ? `<section class="d-sec"><h3>Buys most</h3><div class="cd-top">${r
             .map(
               ({ p, u }) =>
-                `<a class="cd-prod" href="#/products/item/${p.id}">${renderProductThumb(p, `lg`)}<b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.size)} · ${pluralize(u, `unit`)}</small></a>`
+                `<a class="cd-prod" href="/products/item/${p.id}">${renderProductThumb(p, `lg`)}<b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.size)} · ${pluralize(u, `unit`)}</small></a>`
             )
             .join(``)}</div></section>`
         : ``
@@ -745,7 +745,7 @@ function Re(t) {
 }
 function ze(e) {
   let t = findCustomerById(e);
-  let r = `#/customers/${P}`;
+  let r = `/customers/${P}`;
   if (!t) {
     showToast(`That customer isn’t on file`, {
       ico: `alert`,
@@ -761,7 +761,7 @@ function ze(e) {
           if (Q?.id === e) {
             Q = null;
           }
-          if (location.hash.startsWith(`${r}/${e}`)) {
+          if ((location.pathname.startsWith(`${r}/${e}`) || location.hash.startsWith(`${r}/${e}`))) {
             history.replaceState(null, ``, r);
           }
         },
@@ -801,7 +801,7 @@ function ze(e) {
             },
             n,
             (e) => {
-              location.hash = `#/orders/all/${e.id}`;
+              (window as any).navigateTo(`/orders/all/${e.id}`)
             }
           );
         }

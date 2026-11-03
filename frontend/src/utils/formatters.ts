@@ -1,10 +1,10 @@
 import { ONE_DAY_MS } from '../data/constants';
 
-const intFmt = new Intl.NumberFormat('en-US');
-const moneyFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-const moneyRoundFmt = new Intl.NumberFormat('en-US', {
+const intFmt = new Intl.NumberFormat('en-IN');
+const moneyFmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
+const moneyRoundFmt = new Intl.NumberFormat('en-IN', {
   style: 'currency',
-  currency: 'USD',
+  currency: 'INR',
   maximumFractionDigits: 0,
 });
 
@@ -21,8 +21,8 @@ export const formatMoneyRound = (val: number): string => moneyRoundFmt.format(Ma
 
 export const formatMoneyK = (val: number): string =>
   Math.abs(val) >= 1000
-    ? `$${(val / 1000).toFixed(Math.abs(val) >= 10000 ? 0 : 1)}k`
-    : `$${Math.round(val)}`;
+    ? `₹${(val / 1000).toFixed(Math.abs(val) >= 10000 ? 0 : 1)}k`
+    : `₹${Math.round(val)}`;
 
 export const formatDate = (ts: number, includeYear = false): string =>
   new Date(ts).toLocaleDateString('en-US', {

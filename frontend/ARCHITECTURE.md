@@ -1,8 +1,8 @@
-# 🏛️ Architecture & System Design — Vessa Frontend
+# 🏛️ Architecture & System Design — Vels Frontend
 
 ## 1. Architectural Philosophy
 
-Vessa Frontend is built on **Pure Vanilla TypeScript with a Feature-First Clean Architecture**, avoiding the overhead of heavy component frameworks while maintaining enterprise-level separation of concerns, strict type contracts, and predictable data flow.
+Vels Frontend is built on **Pure Vanilla TypeScript with a Feature-First Clean Architecture**, avoiding the overhead of heavy component frameworks while maintaining enterprise-level separation of concerns, strict type contracts, and predictable data flow.
 
 ```
 +-------------------------------------------------------------+
