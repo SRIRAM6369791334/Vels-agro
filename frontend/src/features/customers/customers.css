@@ -1,0 +1,417 @@
+/*! Vessa — stock and supply for a skincare lab — © 2026 Hasib (OVERSHOOT). All rights reserved. Licensed, not sold: see LICENSE.md. */
+.cs-search {
+  width: 270px;
+}
+.cs-sort .ico:last-child {
+  width: 14px;
+  height: 14px;
+  color: var(--muted);
+}
+.cs-views {
+  gap: 6px;
+  display: flex;
+}
+.cs-none {
+  color: var(--faint);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+.cs-grid {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 14px;
+  display: grid;
+}
+.cs-empty {
+  grid-column: 1/-1;
+}
+.cs-card {
+  background: var(--surface-2);
+  border: 1px solid #0000;
+  border-radius: 20px;
+  grid-template-areas: "id" "loc" "tags" "figs" "spark";
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  display: grid;
+}
+.cs-card:hover {
+  border-color: var(--line-2);
+}
+.cs-card:focus-visible {
+  outline-offset: 3px;
+}
+.cs-card__id {
+  grid-area: id;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  display: flex;
+}
+.cs-card__name {
+  min-width: 0;
+}
+.cs-card__name b {
+  font-weight: 600;
+  font-size: var(--fs-base);
+  line-height: 1.25;
+  display: block;
+}
+.cs-card__name small {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
+}
+.cs-card__loc {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  grid-area: loc;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-weight: 600;
+  display: flex;
+}
+.cs-card__loc .ico {
+  width: 15px;
+  height: 15px;
+}
+.cs-card__tags {
+  flex-wrap: wrap;
+  grid-area: tags;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  display: flex;
+}
+.cs-card__figs {
+  border-top: 1px solid var(--line);
+  grid-area: figs;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-top: 12px;
+  display: grid;
+}
+.cs-card__figs small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  display: block;
+}
+.cs-card__figs b {
+  font-size: var(--fs-lg);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  font-weight: 600;
+  display: block;
+}
+.cs-card__spark {
+  grid-area: spark;
+  gap: 4px;
+  display: grid;
+}
+.cs-card__spark .spark {
+  width: 100%;
+  height: auto;
+}
+.cs-card__spark .spark path {
+  stroke-width: 2.2px;
+}
+.cs-card__spark small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+.cs-flat {
+  border-bottom: 1.5px dashed var(--line-2);
+  height: 40px;
+  margin-bottom: 4px;
+  display: block;
+}
+.cs-grid.is-list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.cs-grid.is-list .cs-card {
+  border-radius: 16px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.9fr) minmax(0, 0.9fr) minmax(
+      220px,
+      1.1fr
+    ) 150px;
+  grid-template-areas: "id loc tags figs spark";
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+}
+.cs-grid.is-list .av--lg {
+  width: 44px;
+  height: 44px;
+  font-size: var(--fs-md);
+}
+.cs-grid.is-list .cs-card__figs {
+  border-top: 0;
+  padding-top: 0;
+}
+.cs-grid.is-list .cs-card__spark small {
+  display: none;
+}
+.cs-grid.is-list .cs-flat {
+  height: 30px;
+}
+.sh-table th:last-child {
+  cursor: default;
+}
+.sh-idle {
+  opacity: 0.3;
+}
+.sh-name {
+  white-space: nowrap;
+  font-weight: 700;
+  display: block;
+}
+.sh-name:hover {
+  color: var(--primary);
+}
+.sh-city {
+  white-space: nowrap;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+.sh-city .ico {
+  vertical-align: -3px;
+  width: 15px;
+  height: 15px;
+  margin-right: 6px;
+  display: inline-block;
+}
+.sh-spend b {
+  font-weight: 600;
+}
+.sh-n {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  display: none;
+}
+.sh-last span {
+  white-space: nowrap;
+  font-weight: 600;
+  display: block;
+}
+.sh-last small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  display: block;
+}
+.sh-never {
+  color: var(--faint);
+  font-weight: 600;
+}
+.sh-tags {
+  flex-wrap: wrap;
+  gap: 6px;
+  display: flex;
+}
+.sh-empty:hover {
+  background: 0 0 !important;
+}
+.sh-foot {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+  padding-top: 14px;
+  display: flex;
+}
+.sh-foot:empty {
+  display: none;
+}
+.sh-foot .btn .ico {
+  width: 14px;
+  height: 14px;
+}
+@container table (width<=860px) {
+  .table--stack .a-g {
+    grid-area: g;
+  }
+  .sh-n {
+    display: block;
+  }
+  .sh-table .a-p {
+    text-align: right;
+  }
+  .sh-table .sh-tags:has(.cs-none) {
+    display: none;
+  }
+}
+.cd-contact {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  display: grid;
+}
+.cd-contact > .cd-ch:first-child {
+  grid-column: 1/-1;
+}
+.cd-ch {
+  background: var(--surface-2);
+  border: 1px solid #0000;
+  border-radius: 16px;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 9px 12px;
+  display: flex;
+}
+a.cd-ch:hover {
+  border-color: var(--line-2);
+}
+.cd-ch > .ico {
+  background: var(--well);
+  width: 36px;
+  height: 36px;
+  color: var(--primary);
+  border-radius: 50%;
+  padding: 9px;
+}
+.cd-ch > span {
+  min-width: 0;
+}
+.cd-ch small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  display: block;
+}
+.cd-ch b {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 700;
+  display: block;
+  overflow: hidden;
+}
+.cd-bars.bars {
+  height: 132px;
+}
+.cd-ord {
+  gap: 12px;
+}
+.cd-ord .row__txt b {
+  font-size: var(--fs-md);
+}
+.cd-ord__tot {
+  text-align: right;
+  min-width: 64px;
+  font-weight: 600;
+}
+.cd-more {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+  padding-top: 2px;
+}
+.cd-more a {
+  color: var(--primary);
+  font-weight: 700;
+}
+.cd-top {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  display: grid;
+}
+.cd-prod {
+  gap: 3px;
+  min-width: 0;
+  display: grid;
+}
+.cd-prod .thumb--lg {
+  aspect-ratio: 1;
+  width: 100%;
+  height: auto;
+  margin-bottom: 4px;
+}
+.cd-prod b {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  line-height: 1.25;
+}
+.cd-prod small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.cd-prod:hover b {
+  color: var(--primary);
+}
+.cd-nonote {
+  color: var(--muted);
+  font-size: var(--fs-md);
+}
+@media (width<=1279px) {
+  .cs-grid.is-list .cs-card {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(200px, 1fr);
+    grid-template-areas: "id loc figs" "id tags figs";
+    row-gap: 6px;
+  }
+  .cs-grid.is-list .cs-card__spark {
+    display: none;
+  }
+}
+@media (width<=999px) {
+  .cs-search {
+    flex: 200px;
+    width: auto;
+  }
+}
+@media (width<=760px) {
+  .cs-wrap .toolbar__spacer,
+  .sh-card .toolbar__spacer {
+    display: none;
+  }
+  .cs-search {
+    flex: 100%;
+  }
+  .cs-sort {
+    flex: 1;
+  }
+  .cs-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .cs-grid.is-list .cs-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "id figs" "tags tags";
+  }
+  .cs-grid.is-list .cs-card__loc {
+    display: none;
+  }
+  .cs-grid.is-list .cs-card__figs {
+    text-align: right;
+    grid-template-columns: auto;
+    gap: 0;
+  }
+  .cs-grid.is-list .cs-card__figs > span:last-child small {
+    display: none;
+  }
+  .cs-grid.is-list .cs-card__figs > span:last-child b {
+    font-size: var(--fs-xs);
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .cd-top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sh-foot {
+    text-align: center;
+    justify-content: center;
+  }
+  .sh-foot .btn {
+    width: 100%;
+  }
+}

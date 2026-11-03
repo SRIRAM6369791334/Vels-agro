@@ -1,0 +1,23 @@
+{
+  "name": "vessa-skincare-inventory",
+  "version": "1.0.0",
+  "description": "Vessa - Stock and supply for a skincare lab. Complete editable clone.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^26.6.5",
+    "prettier": "^3.4.0",
+    "typescript": "^7.0.2",
+    "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "gsap": "^3.12.5"
+  }
+}
