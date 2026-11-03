@@ -385,11 +385,11 @@ var Yo = 0,
   $o = [
     {
       id: `m-okafor`,
-      name: `Imani Okafor`,
+      name: `Vels Okafor`,
       title: `Operations lead`,
       team: `Operations`,
       role: `admin`,
-      email: `imani@marlowfern.co`,
+      email: `Vels@marlowfern.co`,
       phone: `(828) 555-0142`,
       locId: `dc`,
       tone: `pine`,
@@ -2004,8 +2004,8 @@ function ls() {
     ce = {
       me: {
         id: Qo,
-        name: `Imani Okafor`,
-        email: `imani@marlowfern.co`,
+        name: `Vels Okafor`,
+        email: `Vels@marlowfern.co`,
         title: `Operations lead`,
         phone: `(828) 555-0142`,
       },
@@ -4681,6 +4681,7 @@ function navigateTo(url) {
   sd();
 }
 window.navigateTo = navigateTo;
+(window as any).setTheme = Tl;
 window.addEventListener(`popstate`, () => sd());
 window.addEventListener(`hashchange`, () => {
   if (location.hash && location.hash.startsWith('#/')) {
