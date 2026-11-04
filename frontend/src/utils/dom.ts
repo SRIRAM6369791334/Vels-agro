@@ -46,3 +46,15 @@ export function createCustomElement<T extends HTMLElement = HTMLElement>(
   }
   return el;
 }
+
+export async function copyToClipboard(text: string, successMessage = 'Copied'): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(text);
+    const { showToast } = await import('../ui/toast');
+    showToast(`${successMessage} to clipboard`, { ico: 'copy' });
+  } catch {
+    const { showToast } = await import('../ui/toast');
+    showToast('Couldn’t reach the clipboard — select and copy instead', { ico: 'copy' });
+  }
+}
+

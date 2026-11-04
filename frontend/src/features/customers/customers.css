@@ -415,3 +415,5 @@ a.cd-ch:hover {
     width: 100%;
   }
 }
+
+.cs-card__name h3 { margin: 0; font-size: inherit; font-weight: inherit; line-height: inherit; }

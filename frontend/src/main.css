@@ -8,6 +8,10 @@
 @import "./features/settings/settings.css";
 @import "./features/help/help.css";
 
+[hidden] {
+  display: none !important;
+}
+
 /*! Vels — Admin Panel — © 2026 Hasib (OVERSHOOT). All rights reserved. Licensed, not sold: see LICENSE.md. */
 :root {
   --font: "Urbanist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;

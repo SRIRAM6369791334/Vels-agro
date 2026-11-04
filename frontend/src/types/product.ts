@@ -7,6 +7,11 @@ export interface ProductStock {
   [locationId: string]: number | undefined;
 }
 
+export interface BillOfMaterialItem {
+  materialId: string;
+  per: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -16,15 +21,21 @@ export interface Product {
   cost: number;
   stock: ProductStock;
   reorderAt: number;
+  reorderQty?: number;
   active: boolean;
   photo?: string;
   sku?: string;
+  barcode?: string;
+  line?: string;
+  bom?: BillOfMaterialItem[];
 }
 
 export interface Material {
   id: string;
   name: string;
   sku: string;
+  code?: string;
+  kind?: 'Ingredient' | 'Packaging';
   unit: string;
   supplierId: string;
   cost: number;

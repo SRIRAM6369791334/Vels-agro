@@ -763,7 +763,7 @@ function St() {
 }
 const Ct = [`new`, `picking`, `packed`, `shipped`];
 const wt = {
-  new: `Waiting to be picked`,
+  new: `Waiting to pack`,
   picking: `On the floor`,
   packed: `Boxed, label printed`,
   shipped: `With the carrier`,

@@ -7,7 +7,7 @@ export const ACTIVE_ORDER_STAGES = ['new', 'picking', 'packed'] as const;
 
 export const ORDER_STATUS_META = {
   new: { name: 'New', tone: 'sky', icon: 'inbox' },
-  picking: { name: 'Picking', tone: 'ocean', icon: 'scan' },
+  picking: { name: 'Packing', tone: 'ocean', icon: 'scan' },
   packed: { name: 'Packed', tone: 'ochre', icon: 'box' },
   shipped: { name: 'Shipped', tone: 'teal', icon: 'truck' },
   delivered: { name: 'Delivered', tone: 'sage', icon: 'check' },
@@ -88,6 +88,29 @@ export const ROLE_NAMES: Record<string, string> = {
   staff: 'Staff',
   viewer: 'Viewer',
 };
+
+export const ROLE_PERMISSIONS = [
+  {
+    key: 'view',
+    label: 'View stock, orders and reports',
+    roles: ['owner', 'admin', 'manager', 'staff', 'viewer'],
+  },
+  {
+    key: 'pick',
+    label: 'Pick, pack and ship orders',
+    roles: ['owner', 'admin', 'manager', 'staff'],
+  },
+  {
+    key: 'adjust',
+    label: 'Adjust stock and run counts',
+    roles: ['owner', 'admin', 'manager', 'staff'],
+  },
+  { key: 'batch', label: 'Release batches from QA', roles: ['owner', 'admin', 'manager'] },
+  { key: 'po', label: 'Create and send purchase orders', roles: ['owner', 'admin', 'manager'] },
+  { key: 'price', label: 'Change prices and costs', roles: ['owner', 'admin'] },
+  { key: 'team', label: 'Invite people and change roles', roles: ['owner', 'admin'] },
+  { key: 'billing', label: 'Billing and plan', roles: ['owner'] },
+] as const;
 
 export const CUSTOMER_TAG_NAMES: Record<string, string> = {
   vip: 'VIP',

@@ -5,6 +5,7 @@ import { PurchaseOrder, Supplier } from './purchasing';
 import { Location, StockMovement, Transfer, CycleCount } from './warehouse';
 import { Customer } from './customer';
 import { TeamMember } from './user';
+import { AppSettings } from './settings';
 
 export interface Notice {
   id: string;
@@ -32,15 +33,6 @@ export interface HelpTicket {
   sub: string;
   createdAt: number;
   status: 'open' | 'resolved';
-}
-
-export interface AppSettings {
-  goal: number;
-  me: TeamMember;
-  prefs: {
-    lowStockThreshold: number;
-    expiryWarnDays: number;
-  };
 }
 
 export interface AppState {

@@ -219,10 +219,18 @@ function handleLoginSubmit(e: Event) {
     }
 
     // Smooth navigation to Dashboard Overview
-    if (typeof (window as any).navigateTo === 'function') {
-      (window as any).navigateTo('/dashboard/overview');
-    } else {
-      window.location.href = '/dashboard/overview';
+    try {
+      if (typeof (window as any).navigateTo === 'function') {
+        (window as any).navigateTo('/dashboard/overview');
+      } else {
+        window.location.hash = '#/dashboard/overview';
+      }
+    } catch (err) {
+      console.error('Navigation error:', err);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Sign in</span>`;
+      }
     }
   }, 350);
 }
@@ -346,6 +354,16 @@ export const page = {
   },
   enter() {
     if (containerEl) {
+      const submitBtn = containerEl.querySelector('#login-submit') as HTMLButtonElement | null;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Sign in</span>`;
+      }
+      const errEl = containerEl.querySelector('#login-error');
+      if (errEl) {
+        errEl.classList.remove('is-active');
+        errEl.textContent = '';
+      }
       const emailInput = containerEl.querySelector('#login-email') as HTMLInputElement | null;
       if (emailInput && !emailInput.value) {
         emailInput.focus();

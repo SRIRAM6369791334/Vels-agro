@@ -76,3 +76,19 @@ export const startOfMonth = (ts: number): number => {
   const d = new Date(ts);
   return new Date(d.getFullYear(), d.getMonth(), 1).getTime();
 };
+
+export const formatMonogram = (name: string): string =>
+  name
+    .replace(/[&]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
+export const daysUntilExpiry = (batch: { expiresAt: number }): number =>
+  Math.ceil((batch.expiresAt - Date.now()) / ONE_DAY_MS);
+
+export { formatCsvRow, downloadFile } from './csv';
+

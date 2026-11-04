@@ -27,6 +27,7 @@ export interface SalesOrder {
   paid: boolean;
   history: OrderHistoryEntry[];
   trackingNumber?: string;
+  tracking?: string;
 }
 
 export type ReturnStatus = 'requested' | 'received' | 'restocked' | 'refunded' | 'rejected';

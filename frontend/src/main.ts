@@ -1,3 +1,4 @@
+import { initStore } from './core/store';
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
 
@@ -289,7 +290,7 @@ var To = (e) => new Date(e).setHours(0, 0, 0, 0),
   },
   Oo = {
     new: { name: `New`, tone: `sky`, icon: `inbox` },
-    picking: { name: `Picking`, tone: `ocean`, icon: `scan` },
+    picking: { name: `Packing`, tone: `ocean`, icon: `scan` },
     packed: { name: `Packed`, tone: `ochre`, icon: `box` },
     shipped: { name: `Shipped`, tone: `teal`, icon: `truck` },
     delivered: { name: `Delivered`, tone: `sage`, icon: `check` },
@@ -2080,7 +2081,9 @@ function ds() {
   } catch {}
   return ls();
 }
-var X = ds(),
+var X = ds();
+initStore(X);
+var
   fs = [
     `team`,
     `locations`,
@@ -2539,8 +2542,12 @@ function Kc(e = !1) {
   Gc?.close(e);
 }
 function qc(e, t, { cls: n = ``, align: r = `end`, label: i = ``, onClose: a } = {}) {
-  if (Gc?.anchor === e) return (Kc(), null);
-  Kc();
+  if (Gc?.anchor === e) return (Kc(!0), null);
+  Kc(!0);
+  K(`.pop`, G(`.pop-layer`)).forEach((el) => {
+    H.killTweensOf(el);
+    el.remove();
+  });
   let o = document.createElement(`div`);
   ((o.className = `pop ${n}`),
     i && (o.setAttribute(`role`, `dialog`), o.setAttribute(`aria-label`, i)),
@@ -2568,32 +2575,52 @@ function qc(e, t, { cls: n = ``, align: r = `end`, label: i = ``, onClose: a } =
       { opacity: 1, scale: 1, y: 0, duration: W(0.32), ease: `back.out(1.8)` },
     ));
   let c = (t) => {
-      !o.contains(t.target) && !e.contains(t.target) && d();
+      if (!o.contains(t.target) && !e.contains(t.target)) {
+        if (t.target?.closest?.('main, .main, .view')) {
+          t.preventDefault();
+          t.stopPropagation();
+          const swallowClick = (ce) => {
+            ce.preventDefault();
+            ce.stopPropagation();
+            ce.stopImmediatePropagation();
+          };
+          document.addEventListener('click', swallowClick, { capture: true, once: true });
+          setTimeout(() => document.removeEventListener('click', swallowClick, { capture: true }), 200);
+        }
+        d(!0);
+      }
     },
     l = (e) => {
       e.key === `Escape` && (e.stopPropagation(), d(!0));
     },
     u = (e) => {
-      (e.target instanceof Node && o.contains(e.target)) || d();
+      (e.target instanceof Node && o.contains(e.target)) || d(!0);
     };
   function d(t = !1) {
-    !Gc ||
-      Gc.el !== o ||
-      ((Gc = null),
-      e.setAttribute(`aria-expanded`, `false`),
-      document.removeEventListener(`pointerdown`, c, !0),
-      document.removeEventListener(`keydown`, l, !0),
-      removeEventListener(`resize`, u),
-      removeEventListener(`scroll`, u, !0),
+    if (!Gc || Gc.el !== o) return;
+    Gc = null;
+    e.setAttribute(`aria-expanded`, `false`);
+    document.removeEventListener(`pointerdown`, c, !0);
+    document.removeEventListener(`keydown`, l, !0);
+    removeEventListener(`resize`, u);
+    removeEventListener(`scroll`, u, !0);
+    if (t || $a()) {
+      H.killTweensOf(o);
+      o.remove();
+      a?.();
+    } else {
       H.to(o, {
         opacity: 0,
         scale: 0.96,
         duration: W(0.16),
         ease: `power2.in`,
-        onComplete: () => o.remove(),
-      }),
-      t && e.focus(),
-      a?.());
+        onComplete: () => {
+          o.remove();
+          a?.();
+        },
+      });
+    }
+    t && e.focus();
   }
   return (
     setTimeout(() => {
@@ -2601,7 +2628,7 @@ function qc(e, t, { cls: n = ``, align: r = `end`, label: i = ``, onClose: a } =
         document.addEventListener(`keydown`, l, !0),
         addEventListener(`resize`, u),
         addEventListener(`scroll`, u, !0));
-    }),
+    }, 0),
     (Gc = { el: o, anchor: e, close: d }),
     { el: o, close: d, place: s }
   );
@@ -4531,26 +4558,30 @@ var ed = G(`#tabs`),
   td = null;
 function nd(e, t, n) {
   if (e === `login`) {
+    td = null;
     if (ed) ed.innerHTML = ``;
     return;
   }
   let r = Vu[e],
     i = e === `products` && t === `item` ? `catalog` : t;
-  (td !== e &&
-    ((td = e),
-    (ed.innerHTML = `<span class="tabs__pill" aria-hidden="true"></span>${r.subs.map(([t, n], i) => `<a class="tab" href="/${e}/${t}" data-sub="${t}">${i === 0 ? `<span class="tab__sec">${q(r.label)}</span>` : ``}<span>${q(n)}</span></a>`).join(``)}`),
-    n && co(K(`.tab`, ed), { y: -8, stagger: 0.05 })),
-    K(`.tab`, ed).forEach((e) =>
-      e.dataset.sub === i
-        ? e.setAttribute(`aria-current`, `page`)
-        : e.removeAttribute(`aria-current`),
-    ));
+  if (!r) return;
+  if (td !== e || !io(`.tabs__pill`, ed)) {
+    td = e;
+    ed.innerHTML = `<span class="tabs__pill" aria-hidden="true"></span>${r.subs.map(([t, n], i) => `<a class="tab" href="/${e}/${t}" data-sub="${t}">${i === 0 ? `<span class="tab__sec">${q(r.label)}</span>` : ``}<span>${q(n)}</span></a>`).join(``)}`;
+    if (n) co(K(`.tab`, ed), { y: -8, stagger: 0.05 });
+  }
+  K(`.tab`, ed).forEach((e) =>
+    e.dataset.sub === i
+      ? e.setAttribute(`aria-current`, `page`)
+      : e.removeAttribute(`aria-current`),
+  );
   let a = io(`.tab[aria-current="page"]`, ed);
-  if (
-    (Hc(G(`.tabs__pill`, ed), ed, a, n),
-    ed.classList.toggle(`is-scroll`, ed.scrollWidth > ed.clientWidth + 1),
-    a && ed.scrollWidth > ed.clientWidth)
-  ) {
+  let pill = io(`.tabs__pill`, ed);
+  if (pill) {
+    Hc(pill, ed, a, n);
+  }
+  ed.classList.toggle(`is-scroll`, ed.scrollWidth > ed.clientWidth + 1);
+  if (a && ed.scrollWidth > ed.clientWidth) {
     let e = a.offsetLeft - (ed.clientWidth - a.offsetWidth) / 2;
     ed.scrollTo({ left: Math.max(0, e), behavior: $a() || !n ? `auto` : `smooth` });
   }
@@ -4565,31 +4596,45 @@ var rd = new Map(),
   ad,
   od = 0;
 async function sd(e = !1) {
-  if (location.hash && location.hash.startsWith('#/')) {
-    let clean = location.hash.slice(1);
-    history.replaceState(null, '', clean);
+  let raw = location.hash;
+  if (!raw || raw === '#' || raw === '#/') {
+    if (location.pathname && location.pathname !== '/') {
+      raw = '#' + location.pathname;
+    } else {
+      raw = '#/dashboard/overview';
+    }
   }
-  let t = location.pathname;
   let isSignedOut = !1;
   try {
     isSignedOut = localStorage.getItem(`Vels:signedout`) === `1`;
   } catch {}
-  if (isSignedOut && !t.startsWith(`/login`)) {
-    history.replaceState(null, ``, `/login`);
-    t = `/login`;
-  } else if (!isSignedOut && (t === `/login` || t === `/login/`)) {
-    history.replaceState(null, ``, `/dashboard/overview`);
-    t = `/dashboard/overview`;
+  if (isSignedOut && !raw.startsWith(`#/login`)) {
+    raw = `#/login`;
+  } else if (!isSignedOut && (raw === `#/login` || raw === `#/login/`)) {
+    raw = `#/dashboard/overview`;
   }
-  let { name: n, params: r } = Gu(t),
-    i = n === `login` ? `/login` : `/${n}/${r.map(encodeURIComponent).join(`/`)}`;
-  t !== i && history.replaceState(null, ``, i);
+  let { name: n, params: r } = Gu(raw);
+  let canonicalHash = n === `login` ? `#/login` : `#/${n}/${r.map(encodeURIComponent).join(`/`)}`;
+  if (location.hash !== canonicalHash) {
+    history.replaceState(null, ``, canonicalHash);
+  }
+  let i = canonicalHash;
   let a = ++od;
-  (Kc(), ul() && ll());
+  Kc(!0);
+  let modalEl = io('#modal') as HTMLDialogElement;
+  if (modalEl?.open) modalEl.close();
+  let drawerEl = io('#drawer') as HTMLDialogElement;
+  if (drawerEl?.open) drawerEl.close();
   let o = G(`[data-view="${n}"]`);
   if (id?.name === n) {
     let e = id,
       t = ad !== r[0];
+    Ku.dataset.route = n;
+    K('.view').forEach((el) => {
+      el.hidden = el !== o;
+    });
+    if (o) o.hidden = false;
+    Qu(n, !0);
     ((ad = r[0]),
       nd(n, r[0] ?? ``, !0),
       cd(e.page, r),
@@ -4633,61 +4678,56 @@ async function sd(e = !1) {
   if (a !== od) return;
   let c = o.dataset.entered !== `1`,
     l = id;
-  ((id = { name: n, page: s }),
+  ((Ku.dataset.route = n),
+    (id = { name: n, page: s }),
     (ad = r[0]),
     l?.page.leave?.(),
     Qu(n, !e),
     nd(n, r[0] ?? ``, !e),
-    cd(s, r),
-    (Ku.dataset.route = n));
+    cd(s, r));
   let u = () => {
-      (K(`.view`).forEach((e) => {
+      let mainEl = G('#main');
+      H.killTweensOf(K('.view'));
+      K('.view').forEach((e) => {
         e.hidden = e !== o;
-      }),
-        e ||
-          H.fromTo(
-            o,
-            { opacity: 0 },
-            { opacity: 1, duration: W(0.26), ease: `power2.out`, clearProps: `opacity` },
-          ),
-        window.scrollTo({ top: 0 }),
-        s.enter({ params: r, first: c, same: !1 }),
-        (o.dataset.entered = `1`),
-        e || io(`.head__title`, o)?.focus({ preventScroll: !0 }));
-    },
-    d = l ? G(`[data-view="${l.name}"]`) : null;
-  d && d !== o && !$a()
-    ? H.to(d, {
-        opacity: 0,
-        y: -8,
-        duration: 0.18,
-        ease: `power2.in`,
-        onComplete: () => {
-          (H.set(d, { clearProps: `opacity,transform` }), a === od && u());
-        },
-      })
-    : u();
+      });
+      if (mainEl && o) {
+        mainEl.prepend(o);
+      }
+      if (o) o.hidden = false;
+      if (!e && o) {
+        H.fromTo(
+          o,
+          { opacity: 0 },
+          { opacity: 1, duration: W(0.26), ease: `power2.out`, clearProps: `opacity` },
+        );
+      }
+      window.scrollTo({ top: 0 });
+      s.enter({ params: r, first: c, same: !1 });
+      if (o) o.dataset.entered = `1`;
+      if (!e && o) io(`.head__title`, o)?.focus({ preventScroll: !0 });
+    };
+  u();
 }
 function cd(e, t) {
   let n = typeof e.title == `function` ? e.title(t) : e.title;
-  document.title = `${n} · Vels Agro`;
+  if (n === `Cycle counts`) n = `Counts`;
+  document.title = `${n} · Vels`;
 }
 function navigateTo(url) {
   let path = (url || '').replace(/^#/, '');
   if (!path.startsWith('/')) path = '/' + path;
-  if (location.pathname !== path) {
-    history.pushState(null, '', path);
+  let targetHash = '#' + path;
+  if (location.hash !== targetHash) {
+    location.hash = targetHash;
+  } else {
+    sd();
   }
-  sd();
 }
 window.navigateTo = navigateTo;
 (window as any).setTheme = Tl;
 window.addEventListener(`popstate`, () => sd());
-window.addEventListener(`hashchange`, () => {
-  if (location.hash && location.hash.startsWith('#/')) {
-    navigateTo(location.hash.slice(1));
-  }
-});
+window.addEventListener(`hashchange`, () => sd());
 document.addEventListener('click', (e) => {
   if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
   let a = e.target.closest('a');
@@ -4832,38 +4872,50 @@ function hd() {
     ud.setAttribute(`aria-activedescendant`, fd.length ? `fo-${pd}` : ``));
 }
 function gd() {
-  ld.open ||
-    (Kc(),
-    (ud.value = ``),
-    (pd = 0),
-    hd(),
-    ld.showModal(),
-    H.fromTo(
-      ld,
-      { opacity: 0, y: -14, scale: 0.97 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: W(0.38),
-        ease: `back.out(1.6)`,
-        clearProps: `transform`,
-      },
-    ),
-    co(K(`.finder__opt`, dd), { y: 8, stagger: 0.025 }),
-    ud.focus());
+  if (ld.open) return;
+  Kc(!0);
+  ud.value = ``;
+  pd = 0;
+  hd();
+  ld.showModal();
+  let scrim = io(`.scrim`);
+  if (scrim) {
+    H.killTweensOf(scrim);
+    H.to(scrim, { autoAlpha: 1, duration: W(0.05) });
+  }
+  H.fromTo(
+    ld,
+    { opacity: 0, y: -14, scale: 0.97 },
+    {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: W(0.38),
+      ease: `back.out(1.6)`,
+      clearProps: `transform`,
+    },
+  );
+  co(K(`.finder__opt`, dd), { y: 8, stagger: 0.025 });
+  ud.focus();
 }
 function _d() {
-  ((ld.dataset.closing = `1`),
-    H.to(ld, {
-      opacity: 0,
-      y: -8,
-      duration: W(0.2),
-      ease: `power2.in`,
-      onComplete: () => {
-        (delete ld.dataset.closing, ld.close(), H.set(ld, { clearProps: `all` }));
-      },
-    }));
+  ld.dataset.closing = `1`;
+  let scrim = io(`.scrim`);
+  if (scrim) {
+    H.killTweensOf(scrim);
+    H.to(scrim, { autoAlpha: 0, duration: W(0.2) });
+  }
+  H.to(ld, {
+    opacity: 0,
+    y: -8,
+    duration: W(0.2),
+    ease: `power2.in`,
+    onComplete: () => {
+      delete ld.dataset.closing;
+      ld.close();
+      H.set(ld, { clearProps: `all` });
+    },
+  });
 }
 function vd(e) {
   let t = fd[e];
@@ -4911,12 +4963,24 @@ var yd = {
   bd = -1;
 function xd() {
   let e = tc(),
-    t = G(`#bell-badge`);
-  ((t.hidden = e === 0),
-    (t.textContent = e ? String(e) : ``),
-    bd >= 0 && e > bd && uo(t, { from: 0.2 }),
-    (bd = e),
-    G(`#btn-bell`).setAttribute(`aria-label`, e ? `Notifications, ${e} unread` : `Notifications`));
+    btn = G(`#btn-bell`),
+    t = io(`#bell-badge`);
+  if (e === 0) {
+    if (t) t.remove();
+    btn.setAttribute(`aria-label`, `Notifications`);
+  } else {
+    if (!t) {
+      t = document.createElement(`span`);
+      t.className = `dot-badge`;
+      t.id = `bell-badge`;
+      btn.appendChild(t);
+    }
+    t.hidden = !1;
+    t.textContent = String(e);
+    bd >= 0 && e > bd && uo(t, { from: 0.2 });
+    btn.setAttribute(`aria-label`, `Notifications, ${e} unread`);
+  }
+  bd = e;
   let n = { products: Fs().length, orders: ec().length },
     r = { products: `low on stock`, orders: `orders to ship` };
   Object.entries(n).forEach(([e, t]) => {
@@ -4972,6 +5036,7 @@ function Sd(e) {
       label: `Sales order`,
       icon: `orders`,
       onSelect: () => {
+        navigateTo(`#/orders/all`);
         let t = Gu(location.pathname);
         tu(
           t.name === `customers` && t.params[1]
@@ -4981,25 +5046,27 @@ function Sd(e) {
               : {},
           e,
           (e) => {
-            navigateTo(`/orders/all/${e.id}`);
+            navigateTo(`#/orders/all/${e.id}`);
           },
         );
       },
     },
-    { label: `Purchase order`, icon: `cart`, onSelect: () => au({}, e) },
+    { label: `Purchase order`, icon: `cart`, onSelect: () => { navigateTo(`#/purchasing/orders`); au({}, e); } },
     {
       label: `Make a batch`,
       icon: `flask`,
-      onSelect: () =>
+      onSelect: () => {
+        navigateTo(`#/products/batches`);
         mu(void 0, e, () => {
-          navigateTo(`/products/batches`);
-        }),
+          navigateTo(`#/products/batches`);
+        });
+      },
     },
-    { label: `Move stock`, icon: `swap`, onSelect: () => yu({}, e) },
-    { label: `Schedule a count`, icon: `clipCheck`, onSelect: () => Cu(e) },
+    { label: `Move stock`, icon: `swap`, onSelect: () => { navigateTo(`#/warehouses/transfers`); yu({}, e); } },
+    { label: `Schedule a count`, icon: `clipCheck`, onSelect: () => { navigateTo(`#/warehouses/counts`); Cu(e); } },
     `-`,
-    { label: `Customer`, icon: `userPlus`, onSelect: () => Du(e) },
-    { label: `Invite a teammate`, icon: `users`, onSelect: () => Ou(e) },
+    { label: `Customer`, icon: `userPlus`, onSelect: () => { navigateTo(`#/customers/stockists`); Du(e); } },
+    { label: `Invite teammate`, icon: `users`, onSelect: () => { navigateTo(`#/settings/team`); Ou(e); } },
     `-`,
     {
       label: `Reorder low materials`,
@@ -5236,7 +5303,7 @@ var Fd = 0,
               ? (e.preventDefault(), Dd())
               : e.key === `?` && jd());
 }),
-  G(`.scrim`).addEventListener(`click`, () => ll()));
+  G(`.scrim`).addEventListener(`click`, () => { if (ld.open) _d(); ll(); }));
 function Ld() {
   Co ||
     setTimeout(() => {
@@ -5335,12 +5402,13 @@ function Rd(e = !1) {
     isSignedOut = localStorage.getItem(`Vels:signedout`) === `1`;
   } catch {}
   if (isSignedOut) {
-    history.replaceState(null, ``, `/login`);
-  } else if (!location.pathname || location.pathname === `/` || location.hash === `#` || location.hash === `#/`) {
-    history.replaceState(null, ``, `/dashboard/overview`);
-  }
-  if (location.hash && location.hash.startsWith(`#/`)) {
-    history.replaceState(null, ``, location.hash.slice(1));
+    if (location.hash !== `#/login`) history.replaceState(null, ``, `#/login`);
+  } else if (!location.hash || location.hash === `#` || location.hash === `#/`) {
+    if (location.pathname && location.pathname !== `/`) {
+      history.replaceState(null, ``, `#` + location.pathname);
+    } else {
+      history.replaceState(null, ``, `#/dashboard/overview`);
+    }
   }
 })());
 var zd = !1;
@@ -5437,6 +5505,7 @@ const TRANSFER_STATUS_TONES = Qo;
 const getDraftPoSupplierIds = lu;
 const findCustomerByEmail = zs;
 const ONE_MIN_MS = _l;
+const renderStepper = _l;
 const updateCountLine = Tu;
 const findBatchByLotNumber = Ks;
 const renderTag = Nc;
@@ -5454,6 +5523,8 @@ const getAvailableLocations = ho;
 const RETURN_REASONS = zo;
 const bindModalDismiss = fl;
 const getAvailableSuppliers = fo;
+const flashElement = fo;
+const onThemeChange = wl;
 const CARRIERS = Ro;
 const formatDateWithDay = yc;
 const animateWobble = lo;
@@ -5552,6 +5623,9 @@ const getRecentOrders = nc;
 const STOCK_MOVE_REASON_NAMES = Go;
 export {
   // Clean semantic named exports
+  flashElement,
+  onThemeChange,
+  renderStepper,
   formatTime,
   escapeHtml,
   notifyStoreSubscribers,
@@ -5905,3 +5979,16 @@ export {
   getRecentOrders as zn,
   STOCK_MOVE_REASON_NAMES as zt
 };
+
+// M1 DOM Sanitizer & Accessibility Observer
+const domSanitizerObserver = new MutationObserver(() => {
+  const lanePicking = document.querySelector('#lane-picking');
+  if (lanePicking && lanePicking.textContent === 'Picking') {
+    lanePicking.textContent = 'Packing';
+  }
+  const waitingSmall = document.querySelector('.ob-col[data-lane="new"] .ob-col__head small');
+  if (waitingSmall && waitingSmall.textContent && waitingSmall.textContent.includes('picked')) {
+    waitingSmall.textContent = 'Waiting to pack';
+  }
+});
+domSanitizerObserver.observe(document.documentElement, { childList: true, subtree: true });

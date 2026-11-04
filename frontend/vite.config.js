@@ -7,6 +7,21 @@ export default defineConfig({
     open: false
   },
   build: {
-    target: 'esnext'
+    target: 'esnext',
+    rollupOptions: {
+      preserveEntrySignatures: 'allow-extension',
+      input: {
+        main: './index.html',
+        'charts-test-bundle': './src/shared/widgets/charts.ts'
+      },
+      output: {
+        entryFileNames: (chunkInfo) => {
+          if (chunkInfo.name === 'charts-test-bundle') {
+            return 'assets/charts-test-bundle.js';
+          }
+          return 'assets/[name]-[hash].js';
+        }
+      }
+    }
   }
 });

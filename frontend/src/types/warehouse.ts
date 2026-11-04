@@ -22,7 +22,9 @@ export interface Location {
 export interface StockMovement {
   id: string;
   at: number;
-  itemId: string;
+  itemId?: string;
+  locId?: string;
+  kind?: string;
   from?: string;
   to?: string;
   qty: number;
@@ -42,7 +44,7 @@ export interface Transfer {
   lines: { productId: string; qty: number }[];
 }
 
-export type CycleCountStatus = 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+export type CycleCountStatus = 'scheduled' | 'counting' | 'in-progress' | 'completed' | 'done' | 'cancelled';
 
 export interface CycleCountLine {
   productId: string;
@@ -57,4 +59,7 @@ export interface CycleCount {
   scheduledAt: number;
   completedAt?: number;
   lines: CycleCountLine[];
+  byId?: string;
+  number?: string;
+  at?: number;
 }
