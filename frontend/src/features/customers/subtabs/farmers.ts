@@ -46,19 +46,19 @@ export function renderFarmersSubtab(container: HTMLElement): void {
       <div class="promo-header">
         <div class="promo-header__title-group">
           <h2>
-            <span>👨‍🌾 Farmer Direct Customer Database</span>
+            <span>👨‍🌾 Customer Database</span>
             <span class="tag" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:12px; font-weight:700;">Section 11</span>
           </h2>
-          <p>Manage verified farmer profiles, agricultural landholdings, crop cycles, tractor purchase histories and revenue tahsildar KYC compliance.</p>
+          <p>Manage verified customer profiles, agricultural landholdings, crop cycles, tractor purchase histories and revenue tahsildar KYC compliance.</p>
         </div>
         <div class="promo-header__actions">
           <button type="button" class="btn btn--ghost" id="farmer-export-csv-btn">
             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export Farmers CSV
+            Export Customers CSV
           </button>
           <button type="button" class="btn btn--primary" id="farmer-register-btn">
             <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Register New Farmer
+            Register New Customer
           </button>
         </div>
       </div>
@@ -75,7 +75,7 @@ export function renderFarmersSubtab(container: HTMLElement): void {
         </div>
         <div class="promo-search-box">
           <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="farmer-search-input" placeholder="Search Farmer, District, Crops..." value="${escapeHtml(searchQuery)}" />
+          <input type="text" id="farmer-search-input" placeholder="Search Customer, District, Crops..." value="${escapeHtml(searchQuery)}" />
         </div>
       </div>
 
@@ -99,12 +99,12 @@ function renderKPIsHtml(): string {
   return `
     <div class="promo-kpi-card">
       <div class="promo-kpi-card__label">
-        <span>Verified Farmer Base</span>
+        <span>Verified Customer Base</span>
         <svg class="ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8.5" r="3.5"/><path d="M3 19.5c.6-3.2 3-5 6-5s5.4 1.8 6 5"/></svg>
       </div>
       <div class="promo-kpi-card__value" style="color: #059669;">${kpi.totalFarmers} Registered</div>
       <div class="promo-kpi-card__meta">
-        <span>${kpi.activeCount} active buying accounts</span>
+        <span>${kpi.activeCount} active customer accounts</span>
       </div>
     </div>
 
@@ -126,7 +126,7 @@ function renderKPIsHtml(): string {
       </div>
       <div class="promo-kpi-card__value" style="color: #7c3aed;">₹${kpi.totalRevenueLakhs} L</div>
       <div class="promo-kpi-card__meta">
-        <span>Lifetime direct farm invoice value</span>
+        <span>Lifetime direct customer invoice value</span>
       </div>
     </div>
 
@@ -154,7 +154,7 @@ function renderFilterPillsHtml(): string {
 
   return `
     <button type="button" class="promo-filter-pill ${activeFilter === 'all' ? 'active' : ''}" data-filter="all">
-      All Farmers <span class="count">${counts.all}</span>
+      All Customers <span class="count">${counts.all}</span>
     </button>
     <button type="button" class="promo-filter-pill ${activeFilter === 'active' ? 'active' : ''}" data-filter="active">
       ✓ Active Accounts <span class="count">${counts.active}</span>
@@ -199,7 +199,7 @@ function renderTableHtml(): string {
   if (filtered.length === 0) {
     return `
       <div style="padding: 48px 24px; text-align: center; color: var(--muted);">
-        <p style="font-size: 15px; font-weight: 600; margin: 0 0 6px 0;">No matching farmer records</p>
+        <p style="font-size: 15px; font-weight: 600; margin: 0 0 6px 0;">No matching customer records</p>
         <p style="font-size: 13px; margin: 0;">Try adjusting your search keywords.</p>
       </div>
     `;
@@ -209,13 +209,13 @@ function renderTableHtml(): string {
     <table class="promo-table">
       <thead>
         <tr>
-          <th>Farmer Profile & Location</th>
+          <th>Customer Profile & Location</th>
           <th>Landholding & Crops</th>
           <th>Machinery Owned</th>
           <th>Lifetime Spend</th>
           <th>KYC / Patta Record</th>
           <th>Account Active</th>
-          <th style="text-align: right;">Farmer Action</th>
+          <th style="text-align: right;">Customer Action</th>
         </tr>
       </thead>
       <tbody>
@@ -277,7 +277,7 @@ function renderTableHtml(): string {
                 </label>
               </td>
               <td style="text-align: right; white-space: nowrap;">
-                <button type="button" class="btn btn--ghost btn--sm farmer-btn-view-profile" data-id="${f.id}" title="View Full Farmer Dossier">
+                <button type="button" class="btn btn--ghost btn--sm farmer-btn-view-profile" data-id="${f.id}" title="View Full Customer Dossier">
                   Profile
                 </button>
               </td>

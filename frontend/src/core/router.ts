@@ -97,7 +97,7 @@ export const ROUTES_CONFIG: Record<string, RouteMeta> = {
     label: 'Customers',
     icon: 'users',
     subs: [
-      ['farmers', 'Farmers Database'],
+      ['farmers', 'Customers'],
       ['stockists', 'Stockists'],
       ['shoppers', 'Shoppers'],
     ],
@@ -109,7 +109,6 @@ export const ROUTES_CONFIG: Record<string, RouteMeta> = {
       ['account', 'Account'],
       ['company', 'Company'],
       ['team', 'Team & roles'],
-      ['billing', 'Billing'],
       ['notifications', 'Notifications'],
     ],
   },

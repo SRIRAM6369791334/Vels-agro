@@ -71,7 +71,7 @@ function activateSubtab(subtab: CustomerSubtab): void {
 export const page: FeaturePage = {
   title(params = []) {
     const sub = params[0] ?? 'farmers';
-    if (sub === 'farmers') return 'Farmers Database';
+    if (sub === 'farmers') return 'Customers';
     const baseTitle = sub === 'shoppers' ? 'Shoppers' : 'Stockists';
     const customer = params[1] ? findCustomerById(params[1]) : null;
     return customer ? `${baseTitle} · ${customer.name}` : baseTitle;

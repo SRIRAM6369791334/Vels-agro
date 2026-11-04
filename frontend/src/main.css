@@ -3559,3 +3559,10 @@ dialog[data-closing]::backdrop {
     inset: -8px -3px;
   }
 }
+
+/* User Configured Hidden Navigation Items */
+.nav__item[data-route="purchasing"],
+.nav__item[data-route="help"],
+.tabs__tab[data-sub="billing"] {
+  display: none !important;
+}
