@@ -1,4 +1,7 @@
 import { initStore } from './core/store';
+import { INITIAL_AGRO_PRODUCTS } from './features/products/agro-products-data';
+import { INITIAL_AGRO_ORDERS, AGRO_FARMER_CUSTOMERS } from './features/orders/agro-orders-data';
+import { INITIAL_AGRO_BATCHES } from './features/products/agro-batches-data';
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
 
@@ -135,9 +138,8 @@ function lo(e, { delay: t = 0, stagger: n = 0.06 } = {}) {
     : H.timeline();
 }
 function uo(e, { from: t = 0.6, delay: n = 0, stagger: r = 0.05 } = {}) {
-  !e ||
-    Qa.matches ||
-    H.fromTo(
+  if (!e || (Array.isArray(e) && !e.length) || (e instanceof NodeList && !e.length) || Qa.matches) return;
+  H.fromTo(
       e,
       { scale: t, opacity: 0 },
       {
@@ -328,8 +330,8 @@ var To = (e) => new Date(e).setHours(0, 0, 0, 0),
   Bo = { scheduled: `Scheduled`, counting: `Counting`, done: `Done` },
   Vo = { owner: `Owner`, admin: `Admin`, manager: `Manager`, staff: `Staff`, viewer: `Viewer` },
   Ho = { vip: `VIP`, new: `New`, net30: `Net 30`, subscriber: `Subscriber` },
-  Uo = [`Cleanse`, `Treat`, `Moisturise`, `Protect`, `Body`],
-  Wo = { Cleanse: `sky`, Treat: `ocean`, Moisturise: `teal`, Protect: `ochre`, Body: `rose` },
+  Uo = [`Tractors`, `Harvesters`, `Tillers`, `Sprayers`, `Spares`, `Implements`, `Cleanse`, `Treat`, `Moisturise`, `Protect`, `Body`],
+  Wo = { Tractors: `pine`, Harvesters: `purple`, Tillers: `ochre`, Sprayers: `sky`, Spares: `slate`, Implements: `teal`, Cleanse: `sky`, Treat: `ocean`, Moisturise: `teal`, Protect: `ochre`, Body: `rose` },
   Go = {
     production: `Batch released`,
     sale: `Shipped`,
@@ -1226,10 +1228,13 @@ function ls() {
     a = To(i),
     o = (e, t = 8, r = 17) => a + e * J + n(t, r) * Y,
     s = $o.map((e, t) => ({ ...e, since: a - (420 + t * 97) * J })),
-    c = rs.map((e) => {
-      let t = is[e.id];
-      return { ...e, stock: { dc: t[0], lab: t[1], shop: t[2] } };
-    }),
+    c = [
+      ...INITIAL_AGRO_PRODUCTS,
+      ...rs.map((e) => {
+        let t = is[e.id] || [10, 5, 2];
+        return { ...e, stock: { dc: t[0], lab: t[1], shop: t[2] } };
+      }),
+    ],
     l = ns.map((e) => ({ ...e, onHand: as[e.id] ?? 0 })),
     u = ts.map((e, t) => ({ ...e, since: a - (300 + t * 140) * J, favorite: t < 2 })),
     d = [
@@ -2051,7 +2056,7 @@ function ls() {
     team: s,
     locations: es.map((e) => ({ ...e, zones: e.zones.map((e) => ({ ...e })) })),
     products: c,
-    batches: v,
+    batches: [...INITIAL_AGRO_BATCHES, ...v],
     materials: l,
     suppliers: u,
     pos: w,
@@ -2076,6 +2081,24 @@ function ds() {
     let e = JSON.parse(localStorage.getItem(us) ?? `null`);
     if (e && e.version === 1) {
       if (e.settings?.company?.currency === `USD`) e.settings.company.currency = `INR`;
+      if (!e.products?.some((p: any) => p.id === 'vels-trac-55') || e.products?.some((p: any) => ['Moisturise', 'Cleanse', 'Treat', 'Protect', 'Body'].includes(p.category))) {
+        const custom = (e.products || []).filter((p: any) => !p.id.startsWith('crb') && !p.id.startsWith('bfs') && !p.id.startsWith('clo') && !['Moisturise', 'Cleanse', 'Treat', 'Protect', 'Body'].includes(p.category) && !INITIAL_AGRO_PRODUCTS.some(a => a.id === p.id));
+        e.products = [...INITIAL_AGRO_PRODUCTS, ...custom];
+        try { localStorage.setItem(us, JSON.stringify(e)); } catch {}
+      }
+      if (!e.batches?.some((b: any) => b.productId?.startsWith('vels-') || b.productId?.startsWith('cpt-')) || e.batches?.some((b: any) => b.productId?.startsWith('crb') || b.productId?.startsWith('clo') || b.productId?.startsWith('nia') || b.productId?.startsWith('bfs'))) {
+        const custom = (e.batches || []).filter((b: any) => b.productId?.startsWith('vels-') || b.productId?.startsWith('cpt-'));
+        e.batches = [...INITIAL_AGRO_BATCHES, ...custom];
+        try { localStorage.setItem(us, JSON.stringify(e)); } catch {}
+      }
+      if (!e.orders?.some((o: any) => o.id?.startsWith('so-agro-'))) {
+        e.orders = [...INITIAL_AGRO_ORDERS, ...(e.orders || [])];
+        try { localStorage.setItem(us, JSON.stringify(e)); } catch {}
+      }
+      if (!e.customers?.some((c: any) => c.id?.startsWith('c-farmer-'))) {
+        e.customers = [...AGRO_FARMER_CUSTOMERS, ...(e.customers || [])];
+        try { localStorage.setItem(us, JSON.stringify(e)); } catch {}
+      }
       return e;
     }
   } catch {}
@@ -2146,8 +2169,8 @@ var ys = (e) => X.team.find((t) => t.id === e),
   Ts = (e) => X.batches.find((t) => t.id === e),
   Es = (e) => X.pos.find((t) => t.id === e),
   Ds = (e) => (e === `web` ? `Online store` : (ys(e)?.name ?? Cs(e)?.name ?? ``)),
-  Os = (e) => `/Vels/photos/Vels/${e.photo}.jpg`,
-  ks = (e) => `${e.name} ${e.size}`,
+  Os = (e) => e?.image || (e?.photo && (e.photo.startsWith('/') || e.photo.startsWith('http')) ? e.photo : `/Vels/photos/Vels/${e?.photo || 'cat_tractor'}.jpg`),
+  ks = (e) => (e ? `${e.name || ''} ${e.size || ''}`.trim() : 'Agro Machinery'),
   As = (e, t) => (t ? (e.stock[t] ?? 0) : Object.values(e.stock).reduce((e, t) => e + t, 0));
 function js(e, t) {
   return X.orders
@@ -4366,6 +4389,15 @@ var Lu = `modulepreload`,
         [`alerts`, `Alerts`],
       ],
     },
+    categories: {
+      label: `Categories`,
+      icon: `grid`,
+      subs: [
+        [`list`, `Main Categories`],
+        [`sub`, `Sub-categories`],
+        [`brands`, `Brand Compatibility`],
+      ],
+    },
     products: {
       label: `Products`,
       icon: `box`,
@@ -4381,6 +4413,8 @@ var Lu = `modulepreload`,
         [`all`, `All orders`],
         [`board`, `Board`],
         [`returns`, `Returns`],
+        [`payments`, `Payments`],
+        [`shipments`, `Shipments`],
       ],
     },
     purchasing: {
@@ -4401,6 +4435,25 @@ var Lu = `modulepreload`,
         [`counts`, `Counts`],
       ],
     },
+    dealers: {
+      label: `Dealers`,
+      icon: `store`,
+      subs: [
+        [`locations`, `Dealer Locations`],
+        [`transfers`, `Dealer Transfers`],
+        [`counts`, `Dealer Counts`],
+      ],
+    },
+    promotions: {
+      label: `Promotions`,
+      icon: `tag`,
+      subs: [
+        [`coupons`, `Coupon Codes`],
+        [`discounts`, `Product & Category Offers`],
+        [`dealers`, `Dealer Special Schemes`],
+        [`banners`, `Banners & Featured`],
+      ],
+    },
     analytics: {
       label: `Analytics`,
       icon: `chart`,
@@ -4414,6 +4467,7 @@ var Lu = `modulepreload`,
       label: `Customers`,
       icon: `users`,
       subs: [
+        [`farmers`, `Farmers Database`],
         [`stockists`, `Stockists`],
         [`shoppers`, `Shoppers`],
       ],
@@ -4449,10 +4503,13 @@ var Lu = `modulepreload`,
   Uu = [`purchasing`, `analytics`, `customers`, `settings`, `help`],
   Wu = {
     dashboard: () => import(`./features/dashboard/dashboard.ts`),
+    categories: () => import(`./features/categories/categories.ts`),
     products: () => import(`./features/products/products.ts`),
     orders: () => import(`./features/orders/orders.ts`),
     purchasing: () => import(`./features/purchasing/purchasing.ts`),
     warehouses: () => import(`./features/warehouses/warehouses.ts`),
+    dealers: () => import(`./features/dealers/dealers.ts`),
+    promotions: () => import(`./features/promotions/promotions.ts`),
     analytics: () => import(`./features/analytics/analytics.ts`),
     customers: () => import(`./features/customers/customers.ts`),
     settings: () => import(`./features/settings/settings.ts`),
@@ -4462,6 +4519,10 @@ var Lu = `modulepreload`,
 function Gu(e) {
   let [t, ...n] = e.replace(/^#?\/?/, ``).split(`/`).filter(Boolean).map(decodeURIComponent);
   if (t === `login`) return { name: `login`, params: [] };
+  if (t === `payments`) return { name: `orders`, params: [`payments`, ...n] };
+  if (t === `shipments`) return { name: `orders`, params: [`shipments`, ...n] };
+  if (t === `offers`) return { name: `promotions`, params: [`coupons`, ...n] };
+  if (t === `farmers`) return { name: `customers`, params: [`farmers`, ...n] };
   if (!Hu.includes(t)) return { name: `dashboard`, params: [`overview`] };
   let r = Vu[t],
     i = r.subs.some(([e]) => e === n[0]) || (t === `products` && n[0] === `item`);

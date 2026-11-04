@@ -70,7 +70,49 @@ import {
   renderOrderStatusBadge,
   initSegmentedControl,
 } from "../../main.ts";
-const Le = [`all`, `board`, `returns`];
+import { INITIAL_AGRO_ORDERS, AGRO_FARMER_CUSTOMERS, INITIAL_AGRO_RETURNS } from "./agro-orders-data";
+import { INITIAL_DEALERS as DEALERS } from "../dealers/dealer-data";
+import { openGstInvoiceModal } from "./invoice-modal";
+import { openCancelOrderModal, openEditLogisticsModal, openReturnReplacementModal, openUpdateStatusModal } from "./order-actions-modal";
+import { renderPaymentsSubtab } from "./subtabs/payments-subtab";
+import { renderShipmentsSubtab } from "./subtabs/shipments-subtab";
+import "./invoice.css";
+import "./payments-shipments.css";
+
+export function ensureAgroOrders() {
+  if (!store.orders || !store.orders.some((o: any) => o.id?.startsWith('so-agro-'))) {
+    store.orders = [...INITIAL_AGRO_ORDERS, ...(store.orders || [])];
+  }
+  if (!store.returns || !store.returns.some((r: any) => r.id?.startsWith('ret-agro-'))) {
+    store.returns = [...INITIAL_AGRO_RETURNS, ...(store.returns || [])];
+  }
+}
+
+export function resolveCustomerOrDealer(id: string) {
+  let cust = findCustomerById(id);
+  if (cust) return cust;
+  let farmer = AGRO_FARMER_CUSTOMERS.find(f => f.id === id);
+  if (farmer) return farmer;
+  let dealer = DEALERS.find(d => d.id === id);
+  if (dealer) {
+    return {
+      id: dealer.id,
+      name: dealer.name,
+      kind: 'stockist' as const,
+      contact: dealer.contactPerson,
+      email: dealer.email,
+      phone: dealer.phone,
+      city: dealer.city,
+      region: `${dealer.state} • GST: ${dealer.gstin}`,
+      tags: ['🏢 Authorized Dealer', dealer.pricingTier.toUpperCase(), dealer.code],
+      note: `Authorized Vels Agro Dealership in ${dealer.city}. Hub: ${dealer.hubId}`,
+      discountPct: dealer.discountPct,
+    };
+  }
+  return null;
+}
+
+const Le = [`all`, `board`, `returns`, `payments`, `shipments`];
 let N;
 let Re = `all`;
 const ze = new Set();
@@ -87,17 +129,29 @@ const Ve = {
   online: `Online`,
   studio: `Studio`,
 };
-const He = (channel) => `<span class="tag" style="--c:var(--${Be[channel]})">${Ve[channel]}</span>`;
+const He = (channelOrOrder: any) => {
+  let isDealer = false;
+  if (typeof channelOrOrder === 'object' && channelOrOrder !== null) {
+    isDealer = channelOrOrder.orderType === 'dealer_wholesale' || channelOrOrder.channel === 'wholesale' || channelOrOrder.customerId?.startsWith('dlr-');
+  } else {
+    isDealer = channelOrOrder === 'wholesale';
+  }
+  if (isDealer) {
+    return `<span class="tag tag--dealer" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-weight:700; font-size:11px;">🏢 Dealer Bulk</span>`;
+  }
+  return `<span class="tag tag--farmer" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-weight:700; font-size:11px;">👨‍🌾 Farmer Direct</span>`;
+};
 const L = (e) => {
   if (ORDER_STATUS_META[e].tone === `faint`) {
     return `slate`;
   }
   return ORDER_STATUS_META[e].tone;
 };
-const Ue = (e) => findCustomerById(e.customerId)?.name ?? `Unknown customer`;
+const Ue = (e) => resolveCustomerOrDealer(e.customerId)?.name ?? `Unknown customer`;
 const We = (e) => {
   if (e) {
-    return `/customers/${e.kind === `stockist` ? `stockists` : `shoppers`}/${e.id}`;
+    if (e.id && e.id.startsWith('dlr-')) return `#/dealers`;
+    return `#/customers/${e.kind === `stockist` ? `stockists` : `shoppers`}/${e.id}`;
   }
   return `/customers/stockists`;
 };
@@ -171,14 +225,18 @@ function $e(e) {
 }
 function et(e) {
   let t = R(e);
-  return `${renderOrderStatusBadge(e.status)}${e.status === `cancelled` ? `` : e.paid ? renderPill(`Paid`, `good`, `check`) : renderPill(`Awaiting payment`, `warn`, `clock`)}${He(e.channel)}${t ? renderPill(`Late · was due ${Ke(e.shipBy)}`, `rose`, `alert`) : ``}`;
+  return `${renderOrderStatusBadge(e.status)}${e.status === `cancelled` ? `` : e.paid ? renderPill(`Paid`, `good`, `check`) : renderPill(`Awaiting payment`, `warn`, `clock`)}${He(e.channel)}${t ? renderPill(`Late Â· was due ${Ke(e.shipBy)}`, `rose`, `alert`) : ``}`;
 }
-function tt(r) {
+function tt(r: any) {
   let i = exportDataBackup(r.locId);
-  return `<div><small>Ships from</small><b>${escapeHtml(i?.name ?? `—`)}</b><span>${escapeHtml(i?.city ?? ``)}</span></div>
-    <div class="${R(r) ? `is-late` : ``}"><small>Ship by</small><b>${escapeHtml(formatRelativeDay(r.shipBy))}</b><span>${formatTime(r.shipBy)}${R(r) ? ` · late` : ``}</span></div>
-    <div><small>Carrier</small><b>${escapeHtml(r.carrier)}</b><span>${r.channel === `studio` ? `Handed over at the till` : r.channel === `wholesale` ? `Cartons, palletised over 40 units` : `Mailer carton`}</span></div>
-    <div><small>Tracking</small><b class="mono od-track">${r.tracking ? escapeHtml(r.tracking) : `—`}</b><span>${r.tracking ? `<button type="button" class="od-link" data-do="copy">${renderIcon(`copy`)}Copy number</button>` : KANBAN_STAGES.indexOf(r.status) >= 3 ? `No label for collected orders` : `Issued when it ships`}</span></div>`;
+  let transporter = r.transporterName || r.carrier || 'VRL Logistics (Flatbed Fleet)';
+  let lr = r.lrNumber || r.tracking || '—';
+  let eway = r.ewayBillNumber || '—';
+  let vehicle = r.vehicleNumber || '—';
+  return `<div><small>Ships from</small><b>${escapeHtml(i?.name ?? `Coimbatore Yard`)}</b><span>${escapeHtml(i?.city ?? `Coimbatore`)}</span></div>
+    <div class="${R(r) ? `is-late` : ``}"><small>Ship by</small><b>${escapeHtml(formatRelativeDay(r.shipBy))}</b><span>${formatTime(r.shipBy)}${R(r) ? ` • late` : ``}</span></div>
+    <div><small>Transporter & LR</small><b>${escapeHtml(transporter)}</b><span>LR: <b class="mono">${escapeHtml(lr)}</b></span></div>
+    <div><small>E-Way Bill & Vehicle</small><b class="mono">${escapeHtml(eway)}</b><span>${escapeHtml(vehicle)}</span></div>`;
 }
 function nt(e) {
   if (e.status === `cancelled`) {
@@ -192,50 +250,107 @@ function rt(e) {
     .reverse()
     .map(
       (n, r) =>
-        `<li class="od-hist__item" data-key="h-${e.history.length - r}" style="--c:var(--${L(n.to)})"><i></i><span><b>${n.to === `new` ? `Order placed` : n.to === `cancelled` ? `Cancelled` : `Moved to ${ORDER_STATUS_META[n.to].name}`}</b><small>${escapeHtml(getPendingReturnsCount(n.by) || `Vels`)} · ${escapeHtml(renderNotificationItem(n.at))}</small></span></li>`
+        `<li class="od-hist__item" data-key="h-${e.history.length - r}" style="--c:var(--${L(n.to)})"><i></i><span><b>${n.to === `new` ? `Order placed` : n.to === `cancelled` ? `Cancelled` : `Moved to ${ORDER_STATUS_META[n.to].name}`}</b><small>${escapeHtml(getPendingReturnsCount(n.by) || `Vels`)} • ${escapeHtml(renderNotificationItem(n.at))}</small></span></li>`
     )
     .join(``);
 }
-function it(e) {
+function it(e: any) {
   let t = Je[e.status];
   let n = KANBAN_STAGES.indexOf(e.status) < 3 && e.status !== `cancelled`;
+  let canReturn = e.status === 'delivered';
   return (
     [
+      `<button type="button" class="btn btn--primary" data-do="gst-invoice" style="background:#166534; border-color:#14532d; color:#fff;">${renderIcon(`doc`)} GST Tax Invoice</button>`,
       t
-        ? `<button type="button" class="btn btn--primary" data-do="advance">${renderIcon(t[1])}${t[0]}</button>`
+        ? `<button type="button" class="btn btn--secondary" data-do="advance">${renderIcon(t[1])}${t[0]}</button>`
         : ``,
-      e.tracking
-        ? `<button type="button" class="btn btn--ghost" data-do="copy">${renderIcon(`copy`)}Copy tracking</button>`
+      `<button type="button" class="btn btn--ghost" data-do="change-status">${renderIcon(`gear`)} Change Status</button>`,
+      `<button type="button" class="btn btn--ghost" data-do="edit-logistics">${renderIcon(`truck`)} Edit Logistics</button>`,
+      canReturn
+        ? `<button type="button" class="btn btn--ghost" data-do="req-return" style="color:#d97706;">${renderIcon(`refresh`)} Request Return / Replace</button>`
         : ``,
       n
-        ? `<button type="button" class="btn btn--ghost od-cancel" data-do="cancel">${renderIcon(`close`)}Cancel order</button>`
+        ? `<button type="button" class="btn btn--ghost od-cancel" data-do="cancel" style="color:#dc2626;">${renderIcon(`close`)} Cancel order</button>`
         : ``,
     ].join(``) ||
     `<p class="od-closed">${renderIcon(e.status === `cancelled` ? `close` : `check`)}${e.status === `cancelled` ? `This order was cancelled — its stock went back on sale.` : `Delivered. Nothing left to do on this one.`}</p>`
   );
 }
-function at(e) {
-  let n = findCustomerById(e.customerId);
+function at(e: any) {
+  let n = resolveCustomerOrDealer(e.customerId);
+  let isDealer = e.orderType === 'dealer_wholesale' || e.channel === 'wholesale' || e.customerId?.startsWith('dlr-');
   let r = e.lines
-    .map((e) => {
+    .map((e: any) => {
       let n = findProductById(e.productId);
       if (n) {
-        return `<div class="row od-line">${renderProductThumb(n, `md`)}<span class="row__txt"><b>${escapeHtml(n.name)}</b><small>${escapeHtml(n.size)} · <span class="mono">${escapeHtml(n.sku)}</span></small></span><span class="od-line__q">${formatInt(e.qty)} × ${formatMoney(e.price)}</span><b class="od-line__sub">${formatMoney(e.qty * e.price)}</b></div>`;
+        return `<div class="row od-line">${renderProductThumb(n, `md`)}<span class="row__txt"><b>${escapeHtml(n.name)}</b><small>${escapeHtml(n.size || '')} • <span class="mono">${escapeHtml(n.sku)}</span></small></span><span class="od-line__q">${formatInt(e.qty)} × ${formatMoney(e.price)}</span><b class="od-line__sub">${formatMoney(e.qty * e.price)}</b></div>`;
       }
       return ``;
     })
     .join(``);
-  return `<header class="d-head"><span class="tile" style="--c:var(--${L(e.status)})" data-ds="tile">${renderIcon(`orders`)}</span><div><h2>${escapeHtml(e.number)}</h2><small>Placed ${escapeHtml(renderNotificationItem(e.createdAt))} · ${CHANNEL_NAMES[e.channel]}</small></div></header>
-    <div class="d-pills" data-ds="pills">${et(e)}</div>
-    <div data-ds="steps">${$e(e)}</div>
-    <div data-ds="err" hidden></div>
-    <section class="d-sec"><h3>Customer</h3><a class="row od-cust" href="${We(n)}">${renderAvatar(e.customerId, `md`)}<span class="row__txt"><b>${escapeHtml(n?.name ?? `Unknown`)}</b><small>${escapeHtml([n?.kind === `stockist` ? n.contact : ``, n ? `${n.city}, ${n.region}` : ``].filter(Boolean).join(` · `))}</small></span>${renderIcon(`chevR`, `row__go`)}</a></section>
-    <div class="d-facts" data-ds="facts">${tt(e)}</div>
-    <section class="d-sec"><h3>Items <span class="od-count">${pluralize(findBatchByLotNumber(e), `unit`)}</span></h3><div class="rows">${r}</div>
-      <div class="od-total"><span>Order total</span><b>${formatMoney(getOrderTotal(e))}</b></div></section>
-    <div class="od-pay" data-ds="pay">${nt(e)}</div>
-    <section class="d-sec"><h3>History</h3><ol class="od-hist" data-ds="hist">${rt(e)}</ol></section>
-    <footer class="d-actions" data-ds="acts">${it(e)}</footer>`;
+  let cancellationBanner = e.status === 'cancelled' && e.cancellationReason
+    ? `<div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:12px 14px; margin:12px 0; color:#991b1b;"><div style="font-weight:700; font-size:12px; margin-bottom:2px;">Cancellation Reason:</div><div style="font-size:12.5px;">${escapeHtml(e.cancellationReason)}</div></div>`
+    : ``;
+  let logisticsCard = `
+    <div class="od-logistics-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <strong style="font-size:12px; color:#1e293b;">🚚 Heavy Transport & Dispatch Details</strong>
+        <button type="button" class="btn btn--ghost btn--xs" data-do="edit-logistics" style="font-size:11px; padding:3px 8px;">${renderIcon('edit')}Edit</button>
+      </div>
+      <div class="od-logistics-grid">
+        <div><small>Transporter:</small><b>${escapeHtml(e.transporterName || e.carrier || 'VRL Logistics')}</b></div>
+        <div><small>LR Bilty Number:</small><b class="mono">${escapeHtml(e.lrNumber || e.tracking || 'LR-Pending')}</b></div>
+        <div><small>Vehicle Number:</small><b>${escapeHtml(e.vehicleNumber || 'TN-38-BZ-4921')}</b></div>
+        <div><small>Driver Phone:</small><b>${escapeHtml(e.driverPhone || '+91 98421 77201')}</b></div>
+        <div><small>E-Way Bill No:</small><b class="mono">${escapeHtml(e.ewayBillNumber || '2418 9032 8841')}</b></div>
+        <div><small>Payment Mode:</small><b>${escapeHtml(e.paymentMode || (isDealer ? 'Dealer 30-Day Credit' : 'NEFT / RTGS'))}</b></div>
+      </div>
+    </div>
+  `;
+
+  return `<header class="d-head">
+    <span class="tile" style="--c:var(--${L(e.status)})" data-ds="tile">${renderIcon(`orders`)}</span>
+    <div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <h2 style="margin:0;">${escapeHtml(e.number)}</h2>
+        ${He(e)}
+      </div>
+      <small>Placed ${escapeHtml(renderNotificationItem(e.createdAt))} • ${CHANNEL_NAMES[e.channel] || (isDealer ? 'Dealer Wholesale' : 'Farmer Direct')}</small>
+    </div>
+    <div style="margin-left:auto; display:flex; gap:6px;">
+      <button type="button" class="btn btn--primary btn--sm" data-do="gst-invoice" style="background:#166534; color:#fff; border:none; display:inline-flex; align-items:center; gap:4px; font-weight:600;">
+        ${renderIcon(`doc`)}GST Invoice
+      </button>
+    </div>
+  </header>
+  <div class="d-pills" data-ds="pills">${et(e)}</div>
+  <div data-ds="steps">${$e(e)}</div>
+  <div data-ds="err" hidden></div>
+  ${cancellationBanner}
+  <section class="d-sec">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <h3 style="margin:0;">${isDealer ? '🏢 Authorized Dealership' : '👨‍🌾 Farmer (Direct Customer)'}</h3>
+      ${n?.phone ? `<small class="mono" style="color:#64748b;">${escapeHtml(n.phone)}</small>` : ''}
+    </div>
+    <a class="row od-cust" href="${We(n)}">
+      ${renderAvatar(e.customerId, `md`)}
+      <span class="row__txt">
+        <b>${escapeHtml(n?.name ?? `Unknown`)}</b>
+        <small>${escapeHtml([n?.contact ? `Contact: ${n.contact}` : ``, n ? `${n.city}, ${n.region}` : ``].filter(Boolean).join(` • `))}</small>
+      </span>
+      ${renderIcon(`chevR`, `row__go`)}
+    </a>
+  </section>
+  <div class="d-facts" data-ds="facts">${tt(e)}</div>
+  ${logisticsCard}
+  <section class="d-sec">
+    <h3>Agricultural Items <span class="od-count">${pluralize(findBatchByLotNumber(e), `unit`)}</span></h3>
+    <div class="rows">${r}</div>
+    <div class="od-total"><span>Order Total (Inc. GST)</span><b>${formatMoney(getOrderTotal(e))}</b></div>
+  </section>
+  <div class="od-pay" data-ds="pay">${nt(e)}</div>
+  <section class="d-sec"><h3>Audit & Dispatch History</h3><ol class="od-hist" data-ds="hist">${rt(e)}</ol></section>
+  <footer class="d-actions" data-ds="acts">${it(e)}</footer>`;
 }
 function ot(e, t, n, r = 0) {
   let i = queryOne(`.od-steps__fill`, e);
@@ -282,7 +397,7 @@ function st(e) {
   let t = findOrderById(e);
   let n = `/orders/${Re}`;
   if (!t) {
-    showToast(`That order isn’t in the book any more`, {
+    showToast(`That order isnâ€™t in the book any more`, {
       ico: `alert`,
     });
     history.replaceState(null, ``, n);
@@ -324,17 +439,40 @@ function ct(e, t) {
   }
   openNewTransferModal(n);
   let i = n.dataset.do;
-  if (i === `advance`) {
+  if (i === `gst-invoice` || i === `receipt`) {
+    openGstInvoiceModal(r);
+  } else if (i === `change-status`) {
+    openUpdateStatusModal(r, () => {
+      if (B?.el) B.el.innerHTML = at(r);
+      q(true);
+    });
+  } else if (i === `edit-logistics`) {
+    openEditLogisticsModal(r, () => {
+      if (B?.el) B.el.innerHTML = at(r);
+      q(true);
+    });
+  } else if (i === `req-return`) {
+    openReturnReplacementModal(r, () => {
+      if (B?.el) B.el.innerHTML = at(r);
+      q(true);
+    });
+  } else if (i === `advance`) {
     let e = advanceOrderStatus(t);
     if (e) {
       showToast(e, {
         ico: `alert`,
       });
       lt(e);
+    } else {
+      if (B?.el) B.el.innerHTML = at(r);
+      q(true);
     }
   } else {
     if (i === `cancel`) {
-      cancelOrder(t);
+      openCancelOrderModal(r, () => {
+        if (B?.el) B.el.innerHTML = at(r);
+        q(true);
+      });
     } else if (i === `paid`) {
       if (r.paid) {
         showToast(`Paid is final here — refunds go through Returns`, {
@@ -342,9 +480,11 @@ function ct(e, t) {
         });
       } else {
         markOrderPaid(t);
+        if (B?.el) B.el.innerHTML = at(r);
+        q(true);
       }
-    } else if (i === `copy` && r.tracking) {
-      renderStockStatusBadge(r.tracking, `Tracking number copied`);
+    } else if (i === `copy` && (r.tracking || (r as any).lrNumber)) {
+      renderStockStatusBadge(r.tracking || (r as any).lrNumber, `Tracking / LR number copied`);
     }
   }
 }
@@ -523,20 +663,22 @@ function gt() {
   ht().forEach((t) => Ye(e, t.key, t.value, t.badge, t.tone));
 }
 function _t() {
+  ensureAgroOrders();
   let e = U ? Date.now() - U * ONE_DAY_MS : 0;
   let t = dt.trim().toLowerCase();
   return store.orders.filter(
-    (n) =>
+    (n: any) =>
       n.createdAt >= e &&
-      (H === `all` || n.channel === H) &&
-      (!t || `${n.number} ${Ue(n)} ${n.tracking ?? ``}`.toLowerCase().includes(t))
+      (H === `all` || n.channel === H || (H === 'wholesale' && n.orderType === 'dealer_wholesale') || (H === 'online' && n.orderType === 'retail_farmer')) &&
+      (!t || `${n.number} ${Ue(n)} ${n.tracking ?? ``} ${n.invoiceNumber ?? ``} ${n.lrNumber ?? ``} ${n.ewayBillNumber ?? ``}`.toLowerCase().includes(t))
   );
 }
 function vt() {
+  ensureAgroOrders();
   let e = P(`all`);
   e.innerHTML = `${renderPageHeader({
-    eyebrow: `Every sale — stockists, the online shop and the studio till`,
-    title: `All orders`,
+    eyebrow: `Agricultural machinery sales — Authorized dealers & direct farmer bookings`,
+    title: `All Machinery & Spares Orders`,
     actions: `<button type="button" class="btn btn--ghost" data-act="export">${renderIcon(`download`)}Export CSV</button><button type="button" class="btn btn--primary magnetic" data-act="new">${renderIcon(`plus`)}New order</button>`,
     stats: ht(),
   })}
@@ -547,15 +689,14 @@ function vt() {
       ${renderSegmentedControl(
         `Channel`,
         [
-          [`all`, `All`],
-          [`wholesale`, `Wholesale`],
-          [`online`, `Online`],
-          [`studio`, `Studio`],
+          [`all`, `All Orders`],
+          [`wholesale`, `🏢 Dealers`],
+          [`online`, `👨‍🌾 Farmers`],
         ],
         H,
         `oa-seg`
       )}
-      <label class="search oa-search">${renderIcon(`search`)}<input type="search" placeholder="Number, customer or tracking…" aria-label="Search orders" data-k="o-q" /></label>
+      <label class="search oa-search">${renderIcon(`search`)}<input type="search" placeholder="Order #, Farmer, Dealer, LR No, E-Way Bill..." aria-label="Search orders" data-k="o-q" /></label>
       <button type="button" class="btn btn--ghost btn--sm oa-range" data-k="o-range" aria-haspopup="menu" aria-expanded="false">${renderIcon(`calendar`)}<span>${ft.find((e) => e[0] === U)[1]}</span>${renderIcon(`down`)}</button>
     </div>
     <div class="table-wrap"><table class="table table--stack oa-table" style="--areas:'t r' 's p'"><thead data-k="o-head"></thead><tbody data-k="o-body"></tbody></table></div>
@@ -708,14 +849,15 @@ function q(n) {
   let f = F(`o-body`);
   let te = d.length
     ? d
-        .map((n) => {
-          let r = findCustomerById(n.customerId);
+        .map((n: any) => {
+          let r = resolveCustomerOrDealer(n.customerId);
           let i = getOrderTotal(n);
+          let isDealer = n.orderType === 'dealer_wholesale' || n.channel === 'wholesale' || n.customerId?.startsWith('dlr-');
           return `<tr class="is-link${n.status === `cancelled` ? ` is-void` : ``}" data-key="${n.id}" data-open="${n.id}">
       <td class="a-h"><a class="ref oa-no" href="/orders/all/${n.id}">${highlightSearchMatch(n.number, a)}</a>${R(n) ? `<span class="oa-late" title="Past its ship-by time">${renderIcon(`alert`)}</span>` : ``}</td>
       <td class="a-h oa-date">${escapeHtml(formatDate(n.createdAt))}<small>${escapeHtml(formatTime(n.createdAt))}</small></td>
-      <td class="a-t"><span class="cell-person">${renderAvatar(n.customerId, `sm`)}<span><b>${highlightSearchMatch(r?.name ?? `Unknown`, a)}</b><small class="oa-city">${escapeHtml(r ? `${r.city}, ${r.region}` : ``)}</small><small class="oa-sub"><a class="oa-sub__no" href="/orders/all/${n.id}">${highlightSearchMatch(n.number, a)}</a> · ${escapeHtml(formatDate(n.createdAt))} · ${Ve[n.channel]}</small></span></span></td>
-      <td class="a-h">${He(n.channel)}</td>
+      <td class="a-t"><span class="cell-person">${renderAvatar(n.customerId, `sm`)}<span><b>${highlightSearchMatch(r?.name ?? `Unknown`, a)}</b><small class="oa-city">${escapeHtml(r ? `${r.city}, ${r.region || ''}` : ``)}</small><small class="oa-sub"><a class="oa-sub__no" href="/orders/all/${n.id}">${highlightSearchMatch(n.number, a)}</a> • ${escapeHtml(formatDate(n.createdAt))} • ${isDealer ? 'Dealer Bulk' : 'Farmer Direct'}</small></span></span></td>
+      <td class="a-h">${He(n)}</td>
       <td class="a-s"><span class="oa-items">${qe(n)}<small>${pluralize(findBatchByLotNumber(n), `unit`)}</small></span></td>
       <td class="a-r r oa-tot"><b>${formatMoney(i)}</b>${n.tracking && a && n.tracking.toLowerCase().includes(a.toLowerCase()) ? `<small class="mono">${highlightSearchMatch(n.tracking, a)}</small>` : ``}</td>
       <td class="a-h">${n.status === `cancelled` ? `<span class="oa-dash">—</span>` : n.paid ? renderPill(`Paid`, `good`) : renderPill(`Unpaid`, `warn`)}</td>
@@ -732,7 +874,7 @@ function q(n) {
     f.innerHTML = te;
   }
   F(`o-foot`).innerHTML = l.length
-    ? `<span>Showing <b>${formatInt(d.length)}</b> of ${pluralize(l.length, `order`)} · <b>${formatMoneyRound(l.reduce((acc, item) => acc + (item.status === `cancelled` ? 0 : getOrderTotal(item)), 0))}</b></span>${l.length > K ? `<button type="button" class="btn btn--ghost btn--sm" data-do="more">Show ${Math.min(20, l.length - K)} more${renderIcon(`down`)}</button>` : ``}`
+    ? `<span>Showing <b>${formatInt(d.length)}</b> of ${pluralize(l.length, `order`)} Â· <b>${formatMoneyRound(l.reduce((acc, item) => acc + (item.status === `cancelled` ? 0 : getOrderTotal(item)), 0))}</b></span>${l.length > K ? `<button type="button" class="btn btn--ghost btn--sm" data-do="more">Show ${Math.min(20, l.length - K)} more${renderIcon(`down`)}</button>` : ``}`
     : ``;
 }
 function St() {
@@ -787,16 +929,16 @@ function Dt(e) {
   }
   return t.sort((e, t) => e.shipBy - t.shipBy || e.createdAt - t.createdAt);
 }
-function Ot(e) {
-  let r = findCustomerById(e.customerId);
+function Ot(e: any) {
+  let r = resolveCustomerOrDealer(e.customerId);
   let i = R(e);
-  let a = e.history.findLast((e) => e.to === `shipped`)?.at;
+  let a = e.history.findLast((e: any) => e.to === `shipped`)?.at;
   let o =
     e.status === `shipped`
-      ? `<span class="ob-ship is-out">${renderIcon(`truck`)}${escapeHtml(e.carrier.split(` `)[0] ?? ``)} · ${a ? formatRelativeTime(a) : ``}</span>`
+      ? `<span class="ob-ship is-out">${renderIcon(`truck`)}${escapeHtml(e.carrier ? e.carrier.split(` `)[0] ?? `` : `VRL`)} · ${a ? formatRelativeTime(a) : ``}</span>`
       : `<span class="ob-ship${i ? ` is-late` : ``}">${renderIcon(i ? `alert` : `clock`)}${i ? `Late · ${escapeHtml(formatRelativeDay(e.shipBy))}` : `Ship ${/^[a-z]/.test(Ke(e.shipBy)) ? `` : `by `}${escapeHtml(Ke(e.shipBy))}`}</span>`;
   return `<article class="ob-card" data-key="${e.id}" data-id="${e.id}" tabindex="0" aria-roledescription="draggable order" aria-label="${escapeHtml(`${e.number}, ${r?.name ?? ``}, ${formatMoneyRound(getOrderTotal(e))}, ${ORDER_STATUS_META[e.status].name}${i ? `, late` : ``}`)}" aria-describedby="ob-help">
-    <div class="ob-card__top"><span class="mono ob-card__no">${escapeHtml(e.number)}</span>${He(e.channel)}</div>
+    <div class="ob-card__top"><span class="mono ob-card__no">${escapeHtml(e.number)}</span>${He(e)}</div>
     <div class="ob-card__who">${renderAvatar(e.customerId, `sm`)}<b>${escapeHtml(r?.name ?? `Unknown`)}</b></div>
     <div class="ob-card__mid">${qe(e, 4)}<span class="ob-card__fig"><small>${pluralize(findBatchByLotNumber(e), `unit`)}</small><b>${formatMoneyRound(getOrderTotal(e))}</b></span></div>
     <div class="ob-card__foot">${o}${e.paid ? `` : `<span class="ob-unpaid" title="Awaiting payment">${renderIcon(`dollar`)}</span>`}</div>
@@ -804,7 +946,7 @@ function Ot(e) {
 }
 function kt() {
   let e = P(`board`);
-  e.innerHTML = `<header class="head"><div class="head__lead"><div class="head__text"><p class="head__eyebrow">Pick, pack and ship — drag a card to move it on</p><h1 class="head__title" tabindex="-1">Order board</h1></div></div>
+  e.innerHTML = `<header class="head"><div class="head__lead"><div class="head__text"><p class="head__eyebrow">Pick, pack and ship â€” drag a card to move it on</p><h1 class="head__title" tabindex="-1">Order board</h1></div></div>
       <div class="head__actions">${renderSegmentedControl(
         `Channel`,
         [
@@ -900,7 +1042,7 @@ function Mt(e) {
   if (!r) {
     i.innerHTML =
       J === `all`
-        ? `${renderIcon(`sparkle`)}<span><b>The floor is clear.</b> Every order is out the door — new ones land in the first lane.</span>`
+        ? `${renderIcon(`sparkle`)}<span><b>The floor is clear.</b> Every order is out the door â€” new ones land in the first lane.</span>`
         : `${renderIcon(`filter`)}<span><b>No ${Ve[J].toLowerCase()} orders in progress.</b> ${J === `studio` ? `Studio sales are handed over at the till, so they skip the board.` : `Switch the channel back to All to see the rest.`}</span><button type="button" class="btn btn--ghost btn--xs" data-k="b-all">Show all</button>`;
   }
   queryOne(`[data-k="b-all"]`, i)?.addEventListener(`click`, () => {
@@ -1395,7 +1537,7 @@ function Xt() {
       key: `refund`,
       icon: `dollar`,
       ico: `teal`,
-      label: `Refunded · 30 days`,
+      label: `Refunded Â· 30 days`,
       value: n.reduce((acc, item) => acc + item.refund, 0),
       fmt: `money2`,
     },
@@ -1403,14 +1545,14 @@ function Xt() {
       key: `restock`,
       icon: `box`,
       ico: `sage`,
-      label: `Units restocked · 30 days`,
+      label: `Units restocked Â· 30 days`,
       value: i.reduce((acc, item) => acc + item.qty, 0),
     },
     {
       key: `rate`,
       icon: `trendDown`,
       ico: `ochre`,
-      label: `Return rate · 90 days`,
+      label: `Return rate Â· 90 days`,
       value: a.rate,
       fmt: `pct1`,
       badge: a.rate <= 0.03 ? `Under target` : `Over 3% target`,
@@ -1443,9 +1585,9 @@ function Qt(e, n) {
   return `<div class="rt-row" data-key="${e.id}">
     ${r ? renderProductThumb(r, `md`) : ``}
     <span class="rt-main"><a class="rt-name" href="/orders/returns/${e.id}">${highlightSearchMatch(r ? formatProductFullName(r) : `Product`, n)}</a>
-      <small><span class="mono">${highlightSearchMatch(e.number, n)}</span> · ${i ? `<a class="ref rt-ord" href="/orders/all/${i.id}">${highlightSearchMatch(i.number, n)}</a>` : ``} · ${highlightSearchMatch(a?.name ?? ``, n)}</small>
+      <small><span class="mono">${highlightSearchMatch(e.number, n)}</span> Â· ${i ? `<a class="ref rt-ord" href="/orders/all/${i.id}">${highlightSearchMatch(i.number, n)}</a>` : ``} Â· ${highlightSearchMatch(a?.name ?? ``, n)}</small>
       <span class="rt-reason">${renderIcon(`info`)}${highlightSearchMatch(e.reason, n)}</span></span>
-    <span class="rt-amt"><small>Refund · ${formatInt(e.qty)} ${e.qty === 1 ? `unit` : `units`}</small><b>${formatMoney(e.refund)}</b></span>
+    <span class="rt-amt"><small>Refund Â· ${formatInt(e.qty)} ${e.qty === 1 ? `unit` : `units`}</small><b>${formatMoney(e.refund)}</b></span>
     <span class="rt-st">${renderPill(RETURN_STATUS_NAMES[e.status], RETURN_STATUS_TONES[e.status])}<small>${escapeHtml(formatRelativeTime(e.createdAt))}</small></span>
     <span class="rt-acts">${s || `<span class="rt-done">${renderIcon(e.status === `rejected` ? `close` : `check`)}${e.status === `rejected` ? `Closed` : `Done`}</span>`}</span>
   </div>`;
@@ -1453,14 +1595,14 @@ function Qt(e, n) {
 function $t() {
   let e = P(`returns`);
   e.innerHTML = `${renderPageHeader({
-    eyebrow: `Back from customers — check it, then restock or refund`,
+    eyebrow: `Back from customers â€” check it, then restock or refund`,
     title: `Returns`,
     stats: Xt(),
   })}
     <div class="rt-grid">
       <section class="card rt-card" aria-label="Returns">
         <div class="toolbar"><div class="chips" data-k="r-st" role="group" aria-label="Status"></div><span class="toolbar__spacer"></span>
-          <label class="search rt-search">${renderIcon(`search`)}<input type="search" placeholder="RMA, order, product or reason…" aria-label="Search returns" data-k="r-q" /></label></div>
+          <label class="search rt-search">${renderIcon(`search`)}<input type="search" placeholder="RMA, order, product or reasonâ€¦" aria-label="Search returns" data-k="r-q" /></label></div>
         <div class="rt-list" data-k="r-list"></div>
       </section>
       <aside class="card rt-side" aria-labelledby="rr-t">
@@ -1586,7 +1728,7 @@ function tn(e) {
     getAvailableSuppliers(i);
   }
   en = n.rate;
-  F(`r-rate-sub`).innerHTML = `${pluralize(n.n, `return`)} · ${pluralize(n.sent, `order`)} shipped`;
+  F(`r-rate-sub`).innerHTML = `${pluralize(n.n, `return`)} Â· ${pluralize(n.sent, `order`)} shipped`;
   gsap.to(F(`r-rate-fill`), {
     scaleX: Math.max(0.02, Math.min(1, n.rate / 0.05)),
     duration: motionDuration(e ? 0.7 : 1.1),
@@ -1650,7 +1792,7 @@ function nn() {
 function rn(e) {
   let n = findProductById(e.productId);
   let r = findOrderById(e.orderId);
-  let i = r ? findCustomerById(r.customerId) : undefined;
+  let i = r ? resolveCustomerOrDealer(r.customerId) : undefined;
   let a = [
     `requested`,
     `received`,
@@ -1660,21 +1802,21 @@ function rn(e) {
   return `<header class="d-head">${n ? renderProductThumb(n, `lg`) : ``}<div><h2>${escapeHtml(e.number)}</h2><small>${n ? escapeHtml(formatProductFullName(n)) : ``}</small></div></header>
     <div class="d-pills" data-ds="pills">${renderPill(RETURN_STATUS_NAMES[e.status], RETURN_STATUS_TONES[e.status])}${renderPill(e.reason, `slate`, `info`)}</div>
     <div class="rd-path${e.status === `rejected` ? ` is-rejected` : ``}" data-ds="path">${a.map((e, t) => `<span class="rd-path__step${t < s || (t === s && t === 2) ? ` is-done` : t === s ? ` is-cur` : ``}"><i>${renderIcon(t < s || (t === s && t === 2) ? `check` : e === `requested` ? `return` : e === `received` ? `inbox` : e === `restocked` ? `box` : `dollar`)}</i>${t === 2 && s < 2 ? `Restock or refund` : RETURN_STATUS_NAMES[e]}</span>`).join(`<span class="rd-path__bar" aria-hidden="true"></span>`)}</div>
-    ${e.status === `rejected` ? `<p class="note">${renderIcon(`info`)}<span>Rejected — the customer was told why and nothing went back on the shelf.</span></p>` : ``}
+    ${e.status === `rejected` ? `<p class="note">${renderIcon(`info`)}<span>Rejected â€” the customer was told why and nothing went back on the shelf.</span></p>` : ``}
     <div class="d-facts">
       <div><small>Quantity</small><b>${formatInt(e.qty)}</b><span>${r?.channel === `wholesale` ? `One inner carton` : `Single unit`}</span></div>
       <div><small>Refund</small><b>${formatMoney(e.refund)}</b><span>${e.status === `refunded` ? `Paid back` : `At the price paid`}</span></div>
-      <div><small>Order</small><b>${r ? `<a class="rd-link mono" href="/orders/all/${r.id}">${escapeHtml(r.number)}</a>` : `—`}</b><span>${r ? escapeHtml(formatDate(r.createdAt, true)) : ``}</span></div>
+      <div><small>Order</small><b>${r ? `<a class="rd-link mono" href="/orders/all/${r.id}">${escapeHtml(r.number)}</a>` : `â€”`}</b><span>${r ? escapeHtml(formatDate(r.createdAt, true)) : ``}</span></div>
       <div><small>Requested</small><b>${escapeHtml(formatRelativeTime(e.createdAt))}</b><span>${escapeHtml(renderNotificationItem(e.createdAt))}</span></div>
     </div>
     ${i ? `<section class="d-sec"><h3>Customer</h3><a class="row od-cust" href="${We(i)}">${renderAvatar(i.id, `md`)}<span class="row__txt"><b>${escapeHtml(i.name)}</b><small>${escapeHtml(i.email)}</small></span>${renderIcon(`chevR`, `row__go`)}</a></section>` : ``}
-    ${n ? `<section class="d-sec"><h3>Product</h3><a class="row od-cust" href="/products/item/${n.id}">${renderProductThumb(n, `md`)}<span class="row__txt"><b>${escapeHtml(n.name)}</b><small>${escapeHtml(n.size)} · <span class="mono">${escapeHtml(n.sku)}</span> · ${formatInt(n.stock.dc ?? 0)} at the DC</small></span>${renderIcon(`chevR`, `row__go`)}</a></section>` : ``}
+    ${n ? `<section class="d-sec"><h3>Product</h3><a class="row od-cust" href="/products/item/${n.id}">${renderProductThumb(n, `md`)}<span class="row__txt"><b>${escapeHtml(n.name)}</b><small>${escapeHtml(n.size)} Â· <span class="mono">${escapeHtml(n.sku)}</span> Â· ${formatInt(n.stock.dc ?? 0)} at the DC</small></span>${renderIcon(`chevR`, `row__go`)}</a></section>` : ``}
     <footer class="d-actions" data-ds="acts">${Zt(e, `btn--sm`) || `<p class="od-closed">${renderIcon(`check`)}Nothing left to do on this return.</p>`}</footer>`;
 }
 function an(e) {
   let t = store.returns.find((t) => t.id === e);
   if (!t) {
-    showToast(`That return isn’t on file`, {
+    showToast(`That return isnâ€™t on file`, {
       ico: `alert`,
     });
     history.replaceState(null, ``, `/orders/returns`);
@@ -1747,8 +1889,12 @@ function sn(e) {
       vt();
     } else if (e === `board`) {
       kt();
-    } else {
+    } else if (e === `returns`) {
       $t();
+    } else if (e === `payments`) {
+      renderPaymentsSubtab(P(`payments`));
+    } else if (e === `shipments`) {
+      renderShipmentsSubtab(P(`shipments`));
     }
   }
   if (e === `all`) {
@@ -1760,9 +1906,13 @@ function sn(e) {
     Mt(false);
     Nt();
     initLiftAnimations(P(`board`));
-  } else {
+  } else if (e === `returns`) {
     $(false);
     nn();
+  } else if (e === `payments`) {
+    renderPaymentsSubtab(P(`payments`));
+  } else if (e === `shipments`) {
+    renderShipmentsSubtab(P(`shipments`));
   }
 }
 function cn(e, t) {
@@ -1782,9 +1932,12 @@ export const page = {
   title: (e) =>
     ({
       board: `Order board`,
-      returns: `Returns`,
+      returns: `Returns & RMA`,
+      payments: `Payment Management & Audit`,
+      shipments: `Courier & Logistics Management`,
     })[e[0] ?? ``] ?? (e[1] ? `Order ${findOrderById(e[1])?.number ?? ``}` : `All orders`),
   mount(e) {
+    ensureAgroOrders();
     N = e;
     N.innerHTML = Le.map((e) => `<div data-sub="${e}" hidden></div>`).join(``);
     findLocationById(`orders`, () => {

@@ -970,3 +970,310 @@
   color: var(--muted);
   font-weight: 600;
 }
+
+
+/* ============================================================
+   VELS AGRO MACHINERY CATALOG ENHANCEMENTS
+   ============================================================ */
+.pcard--agro {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pcard--agro:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.12);
+  border-color: var(--line-2, #cbd5e1);
+}
+
+.pcard-gst-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+
+.pcard-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.pcard-brand {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary, #009140);
+}
+
+.pcard-sku {
+  font-size: 11px;
+  color: var(--muted, #64748b);
+}
+
+.pcard-title-link {
+  color: var(--text, #0f172a);
+  text-decoration: none;
+  font-size: 14.5px;
+  line-height: 1.35;
+  margin: 2px 0 6px;
+  display: block;
+}
+
+.pcard-title-link:hover {
+  color: var(--primary, #009140);
+}
+
+.pcard-tags-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.pcard-specs-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 6px 0 8px;
+}
+
+.pcard-spec-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2.5px 7px;
+  border-radius: 6px;
+  background: var(--surface-2, #f1f5f9);
+  border: 1px solid var(--line, #e2e8f0);
+  color: var(--text, #334155);
+}
+
+.pcard-spec-chip svg, .pcard-spec-chip .ico {
+  width: 12px;
+  height: 12px;
+}
+
+.pcard-spec-chip.hp-chip {
+  background: rgba(0, 145, 64, 0.08);
+  border-color: rgba(0, 145, 64, 0.25);
+  color: #009140;
+}
+
+.pcard-spec-chip.drive-chip {
+  background: rgba(2, 132, 199, 0.08);
+  border-color: rgba(2, 132, 199, 0.25);
+  color: #0284c7;
+}
+
+.pcard-spec-chip.hitch-chip {
+  background: rgba(217, 119, 6, 0.08);
+  border-color: rgba(217, 119, 6, 0.25);
+  color: #d97706;
+}
+
+.pcard-spec-chip.pto-chip {
+  background: rgba(143, 31, 120, 0.08);
+  border-color: rgba(143, 31, 120, 0.25);
+  color: #8f1f78;
+}
+
+.pcard-compat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  margin: 4px 0 8px;
+  padding: 4px 6px;
+  background: var(--surface-2, #f8fafc);
+  border-radius: 6px;
+  border: 1px dashed var(--line, #e2e8f0);
+}
+
+.pcard-compat-label {
+  font-weight: 700;
+  color: var(--muted, #64748b);
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.pcard-compat-tags {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.compat-pill {
+  white-space: nowrap;
+  font-size: 10.5px;
+  color: var(--text, #334155);
+}
+
+.compat-more {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted, #64748b);
+}
+
+.pcard-price-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line, #e2e8f0);
+}
+
+.pcard-price-main {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.pcard-price-curr {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text, #0f172a);
+}
+
+.pcard-price-mrp {
+  font-size: 12px;
+  text-decoration: line-through;
+  color: var(--muted, #94a3b8);
+}
+
+.pcard-price-disc {
+  font-size: 10px;
+  font-weight: 700;
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.1);
+  padding: 1.5px 5px;
+  border-radius: 4px;
+}
+
+.pcard-dealer-price {
+  font-size: 11px;
+  color: var(--muted, #64748b);
+}
+
+.pcard-dealer-price b {
+  color: var(--text, #0f172a);
+  font-weight: 600;
+}
+
+/* Item Detail Enhancements */
+.pi-specs-card {
+  margin-top: 16px;
+  padding: 20px;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: var(--r-card, 16px);
+}
+
+.pi-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.pi-spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pi-spec-item dt {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted, #64748b);
+  letter-spacing: 0.03em;
+}
+
+.pi-spec-item dd {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text, #0f172a);
+  margin: 0;
+}
+
+/* Add / Edit Product Dialog */
+.agro-prod-dialog {
+  max-width: 680px;
+  width: min(680px, 94vw);
+}
+
+:root[data-theme="dark"] .pcard-spec-chip {
+  background: #1a271f;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .pcard-spec-chip.hp-chip {
+  background: rgba(0, 145, 64, 0.2);
+  border-color: rgba(0, 145, 64, 0.4);
+  color: #4ade80;
+}
+
+:root[data-theme="dark"] .pcard-spec-chip.drive-chip {
+  background: rgba(2, 132, 199, 0.2);
+  border-color: rgba(2, 132, 199, 0.4);
+  color: #38bdf8;
+}
+
+:root[data-theme="dark"] .pcard-compat {
+  background: #141f18;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="dark"] .pcard-price-row {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .pcard-price-curr {
+  color: #f8fafc;
+}
+
+:root[data-theme="dark"] .pcard-dealer-price b {
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .pi-specs-card {
+  background: #141f18;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .pi-spec-item dd {
+  color: #f1f5f9;
+}
+
+
+/* Fix CSS Grid collision on agro pcard name */
+.pcard--agro .pcard__name {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  grid-template-columns: none !important;
+}
+
+.pcard--agro .pcard__cat {
+  grid-area: auto !important;
+  align-self: flex-start;
+}

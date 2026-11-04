@@ -1,6 +1,7 @@
 import { domQuery, domQueryAll } from '../../utils/dom';
 import { subscribeToStore, findCustomerById } from '../../core/store';
 import type { FeaturePage } from '../../types/common';
+import '../promotions/promotions.css';
 import {
   mountStockistsSubtab,
   renderStockistsList,
@@ -18,12 +19,13 @@ import {
   refreshActiveDrawer,
   closeActiveCustomerDrawer,
 } from './components/customer-drawer';
+import { renderFarmersSubtab } from './subtabs/farmers';
 
-const SUBTABS = ['stockists', 'shoppers'] as const;
+const SUBTABS = ['farmers', 'stockists', 'shoppers'] as const;
 type CustomerSubtab = (typeof SUBTABS)[number];
 
 let pageContainer: HTMLElement | null = null;
-let activeSubtab: CustomerSubtab = 'stockists';
+let activeSubtab: CustomerSubtab = 'farmers';
 const mountedSubtabs = new Set<CustomerSubtab>();
 
 function getSubtabContainer(subtab: CustomerSubtab): HTMLElement {
@@ -43,7 +45,9 @@ function activateSubtab(subtab: CustomerSubtab): void {
   if (!mountedSubtabs.has(subtab)) {
     mountedSubtabs.add(subtab);
     const subContainer = getSubtabContainer(subtab);
-    if (subtab === 'stockists') {
+    if (subtab === 'farmers') {
+      renderFarmersSubtab(subContainer);
+    } else if (subtab === 'stockists') {
       mountStockistsSubtab(subContainer);
     } else {
       mountShoppersSubtab(subContainer);
@@ -51,7 +55,9 @@ function activateSubtab(subtab: CustomerSubtab): void {
   }
 
   const currentContainer = getSubtabContainer(subtab);
-  if (subtab === 'stockists') {
+  if (subtab === 'farmers') {
+    renderFarmersSubtab(currentContainer);
+  } else if (subtab === 'stockists') {
     updateStockistHeaderKpis(currentContainer);
     renderStockistsList(false);
     animateStockistsSubtabEnter(currentContainer);
@@ -64,7 +70,9 @@ function activateSubtab(subtab: CustomerSubtab): void {
 
 export const page: FeaturePage = {
   title(params = []) {
-    const baseTitle = params[0] === 'shoppers' ? 'Shoppers' : 'Stockists';
+    const sub = params[0] ?? 'farmers';
+    if (sub === 'farmers') return 'Farmers Database';
+    const baseTitle = sub === 'shoppers' ? 'Shoppers' : 'Stockists';
     const customer = params[1] ? findCustomerById(params[1]) : null;
     return customer ? `${baseTitle} · ${customer.name}` : baseTitle;
   },
@@ -74,7 +82,9 @@ export const page: FeaturePage = {
     pageContainer.innerHTML = SUBTABS.map((sub) => `<div data-sub="${sub}" hidden></div>`).join('');
 
     const onStoreChange = () => {
-      if (isSubtabVisible('stockists')) {
+      if (isSubtabVisible('farmers')) {
+        renderFarmersSubtab(getSubtabContainer('farmers'));
+      } else if (isSubtabVisible('stockists')) {
         updateStockistHeaderKpis(getSubtabContainer('stockists'));
         renderStockistsList(true);
       } else if (isSubtabVisible('shoppers')) {

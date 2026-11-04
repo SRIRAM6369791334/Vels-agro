@@ -19,6 +19,15 @@ export const ROUTES_CONFIG: Record<string, RouteMeta> = {
       ['alerts', 'Alerts'],
     ],
   },
+  categories: {
+    label: 'Categories',
+    icon: 'grid',
+    subs: [
+      ['list', 'Main Categories'],
+      ['sub', 'Sub-categories'],
+      ['brands', 'Brand Compatibility'],
+    ],
+  },
   products: {
     label: 'Products',
     icon: 'box',
@@ -34,6 +43,8 @@ export const ROUTES_CONFIG: Record<string, RouteMeta> = {
       ['all', 'All orders'],
       ['board', 'Board'],
       ['returns', 'Returns'],
+      ['payments', 'Payments'],
+      ['shipments', 'Shipments'],
     ],
   },
   purchasing: {
@@ -54,6 +65,25 @@ export const ROUTES_CONFIG: Record<string, RouteMeta> = {
       ['counts', 'Counts'],
     ],
   },
+  dealers: {
+    label: 'Dealers',
+    icon: 'store',
+    subs: [
+      ['locations', 'Dealer Locations'],
+      ['transfers', 'Dealer Transfers'],
+      ['counts', 'Dealer Counts'],
+    ],
+  },
+  promotions: {
+    label: 'Promotions',
+    icon: 'tag',
+    subs: [
+      ['coupons', 'Coupon Codes'],
+      ['discounts', 'Product & Category Offers'],
+      ['dealers', 'Dealer Special Schemes'],
+      ['banners', 'Banners & Featured'],
+    ],
+  },
   analytics: {
     label: 'Analytics',
     icon: 'chart',
@@ -67,6 +97,7 @@ export const ROUTES_CONFIG: Record<string, RouteMeta> = {
     label: 'Customers',
     icon: 'users',
     subs: [
+      ['farmers', 'Farmers Database'],
       ['stockists', 'Stockists'],
       ['shoppers', 'Shoppers'],
     ],
@@ -122,6 +153,22 @@ export function parseRoute(input: string): { name: string; params: string[] } {
 
   if (section === 'login') {
     return { name: 'login', params: [] };
+  }
+
+  if (section === 'payments') {
+    return { name: 'orders', params: ['payments', ...rest] };
+  }
+
+  if (section === 'shipments') {
+    return { name: 'orders', params: ['shipments', ...rest] };
+  }
+
+  if (section === 'offers') {
+    return { name: 'promotions', params: ['coupons', ...rest] };
+  }
+
+  if (section === 'farmers') {
+    return { name: 'customers', params: ['farmers', ...rest] };
   }
 
   if (!section || !KNOWN_ROUTE_NAMES.includes(section)) {

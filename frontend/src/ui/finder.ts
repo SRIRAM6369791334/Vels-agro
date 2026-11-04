@@ -22,10 +22,12 @@ export function querySearchIndex(query: string): SearchResult[] {
   // 1. Pages / Navigation
   const pages: { label: string; meta: string; href: string }[] = [
     { label: 'Dashboard', meta: 'Overview, analytics & KPIs', href: '#/dashboard/overview' },
+    { label: 'Categories', meta: 'Machinery categories, sub-categories & compatibility matrix', href: '#/categories/list' },
     { label: 'Products', meta: 'Catalog & formulation BOMs', href: '#/products/catalog' },
     { label: 'Orders', meta: 'Sales orders & Kanban board', href: '#/orders/board' },
     { label: 'Purchasing', meta: 'Purchase orders, suppliers & raw materials', href: '#/purchasing/orders' },
     { label: 'Warehouses', meta: 'Locations, transfers & cycle counts', href: '#/warehouses/locations' },
+    { label: 'Dealers', meta: 'Dealer network, registrations, pricing & inventory', href: '#/dealers/locations' },
     { label: 'Analytics', meta: 'Reports, revenue & stock velocity', href: '#/analytics/overview' },
     { label: 'Customers', meta: 'Stockists, retail shoppers & RFM ledger', href: '#/customers/stockists' },
     { label: 'Settings', meta: 'Account, team roles, billing & alerts', href: '#/settings/account' },

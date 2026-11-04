@@ -227,14 +227,15 @@ export function updateAlertsGroups(container: HTMLElement, isAnimate = false): v
       items: expiring.map((batch: any) => {
         const prod = findProductById(batch.productId);
         const days = daysUntilExpiry(batch);
+        const prodTitle = prod ? formatProductFullName(prod) : (batch.productName || 'Agro Machinery');
         return `<div class="row al-item" data-key="e-${batch.id}">
           ${renderProductThumb(prod, 'md')}
           <span class="row__txt">
-            <b>${escapeHtml(formatProductFullName(prod))} <span class="mono al-lot">${escapeHtml(batch.lot)}</span></b>
+            <b>${escapeHtml(prodTitle)} <span class="mono al-lot">${escapeHtml(batch.lot)}</span></b>
             <small>${batch.left} left · expires ${formatDate(batch.expiresAt, true)} (${days <= 0 ? 'expired' : `in ${pluralize(days, 'day')}`})</small>
           </span>
           <span class="al-acts">
-            ${actionBtn(`move:${prod?.id}`, 'Sell at the shop', 'store', 'btn--soft')}
+            ${actionBtn(`move:${prod?.id || ''}`, 'Sell at the shop', 'store', 'btn--soft')}
             ${actionBtn(`hold:${batch.id}`, 'Hold', 'pause')}
           </span>
         </div>`;
@@ -249,11 +250,12 @@ export function updateAlertsGroups(container: HTMLElement, isAnimate = false): v
       items: qaBatches.map((batch: any) => {
         const prod = findProductById(batch.productId);
         const chemist = findMemberById(batch.chemistId);
+        const prodTitle = prod ? formatProductFullName(prod) : (batch.productName || 'Agro Machinery');
         return `<div class="row al-item" data-key="q-${batch.id}">
           ${renderProductThumb(prod, 'md')}
           <span class="row__txt">
-            <b>${escapeHtml(formatProductFullName(prod))} <span class="mono al-lot">${escapeHtml(batch.lot)}</span></b>
-            <small>${batch.qty} units · made ${formatRelativeTime(batch.madeAt)} by ${escapeHtml(chemist?.name ?? '')}${batch.note ? ` · ${escapeHtml(batch.note)}` : ''}</small>
+            <b>${escapeHtml(prodTitle)} <span class="mono al-lot">${escapeHtml(batch.lot)}</span></b>
+            <small>${batch.qty} units · made ${formatRelativeTime(batch.madeAt)} by ${escapeHtml(chemist?.name ?? 'QC Inspector')}${batch.note ? ` · ${escapeHtml(batch.note)}` : ''}</small>
           </span>
           <span class="al-acts">
             ${actionBtn(`release:${batch.id}`, 'Release', 'shield', 'btn--primary')}
