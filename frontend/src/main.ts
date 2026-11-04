@@ -4454,6 +4454,15 @@ var Lu = `modulepreload`,
         [`banners`, `Banners & Featured`],
       ],
     },
+    reviews: {
+      label: `Reviews`,
+      icon: `star`,
+      subs: [
+        [`all`, `All Reviews`],
+        [`products`, `Product Ratings`],
+        [`feedback`, `Customer Feedback`],
+      ],
+    },
     analytics: {
       label: `Analytics`,
       icon: `chart`,
@@ -4509,6 +4518,7 @@ var Lu = `modulepreload`,
     warehouses: () => import(`./features/warehouses/warehouses.ts`),
     dealers: () => import(`./features/dealers/dealers.ts`),
     promotions: () => import(`./features/promotions/promotions.ts`),
+    reviews: () => import(`./features/reviews/reviews.ts`),
     analytics: () => import(`./features/analytics/analytics.ts`),
     customers: () => import(`./features/customers/customers.ts`),
     settings: () => import(`./features/settings/settings.ts`),
@@ -4522,6 +4532,7 @@ function Gu(e) {
   if (t === `shipments`) return { name: `orders`, params: [`shipments`, ...n] };
   if (t === `offers`) return { name: `promotions`, params: [`coupons`, ...n] };
   if (t === `farmers`) return { name: `customers`, params: [`farmers`, ...n] };
+  if (t === `ratings`) return { name: `reviews`, params: [`products`, ...n] };
   if (!Hu.includes(t)) return { name: `dashboard`, params: [`overview`] };
   let r = Vu[t],
     i = r.subs.some(([e]) => e === n[0]) || (t === `products` && n[0] === `item`);

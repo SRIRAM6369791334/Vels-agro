@@ -84,6 +84,15 @@ export const ROUTES_CONFIG: Record<string, RouteMeta> = {
       ['banners', 'Banners & Featured'],
     ],
   },
+  reviews: {
+    label: 'Reviews',
+    icon: 'star',
+    subs: [
+      ['all', 'All Reviews'],
+      ['products', 'Product Ratings'],
+      ['feedback', 'Customer Feedback'],
+    ],
+  },
   analytics: {
     label: 'Analytics',
     icon: 'chart',
@@ -168,6 +177,10 @@ export function parseRoute(input: string): { name: string; params: string[] } {
 
   if (section === 'farmers') {
     return { name: 'customers', params: ['farmers', ...rest] };
+  }
+
+  if (section === 'ratings') {
+    return { name: 'reviews', params: ['products', ...rest] };
   }
 
   if (!section || !KNOWN_ROUTE_NAMES.includes(section)) {

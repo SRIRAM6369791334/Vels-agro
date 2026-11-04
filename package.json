@@ -1,0 +1,10 @@
+{
+  "name": "vels-agro-admin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vels Agro Enterprise Admin Application - Static SPA",
+  "scripts": {
+    "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "start": "npm --prefix frontend run preview"
+  }
+}

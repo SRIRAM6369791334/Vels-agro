@@ -340,7 +340,7 @@ function bindTableActions(container: HTMLElement): void {
       if (f) {
         f.isActive = checkbox.checked;
         saveStoredFarmers(farmers);
-        showToast(`Farmer account for ${f.name} is now ${f.isActive ? 'Active' : 'Deactivated'}.`);
+        showToast(`Customer account for ${f.name} is now ${f.isActive ? 'Active' : 'Deactivated'}.`);
       }
     });
   });
@@ -363,7 +363,7 @@ function updateView(): void {
 }
 
 function exportFarmersCsv(): void {
-  const headers = ['Farmer Name', 'Phone', 'Village', 'District', 'State', 'Landholding (Acres)', 'Soil Type', 'Primary Crops', 'Machinery Owned', 'Total Spent (INR)', 'Orders Count', 'KYC Verified', 'Patta Passbook No'];
+  const headers = ['Customer Name', 'Phone', 'Village', 'District', 'State', 'Landholding (Acres)', 'Soil Type', 'Primary Crops', 'Machinery Owned', 'Total Spent (INR)', 'Orders Count', 'KYC Verified', 'Patta Passbook No'];
   const rows = farmers.map((f) => [
     `"${f.name}"`,
     f.phone,
@@ -385,11 +385,11 @@ function exportFarmersCsv(): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `Vels_Agro_Farmers_Directory_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `Vels_Agro_Customers_Directory_${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  showToast('Farmers Directory exported to CSV.');
+  showToast('Customers Directory exported to CSV.');
 }
 
 function openFarmerProfileModal(f: FarmerCustomer): void {
@@ -399,7 +399,7 @@ function openFarmerProfileModal(f: FarmerCustomer): void {
     <div class="promo-modal__header">
       <h3>
         <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8.5" r="3.5"/><path d="M3 19.5c.6-3.2 3-5 6-5s5.4 1.8 6 5"/></svg>
-        Farmer Dossier — ${escapeHtml(f.name)}
+        Customer Dossier — ${escapeHtml(f.name)}
       </h3>
       <button type="button" class="promo-modal__close" data-close>&times;</button>
     </div>
@@ -513,7 +513,7 @@ function openRegisterFarmerModal(): void {
     <div class="promo-modal__header">
       <h3>
         <svg class="ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Register Farmer Direct Account
+        Register Customer Account
       </h3>
       <button type="button" class="promo-modal__close" data-close>&times;</button>
     </div>
@@ -521,7 +521,7 @@ function openRegisterFarmerModal(): void {
       <form id="farmer-register-form">
         <div class="promo-form-grid">
           <div class="promo-field">
-            <label>Farmer Full Name *</label>
+            <label>Customer Full Name *</label>
             <input type="text" id="rf-name" placeholder="Thangavelu K." required />
           </div>
           <div class="promo-field">
@@ -566,7 +566,7 @@ function openRegisterFarmerModal(): void {
     <div class="promo-modal__footer">
       <button type="button" class="btn btn--ghost" data-close>Cancel</button>
       <button type="submit" form="farmer-register-form" class="btn btn--primary">
-        Register Farmer & Issue Dossier
+        Register Customer & Issue Dossier
       </button>
     </div>
   `;
@@ -621,14 +621,14 @@ function openRegisterFarmerModal(): void {
         kycVerified: !!patta,
         registeredDate: Date.now(),
         soilType: soil,
-        notes: 'Newly registered farmer direct customer; scheduled for field survey.',
+        notes: 'Newly registered customer; scheduled for field survey.',
       };
 
       farmers.unshift(newFarmer);
       saveStoredFarmers(farmers);
       modal.close();
       modal.remove();
-      showToast(`Farmer ${name} registered successfully with ${acres} acres holding!`);
+      showToast(`Customer ${name} registered successfully with ${acres} acres holding!`);
       updateView();
     });
   }
