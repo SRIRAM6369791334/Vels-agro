@@ -3,18 +3,24 @@ import pool from '../config/db.js';
 const LOCKOUT_THRESHOLD = 5; // 5 failed attempts
 const LOCKOUT_WINDOW_MINUTES = 15; // 15-minute window
 
-export const checkLockout = async (email, ipAddress) => {
+export const checkLockout = async (email, ipAddress, userType = null) => {
   try {
-    const query = `
+    let query = `
       SELECT COUNT(*) as failed_count, MAX(attempted_at) as last_attempt
       FROM login_attempts
       WHERE email = ? 
         AND ip_address = ? 
         AND is_successful = FALSE
-        AND attempted_at > (NOW() - INTERVAL ? MINUTE);
+        AND attempted_at > (NOW() - INTERVAL ? MINUTE)
     `;
+    const params = [email, ipAddress, LOCKOUT_WINDOW_MINUTES];
 
-    const [rows] = await pool.query(query, [email, ipAddress, LOCKOUT_WINDOW_MINUTES]);
+    if (userType) {
+      query += ` AND user_type = ?`;
+      params.push(userType);
+    }
+
+    const [rows] = await pool.query(query, params);
     const failedCount = rows[0]?.failed_count || 0;
 
     if (failedCount >= LOCKOUT_THRESHOLD) {

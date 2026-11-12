@@ -51,6 +51,16 @@
 - [x] Implemented Dashboard Users Module (`/api/v1/admin/dashboard-users`): CRUD, Manual Password Reset, Status Toggle
 - [x] Implemented Roles & Permissions Module (`/api/v1/admin/roles`): Role CRUD, System Role protection, 16 Permissions catalog
 - [x] Implemented Audit Logs & Security Module (`/api/v1/admin/audit-logs`, `/api/v1/admin/login-attempts`)
+- [x] Integrated industry-standard Zod Schema Validation (`zod`) across all API routes:
+  - Strict type checking (rejecting strings for booleans/numbers)
+  - Clear user-friendly validation error arrays returning `statusCode: 400`
+  - URL parameter validation (numeric ID checking)
+- [x] Intercepted malformed JSON syntax errors in global middleware (no more leaking body-parser internal stack traces)
+- [x] Hardened `toggleUserStatus` validation to explicitly require boolean (`true` or `false`) with human-friendly error messages
+- [x] Eliminated all hardcoded fallback strings (`||`) and created strict centralized environment validator (`src/config/env.js`)
+- [x] Configured and verified JWT secrets strictly from `.env` and `.env.example`:
+  - `JWT_SECRET=vels_agro_super_secure_jwt_secret_key_2026_xyz`
+  - `JWT_EXPIRES_IN=8h`
 - [x] Created comprehensive documentation in `API.md` with links, methods, request bodies, responses, and status codes
 - [x] Built and passed 100% automated test suite (`npm run test:api`) covering all 14 test scenarios!
 

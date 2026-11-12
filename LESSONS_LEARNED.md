@@ -52,3 +52,21 @@ This document records architectural decisions, potential production pitfalls ide
 ### 8. Sub-Millisecond Auth via InnoDB Covering Index
 - **Issue**: Querying the sessions table on every single HTTP API call causes high disk I/O and query latency under heavy concurrency.
 - **Resolution**: Implemented a composite covering index on `sessions (token_hash, is_revoked, expires_at, user_type, user_id)`. The database engine fulfills the entire auth middleware check directly from the index in the InnoDB Buffer Pool without scanning clustered data blocks.
+
+---
+
+### 9. Same-Second JWT Generation & Duplicate Token Hash Collision
+- **Issue**: When a user logs in twice within the same second (e.g., automated test suites, rapid re-authentication), `jwt.sign()` generates an identical string because default timestamp resolution (`iat`) is in seconds. This triggers a MySQL `ER_DUP_ENTRY` error on the unique `token_hash` index in `sessions`.
+- **Resolution**: Included a cryptographically random RFC-7519 `jti: crypto.randomUUID()` in every JWT payload. This ensures 100% entropy and uniqueness for every issued token regardless of concurrency.
+
+---
+
+### 10. Eliminating Insecure Hardcoded Fallbacks (Zero Fallback Secrets Policy)
+- **Issue**: Using default strings with logical OR (e.g. `process.env.JWT_SECRET || 'fallback_secret'`) in code violates production security standards (CWE-798). If an environment variable is omitted in production, the app silently boots with known default credentials.
+- **Resolution**: Implemented a centralized strict validator (`src/config/env.js`) with `requireEnv()`. If any required secret (`JWT_SECRET`, `DB_NAME`, `DB_USER`, `DB_HOST`, `SUPERADMIN_*`, etc.) is missing from `.env`, the server aborts execution immediately with a clear fatal error. Hardcoded fallbacks have been completely eradicated across the codebase.
+
+---
+
+### 11. Comprehensive Server-Side Schema Validation with Zod
+- **Issue**: Clients sending unexpected data types (e.g. strings instead of booleans, strings instead of numeric IDs, missing keys) caused unhandled runtime type errors or cryptic database exceptions.
+- **Resolution**: Integrated `zod` schema validators across all routes (`src/validators/`). An explicit validation middleware checks payloads before controllers execute, returning standardized `statusCode: 400` errors with exact field-level diagnostics (`{ field, message }`).

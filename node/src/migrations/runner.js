@@ -2,23 +2,21 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import mysql from 'mysql2/promise';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import env from '../config/env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DB_NAME = process.env.DB_NAME || 'DB-vels';
+const DB_NAME = env.DB.NAME;
 
 const baseConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  port: Number(process.env.DB_PORT) || 3306,
+  host: env.DB.HOST,
+  user: env.DB.USER,
+  password: env.DB.PASSWORD,
+  port: env.DB.PORT,
   multipleStatements: true,
-  ...(process.env.DB_SSL === 'true' && {
-    ssl: { rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false' }
+  ...(env.DB.SSL && {
+    ssl: { rejectUnauthorized: env.DB.SSL_REJECT_UNAUTHORIZED }
   })
 };
 

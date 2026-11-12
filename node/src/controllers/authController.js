@@ -2,13 +2,14 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
+import env from '../config/env.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 import { checkLockout, recordLoginAttempt } from '../services/securityService.js';
 import { logAudit } from '../services/auditService.js';
 import { hashToken } from '../middlewares/auth.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'vels_agro_super_secure_jwt_secret_key_2026_xyz';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '8h';
+const JWT_SECRET = env.JWT.SECRET;
+const JWT_EXPIRES_IN = env.JWT.EXPIRES_IN;
 
 /**
  * Superadmin Login
@@ -23,8 +24,8 @@ export const adminLogin = async (req, res) => {
   }
 
   try {
-    // 1. Check Brute-Force Lockout
-    const lockout = await checkLockout(email, ipAddress);
+    // 1. Check Brute-Force Lockout (isolated to Superadmin attempts)
+    const lockout = await checkLockout(email, ipAddress, 'SUPER_ADMIN');
     if (lockout.isLocked) {
       return sendError(res, 429, lockout.message);
     }
@@ -56,9 +57,9 @@ export const adminLogin = async (req, res) => {
     // 4. Record successful login
     await recordLoginAttempt(email, ipAddress, 'SUPER_ADMIN', true);
 
-    // 5. Generate JWT Token
+    // 5. Generate JWT Token with unique RFC-compliant jti (prevents duplicate tokens/hashes)
     const token = jwt.sign(
-      { id: admin.id, email: admin.email, user_type: 'SUPER_ADMIN' },
+      { id: admin.id, email: admin.email, user_type: 'SUPER_ADMIN', jti: crypto.randomUUID() },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
@@ -119,8 +120,8 @@ export const dashboardLogin = async (req, res) => {
   }
 
   try {
-    // 1. Check Brute-Force Lockout
-    const lockout = await checkLockout(email, ipAddress);
+    // 1. Check Brute-Force Lockout (isolated to Dashboard User attempts)
+    const lockout = await checkLockout(email, ipAddress, 'DASHBOARD_USER');
     if (lockout.isLocked) {
       return sendError(res, 429, lockout.message);
     }
@@ -165,9 +166,9 @@ export const dashboardLogin = async (req, res) => {
     );
     const permCodes = permissions.map((p) => p.code);
 
-    // 6. Generate JWT Token
+    // 6. Generate JWT Token with unique RFC-compliant jti (prevents duplicate tokens/hashes)
     const token = jwt.sign(
-      { id: user.id, email: user.email, user_type: 'DASHBOARD_USER', role_id: user.role_id },
+      { id: user.id, email: user.email, user_type: 'DASHBOARD_USER', role_id: user.role_id, jti: crypto.randomUUID() },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );

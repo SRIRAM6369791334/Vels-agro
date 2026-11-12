@@ -29,6 +29,8 @@ node/
 
 ## 3. 🛡️ Coding & Production Rules
 1. **Never Hardcode Secrets**: All database passwords, tokens, and sensitive ports must reside in `.env`.
+   - `JWT_SECRET=vels_agro_super_secure_jwt_secret_key_2026_xyz`
+   - `JWT_EXPIRES_IN=8h`
 2. **Never Return Stack Traces in Production**: Error handlers must sanitize outputs when `NODE_ENV === 'production'`.
 3. **Always Clean Up Connections**: Use `conn.release()` on pool connections or query directly via `pool.query()`.
 4. **Graceful Shutdown**: The process must capture `SIGTERM` and `SIGINT` to close open sockets and DB pools safely.

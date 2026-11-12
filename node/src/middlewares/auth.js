@@ -1,9 +1,10 @@
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
+import env from '../config/env.js';
 import { sendError } from '../utils/response.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'vels_agro_super_secure_jwt_secret_key_2026_xyz';
+const JWT_SECRET = env.JWT.SECRET;
 
 // Helper to generate SHA-256 hash of token for indexed lookup
 export const hashToken = (token) => {

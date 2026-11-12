@@ -316,7 +316,11 @@ export const toggleUserStatus = async (req, res) => {
   const { is_active } = req.body;
 
   if (typeof is_active !== 'boolean') {
-    return sendError(res, 400, 'is_active boolean field is required.');
+    return sendError(
+      res,
+      400,
+      'Invalid value for is_active. It must be a boolean: true (to activate) or false (to deactivate).'
+    );
   }
 
   try {

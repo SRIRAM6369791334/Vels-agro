@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import pool from './db.js';
+import env from './env.js';
 
 export const seedSuperadmin = async () => {
   try {
@@ -7,8 +8,8 @@ export const seedSuperadmin = async () => {
     const count = rows[0]?.count || 0;
 
     if (count === 0) {
-      const email = process.env.SUPERADMIN_DEFAULT_EMAIL || 'admin@velsagro.com';
-      const rawPassword = process.env.SUPERADMIN_DEFAULT_PASSWORD || 'SuperAdmin@123';
+      const email = env.SUPERADMIN.EMAIL;
+      const rawPassword = env.SUPERADMIN.PASSWORD;
 
       const salt = await bcrypt.genSalt(10);
       const passwordHash = await bcrypt.hash(rawPassword, salt);
