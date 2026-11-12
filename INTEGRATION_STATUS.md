@@ -19,11 +19,6 @@ The following endpoints are **100% integrated, tested, and actively functioning*
 | **7** | `/api/v1/auth/me` | `PUT` | **LIVE** | [frontend/src/features/settings/subtabs/account.ts](file:///e:/dashborad%20clone/frontend/src/features/settings/subtabs/account.ts) | **Save Profile & Email Lockout**: Updates full name, job title, and phone in MySQL DB (`admin_users` or `dashboard_users`). Strictly enforces immutability on Work Email (rejects tampering with `400 Bad Request`). |
 | **8** | `/api/v1/auth/sessions` | `GET` | **LIVE** | [frontend/src/features/settings/subtabs/account.ts](file:///e:/dashborad%20clone/frontend/src/features/settings/subtabs/account.ts) | **Live Active Sessions**: Displays real sessions from MySQL `sessions` table with device/OS/browser, IP address, and "This device" tag. |
 | **9** | `/api/v1/auth/sessions/revoke-others` | `POST` | **LIVE** | [frontend/src/features/settings/subtabs/account.ts](file:///e:/dashborad%20clone/frontend/src/features/settings/subtabs/account.ts) | **Sign Out Other Devices**: Revokes all other active sessions in the database while keeping current device active. |
-| **10** | `/api/v1/admin/roles` | `GET` | **LIVE** | [frontend/src/features/settings/subtabs/team.ts](file:///e:/dashborad%20clone/frontend/src/features/settings/subtabs/team.ts) | **Live Roles & Capabilities**: Loads all system & custom roles with permission counts directly from MySQL. |
-| **11** | `/api/v1/admin/roles/permissions` | `GET` | **LIVE** | [frontend/src/features/settings/subtabs/team.ts](file:///e:/dashborad%20clone/frontend/src/features/settings/subtabs/team.ts) | **Permission Catalog**: Retrieves all 16 permissions grouped by system modules (Products, Orders, Customers, Warehouses, Purchasing, Analytics, Audit). |
-| **12** | `/api/v1/admin/roles` | `POST` | **LIVE** | [frontend/src/features/settings/subtabs/team.ts](file:///e:/dashborad%20clone/frontend/src/features/settings/subtabs/team.ts) | **Create Custom Role**: Modal form to define role name, description, and assign initial module permissions into MySQL. |
-| **13** | `/api/v1/admin/roles/:id` | `PUT` | **LIVE** | [frontend/src/features/settings/subtabs/team.ts](file:///e:/dashborad%20clone/frontend/src/features/settings/subtabs/team.ts) | **Interactive Permission Matrix**: Toggle checkboxes in real-time and save custom permission matrices directly to MySQL `role_permissions`. |
-| **14** | `/api/v1/admin/roles/:id` | `DELETE` | **LIVE** | [frontend/src/features/settings/subtabs/team.ts](file:///e:/dashborad%20clone/frontend/src/features/settings/subtabs/team.ts) | **Delete Custom Role**: Safely removes custom roles with confirmation dialog. |
 
 ---
 
@@ -84,7 +79,7 @@ Here is the exact analysis of the 3 requested pages:
 
 ---
 
-### 3️⃣ Team & Roles Settings (`http://localhost:5173/settings/team`) — **[ROLES & MATRIX LIVE]**
+### 3️⃣ Team & Roles Settings (`http://localhost:5173/settings/team`)
 * **Source File**: [frontend/src/features/settings/subtabs/team.ts](file:///e:/dashborad%20clone/frontend/src/features/settings/subtabs/team.ts)
 * **What it currently renders**:
   1. **Team Metrics Banner**: 4 KPI cards showing Total Members, Active today, Pending invites, and Seats left.
@@ -92,17 +87,16 @@ Here is the exact analysis of the 3 requested pages:
      - Search input ("Search people…") with live filtering.
      - Role filter chips (`Everyone`, `Admin`, `Manager`, `Staff`, `Viewer`).
      - Staff list showing Name, Work location, Role, Status badge (`Active`, `Away`, `Invited`), and Action menu.
-  3. **Interactive Permissions Matrix ("What each role can do")** — **[LIVE WITH MYSQL]**:
-     - Connected live to `GET /api/v1/admin/roles` & `GET /api/v1/admin/roles/permissions`.
-     - Static SVG icons replaced with interactive checkboxes.
-     - Detects unsaved dirty changes and enables the "Save permissions" button.
-     - Clicking "Save permissions" calls `PUT /api/v1/admin/roles/:id` and updates MySQL `role_permissions`.
-  4. **New Role Creation Modal** — **[LIVE WITH MYSQL]**:
-     - "+ New Role" button opens a modal to name a new role, add description, and select module permissions.
-     - Submitting creates the role in MySQL via `POST /api/v1/admin/roles` and instantly adds the new column to the matrix.
-  5. **Delete Custom Role** — **[LIVE WITH MYSQL]**:
-     - Custom roles display a delete icon allowing safe deletion via `DELETE /api/v1/admin/roles/:id`.
-  6. **Seats & Billing Card**: Progress meter of seats used.
+  3. **Invite Teammate Action**: Opens the invite modal to create a new team user.
+  4. **Permissions Matrix Table ("What each role can do")**: Comprehensive capability table listing allowed features per role.
+  5. **Member Detail Drawer**: Clicking any staff member opens a slide-over drawer showing their details, role switcher, and remove button.
+* **Target Backend Mapping**:
+  * **100% Direct Match with our Backend API**:
+    * Members list & search: `GET /api/v1/admin/dashboard-users`
+    * Invite / Create staff: `POST /api/v1/admin/dashboard-users`
+    * Role switcher: `PUT /api/v1/admin/dashboard-users/:id`
+    * Toggle active / inactive status: `PATCH /api/v1/admin/dashboard-users/:id/status`
+    * Role Matrix & Permissions: `GET /api/v1/admin/roles` & `GET /api/v1/admin/roles/permissions`
 
 ---
 

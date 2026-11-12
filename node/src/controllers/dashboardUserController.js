@@ -43,7 +43,7 @@ export const listDashboardUsers = async (req, res) => {
     // Get users with role info and creator info
     const query = `
       SELECT 
-        u.id, u.email, u.first_name, u.last_name, u.phone, 
+        u.id, u.email, u.first_name, u.last_name, u.phone, u.job_title,
         u.role_id, r.name as role_name,
         u.is_active, u.created_by_admin_id, 
         CONCAT(a.first_name, ' ', COALESCE(a.last_name, '')) as created_by_name,
@@ -79,7 +79,7 @@ export const getDashboardUserById = async (req, res) => {
 
     const query = `
       SELECT 
-        u.id, u.email, u.first_name, u.last_name, u.phone, 
+        u.id, u.email, u.first_name, u.last_name, u.phone, u.job_title,
         u.role_id, r.name as role_name,
         u.is_active, u.created_by_admin_id,
         u.last_login_at, u.created_at, u.updated_at
@@ -117,7 +117,7 @@ export const getDashboardUserById = async (req, res) => {
  * Create New Dashboard User (Superadmin Only)
  */
 export const createDashboardUser = async (req, res) => {
-  const { email, password, first_name, last_name, phone, role_id } = req.body;
+  const { email, password, first_name, last_name, phone, role_id, job_title, jobTitle } = req.body;
 
   if (!email || !password || !first_name || !role_id) {
     return sendError(res, 400, 'Email, password, first_name, and role_id are required fields.');
@@ -146,16 +146,19 @@ export const createDashboardUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
+    const title = job_title || jobTitle || 'Operations Staff';
+
     // 4. Insert User
     const [result] = await pool.query(
-      `INSERT INTO dashboard_users (email, password_hash, first_name, last_name, phone, role_id, created_by_admin_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?);`,
+      `INSERT INTO dashboard_users (email, password_hash, first_name, last_name, phone, job_title, role_id, created_by_admin_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         email.toLowerCase().trim(),
         passwordHash,
         first_name.trim(),
         last_name ? last_name.trim() : null,
         phone ? phone.trim() : null,
+        title,
         role_id,
         req.user.id
       ]
@@ -181,6 +184,7 @@ export const createDashboardUser = async (req, res) => {
       firstName: first_name,
       lastName: last_name || null,
       phone: phone || null,
+      jobTitle: title,
       roleId: role_id,
       roleName: role[0].name,
       isActive: true
@@ -196,7 +200,7 @@ export const createDashboardUser = async (req, res) => {
  */
 export const updateDashboardUser = async (req, res) => {
   const { id } = req.params;
-  const { first_name, last_name, phone, role_id } = req.body;
+  const { first_name, last_name, phone, role_id, job_title, jobTitle } = req.body;
 
   try {
     const [existing] = await pool.query(`SELECT * FROM dashboard_users WHERE id = ? LIMIT 1;`, [id]);
@@ -217,13 +221,14 @@ export const updateDashboardUser = async (req, res) => {
     const updatedFirstName = first_name !== undefined ? first_name.trim() : currentUser.first_name;
     const updatedLastName = last_name !== undefined ? (last_name ? last_name.trim() : null) : currentUser.last_name;
     const updatedPhone = phone !== undefined ? (phone ? phone.trim() : null) : currentUser.phone;
+    const updatedJobTitle = job_title !== undefined ? job_title.trim() : (jobTitle !== undefined ? jobTitle.trim() : currentUser.job_title);
     const updatedRoleId = role_id !== undefined ? role_id : currentUser.role_id;
 
     await pool.query(
       `UPDATE dashboard_users 
-       SET first_name = ?, last_name = ?, phone = ?, role_id = ? 
+       SET first_name = ?, last_name = ?, phone = ?, job_title = ?, role_id = ? 
        WHERE id = ?;`,
-      [updatedFirstName, updatedLastName, updatedPhone, updatedRoleId, id]
+      [updatedFirstName, updatedLastName, updatedPhone, updatedJobTitle, updatedRoleId, id]
     );
 
     // If role changed, revoke current sessions so new permissions take effect
