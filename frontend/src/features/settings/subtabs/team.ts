@@ -29,6 +29,16 @@ import {
   animatePageTransition,
 } from '../../../main';
 import { TeamMember, MemberRole } from '../../../types/settings';
+import {
+  getRoles,
+  getPermissions,
+  createRole,
+  updateRole,
+  deleteRole,
+  SystemRole,
+  SystemPermission,
+} from '../../../core/api/roleService';
+import { openModal, closeModal, confirmDialog as confirmModal } from '../../../ui/modal';
 
 const ROLES: MemberRole[] = ['owner', 'admin', 'manager', 'staff', 'viewer'];
 const ASSIGNABLE_ROLES: MemberRole[] = ['admin', 'manager', 'staff', 'viewer'];
@@ -41,6 +51,22 @@ const STATUS_TONES: Record<string, [string, string]> = {
 
 let searchQuery = '';
 let activeRoleFilter = 'all';
+
+// Live Matrix State (MySQL backed)
+let liveRoles: SystemRole[] = [];
+let livePermissions: SystemPermission[] = [];
+let initialRolePerms: Map<number, Set<number>> = new Map();
+let currentRolePerms: Map<number, Set<number>> = new Map();
+
+const MODULE_TITLES: Record<string, string> = {
+  products: 'Products & Inventory',
+  orders: 'Sales Orders & Fulfillment',
+  customers: 'Customer Directory & Accounts',
+  warehouses: 'Warehouses & Facility Transfers',
+  purchasing: 'Purchasing & Raw Materials',
+  analytics: 'Executive Analytics & KPI Metrics',
+  audit: 'Security & System Audit Logs',
+};
 
 export const getActiveMembersCount = (): number =>
   store.team.filter((m) => m.status !== 'invited').length;
@@ -96,11 +122,24 @@ export function renderTeamSubtab(): string {
   </section>
   <div class="st-grid st-grid--team">
     <section class="card st-perms tcard" aria-labelledby="tm-p-t">
-      <header class="card__head"><div><h2 class="card__title" id="tm-p-t">What each role can do</h2><p class="card__sub">Roles are set per person above</p></div></header>
-      <div class="table-wrap"><table class="table st-matrix">
-        <thead><tr><th scope="col">Permission</th>${ROLES.map((role) => `<th scope="col" class="st-matrix__role" data-col="${role}">${escapeHtml(ROLE_NAMES[role])}<small data-rc="${role}"></small></th>`).join('')}</tr></thead>
-        <tbody>${ROLE_PERMISSIONS.map((cat: any) => `<tr><th scope="row">${escapeHtml(cat.label)}</th>${ROLES.map((role) => `<td data-col="${role}">${cat.roles.includes(role) ? `<span class="st-yes" role="img" aria-label="${escapeHtml(ROLE_NAMES[role])} can"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" pathLength="1"/></svg></span>` : `<span class="st-no" role="img" aria-label="${escapeHtml(ROLE_NAMES[role])} cannot"></span>`}</td>`).join('')}</tr>`).join('')}</tbody>
-      </table></div>
+      <header class="card__head">
+        <div>
+          <h2 class="card__title" id="tm-p-t">What each role can do</h2>
+          <p class="card__sub">Dynamic role capabilities and permission matrix backed by MySQL</p>
+        </div>
+        <div class="card__tools" style="display:flex; align-items:center; gap:8px;">
+          <span class="st-dirty" data-k="tm-matrix-dirty" hidden style="margin-right:4px;">${renderIcon('edit')}Unsaved matrix changes</span>
+          <button type="button" class="btn btn--ghost btn--sm magnetic" data-k="tm-new-role">${renderIcon('userPlus')}New Role</button>
+          <button type="button" class="btn btn--primary btn--sm magnetic" data-k="tm-save-matrix" disabled>${renderIcon('check')}Save permissions</button>
+        </div>
+      </header>
+      <div class="table-wrap">
+        <table class="table st-matrix" data-k="tm-matrix-table">
+          <tbody data-k="tm-matrix-body">
+            <tr><td colspan="6" style="text-align:center; padding:28px; color:var(--muted);">Loading live permissions matrix from database...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
     <section class="card st-seats" aria-labelledby="tm-s-t">
       <header class="card__head"><div><h2 class="card__title" id="tm-s-t">Seats</h2><p class="card__sub" data-k="tm-plan"></p></div></header>
@@ -166,13 +205,6 @@ export function updateMembersTable(container: HTMLElement, withDismiss = false):
     const sitesCount = new Set(store.team.map((m) => m.locId)).size;
     subEl.textContent = `${pluralize(store.team.length, 'person', 'people')} across ${pluralize(sitesCount, 'site')}`;
   }
-
-  ROLES.forEach((role) => {
-    const rcEl = queryOne<HTMLElement>(`[data-rc="${role}"]`, container);
-    if (rcEl) {
-      rcEl.textContent = String(store.team.filter((m) => m.role === role).length);
-    }
-  });
 }
 
 export function updateSeatsSection(container: HTMLElement, animate = false): void {
@@ -244,25 +276,6 @@ export function updateTeamHeaderStats(container: HTMLElement): void {
   if (suffixEl) suffixEl.textContent = `of ${store.settings.billing.seats}`;
 }
 
-export function animateMatrixCheckmarks(container: HTMLElement, delay = 0): void {
-  const checkmarks = domQueryAll('.st-yes path', container);
-  if (prefersReducedMotion.matches) {
-    gsap.set(checkmarks, { strokeDashoffset: 0 });
-    return;
-  }
-  gsap.fromTo(
-    checkmarks,
-    { strokeDasharray: 1, strokeDashoffset: 1 },
-    {
-      strokeDashoffset: 0,
-      duration: motionDuration(0.45),
-      ease: 'power2.out',
-      stagger: { each: motionDuration(0.025), from: 'start' },
-      delay: motionDuration(delay),
-    }
-  );
-}
-
 const formatMemberTenure = (since: number): string => {
   const months = Math.floor((Date.now() - since) / (30.4 * ONE_DAY_MS));
   if (months < 1) return 'This month';
@@ -285,10 +298,10 @@ export function openMemberDrawer(memberId: string): void {
 
   openDrawer(
     `<div class="d-head">${renderAvatar(member.id, 'lg')}<div><h2>${escapeHtml(member.name)}</h2><small>${escapeHtml(member.title)} · ${escapeHtml(member.team)}</small></div></div>
-    <div class="d-pills">${renderPill(statusLabel, tone)}${renderPill(ROLE_NAMES[member.role], 'pine', 'shield')}</div>
+    <div class="d-pills">${renderPill(statusLabel, tone)}${renderPill(ROLE_NAMES[member.role] || member.role, 'pine', 'shield')}</div>
     <div class="d-facts"><div><small>Works at</small><b>${escapeHtml(location?.name ?? '')}</b><span>${escapeHtml(location?.city ?? '')}</span></div><div><small>${member.status === 'invited' ? 'Invited' : 'Joined'}</small><b>${formatDate(member.since, true)}</b><span>${formatMemberTenure(member.since)}</span></div></div>
     <div class="d-sec"><h3>Contact</h3><div class="rows"><a class="row" href="mailto:${escapeHtml(member.email)}">${renderTag('mail', 'sky', 'sm')}<span class="row__txt"><b>${escapeHtml(member.email)}</b><small>Email</small></span></a>${member.phone ? `<a class="row" href="tel:${escapeHtml(member.phone)}">${renderTag('phone', 'teal', 'sm')}<span class="row__txt"><b>${escapeHtml(member.phone)}</b><small>Phone</small></span></a>` : ''}</div></div>
-    <div class="d-sec"><h3>As ${escapeHtml(ROLE_NAMES[member.role].toLowerCase())}, ${isMe ? 'you' : member.name.split(' ')[0]} can</h3><ul class="st-can">${ROLE_PERMISSIONS.map((cat: any) => `<li class="${cat.roles.includes(member.role) ? 'is-yes' : ''}">${renderIcon(cat.roles.includes(member.role) ? 'check' : 'close')}${escapeHtml(cat.label)}</li>`).join('')}</ul></div>
+    <div class="d-sec"><h3>Role Permissions</h3><ul class="st-can">${ROLE_PERMISSIONS.map((cat: any) => `<li class="${cat.roles.includes(member.role) ? 'is-yes' : ''}">${renderIcon(cat.roles.includes(member.role) ? 'check' : 'close')}${escapeHtml(cat.label)}</li>`).join('')}</ul></div>
     <div class="d-actions"><a class="btn btn--ghost" href="mailto:${escapeHtml(member.email)}">${renderIcon('mail')}Email</a>${isMe || member.role === 'owner' ? '' : `<button type="button" class="btn btn--ghost" data-d-remove="${member.id}">${renderIcon('trash')}Remove</button>`}</div>`,
     {
       label: member.name,
@@ -312,15 +325,270 @@ export function openMemberDrawer(memberId: string): void {
   );
 }
 
+// -------------------------------------------------------------
+// Live Matrix Functions (Backed by MySQL /api/v1/admin/roles)
+// -------------------------------------------------------------
+
+function checkMatrixDirty(container: HTMLElement): void {
+  let isDirty = false;
+  for (const role of liveRoles) {
+    const initSet = initialRolePerms.get(role.id) || new Set();
+    const currSet = currentRolePerms.get(role.id) || new Set();
+    if (initSet.size !== currSet.size) {
+      isDirty = true;
+      break;
+    }
+    for (const pid of currSet) {
+      if (!initSet.has(pid)) {
+        isDirty = true;
+        break;
+      }
+    }
+    if (isDirty) break;
+  }
+
+  const saveBtn = queryOne<HTMLButtonElement>('[data-k="tm-save-matrix"]', container);
+  const dirtyBadge = queryOne<HTMLElement>('[data-k="tm-matrix-dirty"]', container);
+  if (saveBtn) saveBtn.disabled = !isDirty;
+  if (dirtyBadge) dirtyBadge.hidden = !isDirty;
+}
+
+function renderMatrixTable(container: HTMLElement): void {
+  const table = queryOne<HTMLElement>('[data-k="tm-matrix-table"]', container);
+  if (!table) return;
+
+  if (liveRoles.length === 0 || livePermissions.length === 0) {
+    table.innerHTML = `<tbody><tr><td style="text-align:center; padding:24px; color:var(--muted);">No roles found in database.</td></tr></tbody>`;
+    return;
+  }
+
+  // 1. Build Header
+  const headerColsHtml = liveRoles
+    .map(
+      (role) => `
+      <th scope="col" class="st-matrix__role" data-col="r-${role.id}">
+        <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span>${escapeHtml(role.name)}</span>
+          ${
+            !role.is_system
+              ? `<button type="button" class="ibtn ibtn--xs st-role-del-btn" data-del-role="${role.id}" data-role-name="${escapeHtml(role.name)}" title="Delete custom role ${escapeHtml(role.name)}">${renderIcon('trash')}</button>`
+              : ''
+          }
+        </div>
+        <small>${role.is_system ? 'System Role' : 'Custom Role'}</small>
+      </th>
+    `
+    )
+    .join('');
+
+  const theadHtml = `
+    <thead>
+      <tr>
+        <th scope="col" style="min-width: 220px; text-align: left;">Permission / Capability</th>
+        ${headerColsHtml}
+      </tr>
+    </thead>
+  `;
+
+  // 2. Group permissions by module
+  const moduleMap: Record<string, SystemPermission[]> = {};
+  livePermissions.forEach((p) => {
+    if (!moduleMap[p.module]) moduleMap[p.module] = [];
+    moduleMap[p.module].push(p);
+  });
+
+  // 3. Build Body Rows
+  const tbodyRows: string[] = [];
+
+  Object.entries(moduleMap).forEach(([mod, perms]) => {
+    const modTitle = MODULE_TITLES[mod] || mod.toUpperCase();
+    tbodyRows.push(`
+      <tr class="st-matrix__mod-head">
+        <th colspan="${liveRoles.length + 1}">${escapeHtml(modTitle)}</th>
+      </tr>
+    `);
+
+    perms.forEach((perm) => {
+      const roleCellsHtml = liveRoles
+        .map((role) => {
+          const isChecked = currentRolePerms.get(role.id)?.has(perm.id) ?? false;
+          return `
+          <td data-col="r-${role.id}">
+            <label class="st-matrix-check" title="${escapeHtml(role.name)}: ${escapeHtml(perm.description)}">
+              <input type="checkbox" class="st-perm-toggle" data-role-id="${role.id}" data-perm-id="${perm.id}" ${isChecked ? 'checked' : ''} />
+            </label>
+          </td>
+        `;
+        })
+        .join('');
+
+      tbodyRows.push(`
+        <tr>
+          <th scope="row">
+            <b>${escapeHtml(perm.description || perm.code)}</b>
+            <small style="display:block; font-size:var(--fs-2xs); color:var(--muted);">${escapeHtml(perm.code)}</small>
+          </th>
+          ${roleCellsHtml}
+        </tr>
+      `);
+    });
+  });
+
+  table.innerHTML = `
+    ${theadHtml}
+    <tbody data-k="tm-matrix-body">
+      ${tbodyRows.join('')}
+    </tbody>
+  `;
+
+  checkMatrixDirty(container);
+}
+
+export async function loadLiveMatrix(container: HTMLElement): Promise<void> {
+  try {
+    const [rolesData, permsData] = await Promise.all([getRoles(), getPermissions()]);
+    liveRoles = rolesData;
+    livePermissions = permsData.list || [];
+
+    initialRolePerms = new Map();
+    currentRolePerms = new Map();
+
+    liveRoles.forEach((role) => {
+      const permIds = new Set<number>((role.permissions || []).map((p) => p.id));
+      initialRolePerms.set(role.id, new Set(permIds));
+      currentRolePerms.set(role.id, new Set(permIds));
+    });
+
+    renderMatrixTable(container);
+  } catch (err) {
+    console.warn('Failed to load live roles matrix from backend:', err);
+    const tbody = queryOne<HTMLElement>('[data-k="tm-matrix-body"]', container);
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--bad);">Failed to load roles from backend. Please verify your connection.</td></tr>`;
+    }
+  }
+}
+
+function openCreateRoleModal(container: HTMLElement): void {
+  // Render permissions checklist grouped by module for modal
+  const moduleMap: Record<string, SystemPermission[]> = {};
+  livePermissions.forEach((p) => {
+    if (!moduleMap[p.module]) moduleMap[p.module] = [];
+    moduleMap[p.module].push(p);
+  });
+
+  const permsChecklistHtml = Object.entries(moduleMap)
+    .map(
+      ([mod, perms]) => `
+      <div style="margin-bottom: 12px;">
+        <b style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px;">${escapeHtml(MODULE_TITLES[mod] || mod)}</b>
+        <div class="st-perm-modal-grid">
+          ${perms
+            .map(
+              (p) => `
+            <label class="st-perm-modal-item">
+              <input type="checkbox" name="role_perms" value="${p.id}" />
+              <span><b>${escapeHtml(p.description || p.code)}</b><small style="display:block; color:var(--muted); font-size:var(--fs-2xs);">${escapeHtml(p.code)}</small></span>
+            </label>
+          `
+            )
+            .join('')}
+        </div>
+      </div>
+    `
+    )
+    .join('');
+
+  const modalHtml = `
+    <form id="create-role-form" style="display: grid; gap: 14px;">
+      <label class="st-field">
+        <span class="field__label">Role Name *</span>
+        <input class="st-in" name="name" type="text" placeholder="e.g. Quality Auditor" required autofocus />
+      </label>
+      <label class="st-field">
+        <span class="field__label">Description</span>
+        <input class="st-in" name="description" type="text" placeholder="Short description of responsibilities" />
+      </label>
+      <div class="st-field">
+        <span class="field__label">Assign Initial Permissions</span>
+        <div style="border: 1px solid var(--line-2); border-radius: 12px; padding: 12px; background: var(--surface);">
+          ${permsChecklistHtml}
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
+        <button type="button" class="btn btn--ghost btn--sm" data-action="cancel">Cancel</button>
+        <button type="submit" class="btn btn--primary btn--sm" data-action="submit">${renderIcon('check')}Create Role</button>
+      </div>
+    </form>
+  `;
+
+  openModal(modalHtml, {
+    title: 'Create New Custom Role',
+    sub: 'Define a new role and configure its system privileges in MySQL',
+    onMount: (dialog) => {
+      dialog.querySelector('[data-action="cancel"]')?.addEventListener('click', () => {
+        closeModal();
+      });
+
+      const form = dialog.querySelector<HTMLFormElement>('#create-role-form');
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nameInput = form.elements.namedItem('name') as HTMLInputElement;
+        const descInput = form.elements.namedItem('description') as HTMLInputElement;
+        const nameVal = nameInput.value.trim();
+        const descVal = descInput.value.trim();
+
+        if (nameVal.length < 2) {
+          alert('Role name must be at least 2 characters long.');
+          nameInput.focus();
+          return;
+        }
+
+        const checkedPerms = Array.from(
+          form.querySelectorAll<HTMLInputElement>('input[name="role_perms"]:checked')
+        ).map((cb) => Number(cb.value));
+
+        const submitBtn = dialog.querySelector<HTMLButtonElement>('[data-action="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = `<span>Creating...</span>`;
+        }
+
+        try {
+          await createRole({
+            name: nameVal,
+            description: descVal || undefined,
+            permission_ids: checkedPerms,
+          });
+          closeModal();
+          showToast(`Role "${nameVal}" created successfully in MySQL`, { ico: 'check' });
+          await loadLiveMatrix(container);
+        } catch (err: any) {
+          alert(err?.message || 'Failed to create role');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `${renderIcon('check')}Create Role`;
+          }
+        }
+      });
+    },
+  });
+}
+
 export function initTeamSubtab(container: HTMLElement): void {
   bindMagnetic(container);
 
+  // Load live matrix from MySQL
+  loadLiveMatrix(container);
+
+  // Invite button
   queryOne<HTMLElement>('[data-k="tm-invite"]', container)?.addEventListener('click', (e) => {
     const target = e.currentTarget as HTMLElement;
     playHaptic(target);
     openInviteTeammateModal(target);
   });
 
+  // Search input
   const searchInput = queryOne<HTMLInputElement>('[data-k="tm-q"]', container);
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -329,6 +597,7 @@ export function initTeamSubtab(container: HTMLElement): void {
     });
   }
 
+  // Filter chips
   queryOne<HTMLElement>('[data-k="tm-roles"]', container)?.addEventListener('click', (e) => {
     const chip = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-role-f]');
     if (chip) {
@@ -341,15 +610,109 @@ export function initTeamSubtab(container: HTMLElement): void {
     }
   });
 
+  // Member role select dropdown
   container.addEventListener('change', (e) => {
-    const select = (e.target as HTMLElement).closest<HTMLSelectElement>('[data-role]');
+    const target = e.target as HTMLElement;
+
+    // 1. Matrix Checkbox Toggle
+    const permToggle = target.closest<HTMLInputElement>('.st-perm-toggle');
+    if (permToggle) {
+      const roleId = Number(permToggle.dataset.roleId);
+      const permId = Number(permToggle.dataset.permId);
+      const set = currentRolePerms.get(roleId);
+      if (set) {
+        if (permToggle.checked) {
+          set.add(permId);
+        } else {
+          set.delete(permId);
+        }
+      }
+      checkMatrixDirty(container);
+      return;
+    }
+
+    // 2. Member Roster Role Selector
+    const select = target.closest<HTMLSelectElement>('[data-role]');
     if (select) {
       updateMemberRole(select.dataset.role as string, select.value);
     }
   });
 
-  container.addEventListener('click', (e) => {
+  // Save Permissions Matrix Button
+  queryOne<HTMLButtonElement>('[data-k="tm-save-matrix"]', container)?.addEventListener(
+    'click',
+    async (e) => {
+      const btn = e.currentTarget as HTMLButtonElement;
+      playHaptic(btn);
+      btn.disabled = true;
+      btn.innerHTML = `<span>Saving...</span>`;
+
+      try {
+        for (const role of liveRoles) {
+          const initSet = initialRolePerms.get(role.id) || new Set();
+          const currSet = currentRolePerms.get(role.id) || new Set();
+
+          let changed = initSet.size !== currSet.size;
+          if (!changed) {
+            for (const pid of currSet) {
+              if (!initSet.has(pid)) {
+                changed = true;
+                break;
+              }
+            }
+          }
+
+          if (changed) {
+            await updateRole(role.id, {
+              permission_ids: Array.from(currSet),
+            });
+          }
+        }
+
+        showToast('Permissions updated and persisted to database', { ico: 'check' });
+        await loadLiveMatrix(container);
+      } catch (err: any) {
+        showToast(err?.message || 'Failed to update permissions', { ico: 'close' });
+        checkMatrixDirty(container);
+      }
+    }
+  );
+
+  // Create Role Button
+  queryOne<HTMLElement>('[data-k="tm-new-role"]', container)?.addEventListener('click', (e) => {
+    const target = e.currentTarget as HTMLElement;
+    playHaptic(target);
+    openCreateRoleModal(container);
+  });
+
+  // Table row actions & modal dismissals
+  container.addEventListener('click', async (e) => {
     const target = e.target as HTMLElement;
+
+    // Delete custom role button
+    const delRoleBtn = target.closest<HTMLElement>('[data-del-role]');
+    if (delRoleBtn) {
+      playHaptic(delRoleBtn);
+      const roleId = Number(delRoleBtn.dataset.delRole);
+      const roleName = delRoleBtn.dataset.roleName || 'Custom Role';
+
+      const confirmed = await confirmModal(
+        `Are you sure you want to delete role "${roleName}"? This action cannot be undone.`,
+        'Delete Role',
+        'Delete Role',
+        true
+      );
+      if (!confirmed) return;
+
+      try {
+        await deleteRole(roleId);
+        showToast(`Role "${roleName}" deleted successfully`, { ico: 'trash' });
+        await loadLiveMatrix(container);
+      } catch (err: any) {
+        showToast(err?.message || 'Failed to delete role', { ico: 'close' });
+      }
+      return;
+    }
 
     const removeBtn = target.closest<HTMLElement>('[data-remove]');
     if (removeBtn) {
@@ -384,7 +747,7 @@ export function initTeamSubtab(container: HTMLElement): void {
     }
 
     const openRow = target.closest<HTMLElement>('[data-open]');
-    if (openRow && !target.closest('select, button, a')) {
+    if (openRow && !target.closest('select, button, a, label, input')) {
       (window as any).navigateTo(`/settings/team/${openRow.dataset.open}`);
     }
   });
@@ -412,6 +775,5 @@ export function animateTeamSubtab(container: HTMLElement): void {
     .add(animateRows(domQueryAll('.st-mtable tbody tr', container), { y: 10, stagger: 0.035 }), 0.35)
     .add(animateRows(domQueryAll('[data-role-f]', container), { y: -6, stagger: 0.04 }), 0.3);
 
-  animateMatrixCheckmarks(container, 0.6);
   updateSeatsSection(container, true);
 }
