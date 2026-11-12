@@ -1,8 +1,15 @@
 // Vels Agro — Enterprise Admin Login Page Module
 // Integrated with Real Agro Background, Ambient Physics & Glassmorphism
+// Wired to Live Unified Authentication Gateway with GSAP & SweetAlert2
+import Swal from 'sweetalert2';
+import { gsap } from 'gsap';
+import { unifiedLogin } from '../../core/api/authService';
+import { ApiError } from '../../core/api/apiClient';
 import './login.css';
 
 let containerEl: HTMLElement | null = null;
+let lockoutTimerInterval: any = null;
+let remainingLockoutSeconds = 0;
 
 function renderLoginForm(): string {
   const currentTheme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
@@ -49,86 +56,121 @@ function renderLoginForm(): string {
           <div class="login-card__mark" aria-hidden="true">
             <img src="/brand/vels_logo.svg" alt="Vels Agro Logo" class="login-card__logo" />
           </div>
-          <span class="badge badge--good">
-            <i class="dot" aria-hidden="true"></i> Admin Portal
-          </span>
-        </div>
-
-        <!-- Card Headline -->
-        <div class="login-card__head">
-          <h1 class="login-card__title">Welcome back to Vels</h1>
-          <p class="login-card__sub">Sign in to Vels Agro Machinery &amp; Parts stockroom</p>
-        </div>
-
-        <!-- Work Email Field -->
-        <label class="field">
-          <span class="field__label">Work email</span>
-          <input
-            id="login-email"
-            type="email"
-            autocomplete="username"
-            value="admin@velsagro.com"
-            placeholder="name@velsagro.com"
-            required
-            spellcheck="false"
-          />
-        </label>
-
-        <!-- Password Field with View Eye Toggle -->
-        <label class="field">
-          <span class="field__label">Password</span>
-          <div class="field__input-wrap">
-            <input
-              id="login-pass"
-              type="password"
-              autocomplete="current-password"
-              value="vels@admin2026"
-              placeholder="••••••••••••"
-              required
-            />
-            <button
-              type="button"
-              class="field__eye-btn"
-              id="btn-toggle-pass"
-              aria-label="Show password"
-              title="Show password"
-            >
-              <svg class="ico ico--eye" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
-                <circle cx="12" cy="12" r="2.8" />
-              </svg>
-              <svg class="ico ico--eye-off" viewBox="0 0 24 24" aria-hidden="true" style="display: none;">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 5c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                <line x1="2" y1="2" x2="22" y2="22" />
-              </svg>
-            </button>
+          <div class="login-card__badge">
+            <span class="login-card__badge-dot" aria-hidden="true"></span>
+            <span>Enterprise Gateway</span>
           </div>
-        </label>
-
-        <!-- Security & Remember Me Row -->
-        <div class="login-card__row">
-          <label class="login-card__remember">
-            <input type="checkbox" id="login-remember" checked />
-            <span>Keep me signed in</span>
-          </label>
-          <span class="login-card__ssl">
-            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="5" y="10.5" width="14" height="10" rx="2.5" />
-              <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
-            </svg>
-            <span>SSL Secured</span>
-          </span>
         </div>
 
-        <p class="mform__err" id="login-err" role="alert"></p>
+        <!-- Heading Group -->
+        <div class="login-card__head">
+          <h1 class="login-card__title">Sign in to Vels Agro</h1>
+          <p class="login-card__subtitle">
+            Enter your administrative credentials to manage inventory, machinery & dealers
+          </p>
+        </div>
 
-        <!-- Action Button with Diagonal Shine Beam & Arrow Bounce -->
-        <button type="submit" class="btn btn--primary login-card__btn" id="login-submit">
-          <span>Sign in</span>
-          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
-        </button>
+        <!-- Input Fields -->
+        <div class="login-card__fields">
+          <!-- Work Email -->
+          <label class="field" for="login-email">
+            <span class="field__label">
+              <span>Work email</span>
+              <span class="field__req" aria-hidden="true">*</span>
+            </span>
+            <div class="field__control">
+              <svg class="ico field__ico" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="m3 7 9 6 9-6" />
+              </svg>
+              <input
+                type="email"
+                id="login-email"
+                name="email"
+                class="field__input"
+                placeholder="name@velsagro.com"
+                autocomplete="username"
+                required
+              />
+            </div>
+          </label>
+
+          <!-- Password -->
+          <label class="field" for="login-pass">
+            <div class="field__label-row">
+              <span class="field__label">
+                <span>Password</span>
+                <span class="field__req" aria-hidden="true">*</span>
+              </span>
+            </div>
+            <div class="field__control">
+              <svg class="ico field__ico" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="10.5" width="14" height="10" rx="2.5" />
+                <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
+              </svg>
+              <input
+                type="password"
+                id="login-pass"
+                name="password"
+                class="field__input field__input--pass"
+                placeholder="••••••••••••"
+                autocomplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                class="field__eye-btn"
+                id="btn-toggle-pass"
+                aria-label="Show password"
+                title="Show password"
+              >
+                <svg class="ico ico--eye" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+                  <circle cx="12" cy="12" r="2.8" />
+                </svg>
+                <svg class="ico ico--eye-off" viewBox="0 0 24 24" aria-hidden="true" style="display: none;">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 5c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                  <line x1="2" y1="2" x2="22" y2="22" />
+                </svg>
+              </button>
+            </div>
+          </label>
+
+          <!-- Security & Remember Me Row -->
+          <div class="login-card__row">
+            <label class="login-card__remember">
+              <input type="checkbox" id="login-remember" checked />
+              <span>Keep me signed in</span>
+            </label>
+            <span class="login-card__ssl">
+              <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="10.5" width="14" height="10" rx="2.5" />
+                <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
+              </svg>
+              <span>SSL Secured</span>
+            </span>
+          </div>
+
+          <!-- Dynamic Error & Lockout Alert Banner -->
+          <div class="login-alert" id="login-alert" role="alert" style="display: none;">
+            <div class="login-alert__icon" id="login-alert-icon"></div>
+            <div class="login-alert__content">
+              <strong class="login-alert__title" id="login-alert-title"></strong>
+              <p class="login-alert__desc" id="login-alert-desc"></p>
+              <div class="login-alert__timer" id="login-alert-timer" style="display: none;">
+                <span>Lockout expires in: </span><b id="lockout-countdown">15:00</b>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Button with Diagonal Shine Beam & Arrow Bounce -->
+          <button type="submit" class="btn btn--primary login-card__btn" id="login-submit">
+            <span>Sign in</span>
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
 
         <!-- Card Trust Footer -->
         <div class="login-card__foot">
@@ -150,89 +192,222 @@ function renderLoginForm(): string {
   `;
 }
 
-function handleLoginSubmit(e: Event) {
+function showLoginAlert(
+  type: 'danger' | 'warning',
+  title: string,
+  desc: string,
+  countdownSeconds?: number
+) {
+  const alertEl = document.querySelector('#login-alert') as HTMLElement | null;
+  const iconEl = document.querySelector('#login-alert-icon') as HTMLElement | null;
+  const titleEl = document.querySelector('#login-alert-title') as HTMLElement | null;
+  const descEl = document.querySelector('#login-alert-desc') as HTMLElement | null;
+  const timerWrap = document.querySelector('#login-alert-timer') as HTMLElement | null;
+  const countdownEl = document.querySelector('#lockout-countdown') as HTMLElement | null;
+
+  if (!alertEl || !iconEl || !titleEl || !descEl) return;
+
+  // Clear previous intervals
+  if (lockoutTimerInterval) {
+    clearInterval(lockoutTimerInterval);
+    lockoutTimerInterval = null;
+  }
+
+  alertEl.className = `login-alert login-alert--${type}`;
+  alertEl.style.display = 'flex';
+  titleEl.textContent = title;
+  descEl.textContent = desc;
+
+  if (type === 'danger') {
+    iconEl.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+    `;
+    if (timerWrap) timerWrap.style.display = 'none';
+  } else {
+    // Warning / Lockout
+    iconEl.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="5" y="11" width="14" height="10" rx="2" />
+        <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+      </svg>
+    `;
+
+    if (countdownSeconds && timerWrap && countdownEl) {
+      timerWrap.style.display = 'flex';
+      remainingLockoutSeconds = countdownSeconds;
+
+      const updateTimerDisplay = () => {
+        const mins = Math.floor(remainingLockoutSeconds / 60);
+        const secs = remainingLockoutSeconds % 60;
+        countdownEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      };
+
+      updateTimerDisplay();
+      lockoutTimerInterval = setInterval(() => {
+        remainingLockoutSeconds--;
+        if (remainingLockoutSeconds <= 0) {
+          clearInterval(lockoutTimerInterval);
+          lockoutTimerInterval = null;
+          clearLoginAlert();
+          const submitBtn = document.querySelector('#login-submit') as HTMLButtonElement | null;
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<span>Sign in</span>
+              <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>`;
+          }
+        } else {
+          updateTimerDisplay();
+        }
+      }, 1000);
+    }
+  }
+
+  // Trigger GSAP card shake animation (Q2 - Option A)
+  gsap.fromTo(
+    '.login-card',
+    { x: -9 },
+    {
+      x: 9,
+      duration: 0.06,
+      repeat: 5,
+      yoyo: true,
+      ease: 'power2.inOut',
+      onComplete: () => {
+        gsap.set('.login-card', { x: 0 });
+      },
+    }
+  );
+}
+
+function clearLoginAlert() {
+  const alertEl = document.querySelector('#login-alert') as HTMLElement | null;
+  if (alertEl) {
+    alertEl.style.display = 'none';
+  }
+  const emailInput = document.querySelector('#login-email') as HTMLInputElement | null;
+  const passInput = document.querySelector('#login-pass') as HTMLInputElement | null;
+  emailInput?.classList.remove('is-invalid');
+  passInput?.classList.remove('is-invalid');
+}
+
+async function handleLoginSubmit(e: Event) {
   e.preventDefault();
   const form = e.target as HTMLFormElement;
   const emailInput = form.querySelector('#login-email') as HTMLInputElement | null;
   const passInput = form.querySelector('#login-pass') as HTMLInputElement | null;
-  const errEl = form.querySelector('#login-err') as HTMLElement | null;
   const submitBtn = form.querySelector('#login-submit') as HTMLButtonElement | null;
 
-  if (!emailInput || !passInput || !errEl) return;
+  if (!emailInput || !passInput || !submitBtn) return;
 
   const email = emailInput.value.trim();
   const pass = passInput.value.trim();
 
-  // Reset error
-  errEl.textContent = '';
-  errEl.classList.remove('is-active');
+  clearLoginAlert();
 
-  // Basic validation
+  // Basic client-side validation
   if (!email) {
-    errEl.textContent = 'Please enter your work email.';
-    errEl.classList.add('is-active');
+    emailInput.classList.add('is-invalid');
     emailInput.focus();
+    showLoginAlert('danger', 'Email Required', 'Please enter your administrator work email.');
     return;
   }
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errEl.textContent = 'Please enter a valid work email address.';
-    errEl.classList.add('is-active');
+    emailInput.classList.add('is-invalid');
     emailInput.focus();
+    showLoginAlert('danger', 'Invalid Email Format', 'Please enter a valid business email address.');
     return;
   }
 
   if (!pass) {
-    errEl.textContent = 'Please enter your password.';
-    errEl.classList.add('is-active');
+    passInput.classList.add('is-invalid');
     passInput.focus();
+    showLoginAlert('danger', 'Password Required', 'Please enter your password.');
     return;
   }
 
   if (pass.length < 4) {
-    errEl.textContent = 'Password must be at least 4 characters.';
-    errEl.classList.add('is-active');
+    passInput.classList.add('is-invalid');
     passInput.focus();
+    showLoginAlert('danger', 'Password Too Short', 'Password must be at least 4 characters.');
     return;
   }
 
   // Visual loading feedback on button
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span>Signing in...</span>`;
-  }
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = `<span>Verifying credentials...</span>`;
 
-  setTimeout(() => {
-    try {
-      localStorage.setItem('Vels:signedout', '0');
-      localStorage.setItem(
-        'Vels:active_user',
-        JSON.stringify({
-          email,
-          role: 'Super Admin',
-          name: email.split('@')[0],
-          loginTime: new Date().toISOString(),
-        })
-      );
-    } catch (err) {
-      console.warn('Storage save error:', err);
-    }
+  try {
+    // Unified Smart Authentication Call (Q1 - Option C)
+    const res = await unifiedLogin(email, pass);
+
+    // Micro-interaction on button (Q4 - Option A)
+    submitBtn.classList.add('is-success');
+    submitBtn.innerHTML = `<span>✓ Authenticated</span>`;
+
+    // SweetAlert2 notification with Agro Emerald Theme (Q4)
+    const isDark = document.documentElement.dataset.theme === 'dark';
+    await Swal.fire({
+      title: 'Authentication Successful',
+      text: `Welcome back, ${res.user.first_name || res.user.name || 'Admin'}! Secure session established.`,
+      icon: 'success',
+      timer: 1400,
+      timerProgressBar: true,
+      showConfirmButton: false,
+      background: isDark ? '#142017' : '#ffffff',
+      color: isDark ? '#f0fdf4' : '#14532d',
+      iconColor: '#10b981',
+      customClass: {
+        popup: 'vels-swal-popup',
+        timerProgressBar: 'vels-swal-progress',
+      },
+    });
 
     // Smooth navigation to Dashboard Overview
     try {
       if (typeof (window as any).navigateTo === 'function') {
         (window as any).navigateTo('/dashboard/overview');
       } else {
-        window.location.hash = '#/dashboard/overview';
+        window.location.pathname = '/dashboard/overview';
       }
-    } catch (err) {
-      console.error('Navigation error:', err);
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `<span>Sign in</span>`;
-      }
+    } catch (navErr) {
+      console.error('Navigation error:', navErr);
+      window.location.pathname = '/dashboard/overview';
     }
-  }, 350);
+  } catch (err: any) {
+    submitBtn.classList.remove('is-success');
+
+    if (err instanceof ApiError && err.statusCode === 429) {
+      // Q3 - Both (Amber Lockout Box + Live Countdown Timer + Disabled Button)
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Account Locked</span>`;
+      showLoginAlert(
+        'warning',
+        'Security Lockout (Too Many Attempts)',
+        err.message || 'Account temporarily locked due to too many failed attempts. Try again in 15 minutes.',
+        900
+      );
+    } else {
+      // Q2 - Option A (Card Shake + Red Banner Alert)
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span>Sign in</span>
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>`;
+
+      passInput.classList.add('is-invalid');
+      passInput.focus();
+
+      const errMsg = err?.message || 'Invalid email or password.';
+      showLoginAlert('danger', 'Authentication Failed', errMsg);
+    }
+  }
 }
 
 function updateThemeIcons(theme: string) {
@@ -246,71 +421,46 @@ function updateThemeIcons(theme: string) {
 }
 
 function handleThemeToggle(e: MouseEvent) {
-  const btn = (e.currentTarget as HTMLElement) || (document.getElementById('login-theme-toggle') as HTMLElement);
   const current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
   const next = current === 'dark' ? 'light' : 'dark';
 
-  // Icon spin & bounce animation
-  if (btn) {
-    btn.animate(
-      [
-        { transform: 'scale(0.85) rotate(-90deg)' },
-        { transform: 'scale(1.12) rotate(15deg)', offset: 0.7 },
-        { transform: 'scale(1) rotate(0deg)' },
-      ],
-      { duration: 550, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
-    );
-  }
-
-  // 1. If global setTheme is available (from main.ts), delegate to it for native consistency
-  if (typeof (window as any).setTheme === 'function') {
-    (window as any).setTheme(next, btn);
-    updateThemeIcons(next);
-    return;
-  }
-
-  // 2. Direct circular ripple view-transition implementation (matches El in main.ts)
-  const applyTheme = () => {
+  if (!(document as any).startViewTransition) {
     document.documentElement.dataset.theme = next;
     try {
       localStorage.setItem('Vels:theme', JSON.stringify(next));
     } catch {}
     updateThemeIcons(next);
-  };
-
-  const doc = document as any;
-  if (!doc.startViewTransition || !btn) {
-    applyTheme();
     return;
   }
 
-  const rect = btn.getBoundingClientRect();
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
   const x = rect.left + rect.width / 2;
   const y = rect.top + rect.height / 2;
-  const maxRadius = Math.hypot(
+  const radius = Math.hypot(
     Math.max(x, window.innerWidth - x),
     Math.max(y, window.innerHeight - y)
   );
 
-  const transition = doc.startViewTransition(applyTheme);
+  const transition = (document as any).startViewTransition(() => {
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem('Vels:theme', JSON.stringify(next));
+    } catch {}
+    updateThemeIcons(next);
+  });
 
-  transition.ready
-    .then(() => {
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${maxRadius}px at ${x}px ${y}px)`,
-          ],
-        },
-        {
-          duration: 620,
-          easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
-          pseudoElement: '::view-transition-new(root)',
-        }
-      );
-    })
-    .catch(() => {});
+  transition.ready.then(() => {
+    document.documentElement.animate(
+      {
+        clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
+      },
+      {
+        duration: 480,
+        easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+        pseudoElement: '::view-transition-new(root)',
+      }
+    );
+  });
 }
 
 export const page = {
@@ -357,13 +507,13 @@ export const page = {
       const submitBtn = containerEl.querySelector('#login-submit') as HTMLButtonElement | null;
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `<span>Sign in</span>`;
+        submitBtn.classList.remove('is-success');
+        submitBtn.innerHTML = `<span>Sign in</span>
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>`;
       }
-      const errEl = containerEl.querySelector('#login-error');
-      if (errEl) {
-        errEl.classList.remove('is-active');
-        errEl.textContent = '';
-      }
+      clearLoginAlert();
       const emailInput = containerEl.querySelector('#login-email') as HTMLInputElement | null;
       if (emailInput && !emailInput.value) {
         emailInput.focus();
@@ -371,6 +521,9 @@ export const page = {
     }
   },
   leave() {
-    // Cleanup if needed
+    if (lockoutTimerInterval) {
+      clearInterval(lockoutTimerInterval);
+      lockoutTimerInterval = null;
+    }
   },
 };

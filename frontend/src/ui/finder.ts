@@ -21,17 +21,17 @@ export function querySearchIndex(query: string): SearchResult[] {
 
   // 1. Pages / Navigation
   const pages: { label: string; meta: string; href: string }[] = [
-    { label: 'Dashboard', meta: 'Overview, analytics & KPIs', href: '#/dashboard/overview' },
-    { label: 'Categories', meta: 'Machinery categories, sub-categories & compatibility matrix', href: '#/categories/list' },
-    { label: 'Products', meta: 'Catalog & formulation BOMs', href: '#/products/catalog' },
-    { label: 'Orders', meta: 'Sales orders & Kanban board', href: '#/orders/board' },
-    { label: 'Purchasing', meta: 'Purchase orders, suppliers & raw materials', href: '#/purchasing/orders' },
-    { label: 'Warehouses', meta: 'Locations, transfers & cycle counts', href: '#/warehouses/locations' },
-    { label: 'Dealers', meta: 'Dealer network, registrations, pricing & inventory', href: '#/dealers/locations' },
-    { label: 'Analytics', meta: 'Reports, revenue & stock velocity', href: '#/analytics/overview' },
-    { label: 'Customers', meta: 'Stockists, retail shoppers & RFM ledger', href: '#/customers/stockists' },
-    { label: 'Settings', meta: 'Account, team roles, billing & alerts', href: '#/settings/account' },
-    { label: 'Help center', meta: 'Knowledge base, shortcuts & tickets', href: '#/help/center' },
+    { label: 'Dashboard', meta: 'Overview, analytics & KPIs', href: '/dashboard/overview' },
+    { label: 'Categories', meta: 'Machinery categories, sub-categories & compatibility matrix', href: '/categories/list' },
+    { label: 'Products', meta: 'Catalog & formulation BOMs', href: '/products/catalog' },
+    { label: 'Orders', meta: 'Sales orders & Kanban board', href: '/orders/board' },
+    { label: 'Purchasing', meta: 'Purchase orders, suppliers & raw materials', href: '/purchasing/orders' },
+    { label: 'Warehouses', meta: 'Locations, transfers & cycle counts', href: '/warehouses/locations' },
+    { label: 'Dealers', meta: 'Dealer network, registrations, pricing & inventory', href: '/dealers/locations' },
+    { label: 'Analytics', meta: 'Reports, revenue & stock velocity', href: '/analytics/overview' },
+    { label: 'Customers', meta: 'Stockists, retail shoppers & RFM ledger', href: '/customers/stockists' },
+    { label: 'Settings', meta: 'Account, team roles, billing & alerts', href: '/settings/account' },
+    { label: 'Help center', meta: 'Knowledge base, shortcuts & tickets', href: '/help/center' },
   ];
 
   pages
@@ -58,7 +58,7 @@ export function querySearchIndex(query: string): SearchResult[] {
         group: 'Products',
         label: p.name,
         meta: `${p.size} · ${p.sku ?? ''} · ₹${p.price}`,
-        href: `#/products/item/${p.id}`,
+        href: `/products/item/${p.id}`,
         lead: `<span class="lead">${renderIcon('box')}</span>`,
       });
     });
@@ -73,7 +73,7 @@ export function querySearchIndex(query: string): SearchResult[] {
         group: 'Batches',
         label: `Lot ${b.lot}`,
         meta: `${prod?.name ?? ''} · ${b.status} · ${b.left} left`,
-        href: `#/products/batches/${b.id}`,
+        href: `/products/batches/${b.id}`,
         lead: `<span class="lead">${renderIcon('cal')}</span>`,
       });
     });
@@ -88,7 +88,7 @@ export function querySearchIndex(query: string): SearchResult[] {
         group: 'Orders',
         label: o.number,
         meta: `${cust?.name ?? ''} · ${o.status} · ₹${o.lines.reduce((acc, l) => acc + l.qty * l.price, 0)}`,
-        href: `#/orders/all/${o.id}`,
+        href: `/orders/all/${o.id}`,
         lead: `<span class="lead">${renderIcon('orders')}</span>`,
       });
     });
@@ -102,7 +102,7 @@ export function querySearchIndex(query: string): SearchResult[] {
         group: 'Customers',
         label: c.name,
         meta: `${c.kind === 'stockist' ? 'Stockist' : 'Shopper'} · ${c.city}`,
-        href: `#/customers/${c.kind === 'stockist' ? 'stockists' : 'shoppers'}/${c.id}`,
+        href: `/customers/${c.kind === 'stockist' ? 'stockists' : 'shoppers'}/${c.id}`,
         lead: `<span class="lead">${renderIcon('users')}</span>`,
       });
     });
@@ -116,7 +116,7 @@ export function querySearchIndex(query: string): SearchResult[] {
         group: 'Suppliers',
         label: s.name,
         meta: `${s.contact} · ${s.country}`,
-        href: `#/purchasing/suppliers/${s.id}`,
+        href: `/purchasing/suppliers/${s.id}`,
         lead: `<span class="lead">${renderIcon('cart')}</span>`,
       });
     });
@@ -130,7 +130,7 @@ export function querySearchIndex(query: string): SearchResult[] {
         group: 'Materials',
         label: m.name,
         meta: `${m.code ?? m.sku ?? ''} · ${m.onHand} ${m.unit}`,
-        href: `#/purchasing/materials/${m.id}`,
+        href: `/purchasing/materials/${m.id}`,
         lead: `<span class="lead">${renderIcon('drop')}</span>`,
       });
     });

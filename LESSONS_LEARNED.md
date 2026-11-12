@@ -82,3 +82,27 @@ This document records architectural decisions, potential production pitfalls ide
 ### 13. Brotli / Gzip Payload Optimization & Connection Keep-Alive
 - **Issue**: Large JSON arrays (such as roles, permissions catalogs, audit logs) introduce mobile network latency.
 - **Resolution**: Added `compression()` middleware to negotiate Brotli/Gzip content encoding automatically, shrinking payloads by ~70%, and enabled TCP Keep-Alive in MySQL connection pools to eliminate TCP handshake latency.
+
+---
+
+### 14. SPA Clean URLs: Migrating from Hash Routing to HTML5 History API
+- **Issue**: The frontend was forcing a `#` in all URLs (e.g. `http://localhost:5173/#/login`), which looks outdated and complicates query string handling and deep-linking.
+- **Resolution**: Replaced `location.hash` and `hashchange` listeners with `window.history.pushState()`, `window.history.replaceState()`, and `location.pathname`. Added automatic normalization so legacy `#` bookmarks seamlessly redirect to clean paths without reloading.
+
+---
+
+### 15. Concurrency & CPU-Intensive Hashing Bottlenecks in Node.js Event Loop
+- **Issue**: Simulating 100 concurrent logins at the exact same millisecond took ~8.78 seconds, while standard read endpoints took only 5ms.
+- **Resolution**: Diagnosed that `bcrypt.compare` is intentionally CPU-intensive (cost 10 = 1024 iterations). Because Node.js delegates bcrypt to the Libuv worker thread pool (default 4 threads), 100 requests queue in batches of 4. Node.js successfully handled all 100 logins with 0 dropped connections and zero memory leaks. To scale beyond 1,000 concurrent logins in production, recommended raising `UV_THREADPOOL_SIZE=16` or using PM2 cluster mode to utilize all CPU cores.
+
+---
+
+### 16. Zero-Fallback Environment Configuration in Vite Build Systems
+- **Issue**: Using fallback expressions like `const backendUrl = env.VITE_BACKEND_URL || 'http://localhost:5000'` masks missing environment configuration and breaks deployment portability across staging and production environments.
+- **Resolution**: Enforced strict environment retrieval in `vite.config.js` via `const backendUrl = env.VITE_BACKEND_URL;` and `import.meta.env.VITE_API_URL`. All environments define their target host strictly via `.env` files with zero hardcoded fallbacks in source code.
+
+---
+
+### 17. Unified Smart Authentication Gateways in Multi-Table Auth Schemas
+- **Issue**: When an enterprise system isolates Superadmins (`admin_users`) from Staff (`dashboard_users`) into distinct database tables and login endpoints, forcing users to manually select their role on the login UI degrades UX and introduces operational friction.
+- **Resolution**: Engineered a Unified Smart Auth Gateway (`src/core/api/authService.ts`) in the frontend. It transparently routes credentials to the appropriate endpoint, securely saves role and session tokens, and presents a cohesive, single-form login experience with SweetAlert2 notifications and GSAP micro-animations.

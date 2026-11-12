@@ -4667,29 +4667,29 @@ var rd = new Map(),
   ad,
   od = 0;
 async function sd(e = !1) {
-  let raw = location.hash;
-  if (!raw || raw === '#' || raw === '#/') {
-    if (location.pathname && location.pathname !== '/') {
-      raw = '#' + location.pathname;
-    } else {
-      raw = '#/dashboard/overview';
-    }
+  let raw = location.pathname;
+  if (location.hash && location.hash.startsWith('#/')) {
+    raw = location.hash.replace(/^#/, '');
+    history.replaceState(null, '', raw);
+  }
+  if (!raw || raw === '/' || raw === '') {
+    raw = '/dashboard/overview';
   }
   let isSignedOut = !1;
   try {
     isSignedOut = localStorage.getItem(`Vels:signedout`) === `1`;
   } catch {}
-  if (isSignedOut && !raw.startsWith(`#/login`)) {
-    raw = `#/login`;
-  } else if (!isSignedOut && (raw === `#/login` || raw === `#/login/`)) {
-    raw = `#/dashboard/overview`;
+  if (isSignedOut && !raw.startsWith(`/login`)) {
+    raw = `/login`;
+  } else if (!isSignedOut && (raw === `/login` || raw === `/login/`)) {
+    raw = `/dashboard/overview`;
   }
   let { name: n, params: r } = Gu(raw);
-  let canonicalHash = n === `login` ? `#/login` : `#/${n}/${r.map(encodeURIComponent).join(`/`)}`;
-  if (location.hash !== canonicalHash) {
-    history.replaceState(null, ``, canonicalHash);
+  let canonicalPath = n === `login` ? `/login` : `/${n}/${r.map(encodeURIComponent).join(`/`)}`;
+  if (location.pathname !== canonicalPath || location.hash) {
+    history.replaceState(null, ``, canonicalPath);
   }
-  let i = canonicalHash;
+  let i = canonicalPath;
   let a = ++od;
   Kc(!0);
   let modalEl = io('#modal') as HTMLDialogElement;
@@ -4788,9 +4788,9 @@ function cd(e, t) {
 function navigateTo(url) {
   let path = (url || '').replace(/^#/, '');
   if (!path.startsWith('/')) path = '/' + path;
-  let targetHash = '#' + path;
-  if (location.hash !== targetHash) {
-    location.hash = targetHash;
+  if (location.pathname !== path) {
+    history.pushState(null, '', path);
+    sd();
   } else {
     sd();
   }
@@ -5473,13 +5473,11 @@ function Rd(e = !1) {
     isSignedOut = localStorage.getItem(`Vels:signedout`) === `1`;
   } catch {}
   if (isSignedOut) {
-    if (location.hash !== `#/login`) history.replaceState(null, ``, `#/login`);
-  } else if (!location.hash || location.hash === `#` || location.hash === `#/`) {
-    if (location.pathname && location.pathname !== `/`) {
-      history.replaceState(null, ``, `#` + location.pathname);
-    } else {
-      history.replaceState(null, ``, `#/dashboard/overview`);
-    }
+    if (location.pathname !== `/login`) history.replaceState(null, ``, `/login`);
+  } else if (location.hash && location.hash.startsWith('#/')) {
+    history.replaceState(null, ``, location.hash.replace(/^#/, ''));
+  } else if (!location.pathname || location.pathname === `/`) {
+    history.replaceState(null, ``, `/dashboard/overview`);
   }
 })());
 var zd = !1;

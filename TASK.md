@@ -72,14 +72,23 @@
 - [x] Built and passed automated Playwright Negative & Chaos Test Suite (`tests/playwright_api_chaos.cjs`):
   - 11/11 Chaos scenarios passed (Malformed JSON, short passwords, invalid emails, mass assignment, tampered tokens, non-numeric IDs, Brotli compression)
 - [x] Built and passed 100% automated test suite (`npm run test:api`) covering all 14 test scenarios!
+- [x] Executed full spectrum benchmark across all 19 endpoints (570 requests, 100% success, 32.8ms avg latency).
+- [x] Executed 100 concurrent logins stress test (100/100 succeeded in 8.78s, 0 dropped).
 
 ---
 
-### Phase 4: Frontend-Backend Integration & E2E Testing [NEXT / READY]
-- [ ] Connect Frontend API service in `frontend/src/` to `http://localhost:5000/api/v1`
-- [ ] Replace mock authentication with live JWT bearer authentication
-- [ ] Wire Dashboard Users and Roles UI to live backend
-- [ ] Run Playwright verification suite
+### Phase 4: Frontend-Backend Integration & Alert UX [ACTIVE]
+- [x] Removed `#` (Hash routing) from frontend routes; upgraded to clean HTML5 History API routing (`/login`).
+- [x] Verified route normalization and clean URL loading via Playwright headless browser.
+- [x] Enforced Zero Hardcoding Policy for Frontend: `frontend/.env` and `vite.config.js` (`const backendUrl = env.VITE_BACKEND_URL;` without fallback strings).
+- [x] Built robust API Client (`frontend/src/core/api/apiClient.ts`) reading strictly from `VITE_API_URL`.
+- [x] Built Unified Authentication Service (`src/core/api/authService.ts`) auto-resolving Super Admin vs Staff (Q1 - Option C).
+- [x] Implemented GSAP Card Shake + Sleek Inline Danger Alert Banner for wrong credentials & validation errors (Q2 - Option A).
+- [x] Implemented Amber Security Lockout Box with live countdown timer and button disable for 429 status (Q3 - Both).
+- [x] Implemented Button Micro-interaction (`✓ Authenticated`) + SweetAlert2 Emerald Agro Theme popup (Q4 - Option A + SweetAlert).
+- [x] Verified both Superadmin (`SUPER_ADMIN`) and Staff (`DASHBOARD_USER`) live login flows in Playwright (100% passing).
+- [ ] Wire staff management (`src/features/settings/subtabs/team.ts`) to `/api/v1/admin/dashboard-users`.
+- [ ] Wire Roles matrix to `/api/v1/admin/roles`.
 
 ---
 

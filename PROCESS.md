@@ -35,6 +35,13 @@ node/
 3. **Always Clean Up Connections**: Use `conn.release()` on pool connections or query directly via `pool.query()`.
 4. **Graceful Shutdown**: The process must capture `SIGTERM` and `SIGINT` to close open sockets and DB pools safely.
 5. **Port Binding**: Always bind to `0.0.0.0` to ensure Docker and cloud environment compatibility.
+6. **Frontend-Backend Contract & Alert Standards**:
+   - Every API response explicitly delivers `statusCode: <int>`.
+   - `200/201`: Success Toast or optimistic state transition.
+   - `400`: Zod validation issues rendered inline below relevant form inputs.
+   - `401`: Credential error displayed inside the login card banner.
+   - `429`: Rate limit or brute-force account lockout banner with timer.
+   - `500`: Generic error banner with non-technical, helpful message.
 
 ---
 

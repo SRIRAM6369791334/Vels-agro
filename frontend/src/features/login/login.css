@@ -762,3 +762,115 @@ html[data-route="login"] .view[data-view="login"] {
     border-radius: 26px;
   }
 }
+
+/* =========================================================
+   6. ENTERPRISE ALERT BANNER & SWEETALERT ENHANCEMENTS
+   ========================================================= */
+
+.login-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: var(--fs-xs, 12px);
+  line-height: 1.45;
+  margin-bottom: 4px;
+  transition: all 0.25s ease;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.login-alert--danger {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #b91c1c;
+}
+:root[data-theme="dark"] .login-alert--danger {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+}
+
+.login-alert--warning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #b45309;
+}
+:root[data-theme="dark"] .login-alert--warning {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fcd34d;
+}
+
+.login-alert__icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+}
+.login-alert__icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2px;
+}
+
+.login-alert__content {
+  flex: 1;
+}
+
+.login-alert__title {
+  display: block;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.login-alert__desc {
+  margin: 0;
+  opacity: 0.95;
+}
+
+.login-alert__timer {
+  margin-top: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.login-alert__timer b {
+  font-variant-numeric: tabular-nums;
+  color: #dc2626;
+  font-weight: 800;
+}
+:root[data-theme="dark"] .login-alert__timer b {
+  color: #f87171;
+}
+
+.field__input.is-invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18) !important;
+}
+
+.login-card__btn.is-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* SweetAlert2 Agro Theme Overrides */
+.vels-swal-popup {
+  border-radius: 24px !important;
+  padding: 24px 28px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22) !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  backdrop-filter: blur(12px) !important;
+}
+.vels-swal-progress {
+  background: #10b981 !important;
+}
+

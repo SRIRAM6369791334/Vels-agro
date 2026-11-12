@@ -209,9 +209,9 @@ export function navigateTo(url: string): void {
   let path = (url || '').replace(/^#/, '');
   if (!path.startsWith('/')) path = '/' + path;
 
-  const targetHash = '#' + path;
-  if (location.hash !== targetHash) {
-    location.hash = targetHash;
+  if (location.pathname !== path) {
+    history.pushState(null, '', path);
+    executeRouteTransition();
   } else {
     executeRouteTransition();
   }
@@ -248,7 +248,7 @@ export function renderSubtabs(routeName: string, activeSub: string, animate = fa
     tabsTrack.innerHTML = `<span class="tabs__pill" aria-hidden="true"></span>${meta.subs
       .map(
         ([sub, label], idx) =>
-          `<a class="tab" href="#/${routeName}/${sub}" data-sub="${sub}">${
+          `<a class="tab" href="/${routeName}/${sub}" data-sub="${sub}">${
             idx === 0 ? `<span class="tab__sec">${escapeHtml(meta.label)}</span>` : ''
           }<span>${escapeHtml(label)}</span></a>`
       )
@@ -306,15 +306,14 @@ export function syncSidebarNavigation(routeName: string): void {
 }
 
 export async function executeRouteTransition(skipAnimation = false): Promise<void> {
-  // Read current URL from location.hash first (standard hash router)
-  let raw = location.hash;
-  if (!raw || raw === '#' || raw === '#/') {
-    // Check if pathname has a route or default to dashboard/overview
-    if (location.pathname && location.pathname !== '/') {
-      raw = '#' + location.pathname;
-    } else {
-      raw = '#/dashboard/overview';
-    }
+  // Read current URL from location.pathname first (standard HTML5 history router)
+  let raw = location.pathname;
+  if (location.hash && location.hash.startsWith('#/')) {
+    raw = location.hash.replace(/^#/, '');
+    history.replaceState(null, '', raw);
+  }
+  if (!raw || raw === '/' || raw === '') {
+    raw = '/dashboard/overview';
   }
 
   let isSignedOut = false;
@@ -322,17 +321,17 @@ export async function executeRouteTransition(skipAnimation = false): Promise<voi
     isSignedOut = localStorage.getItem('Vels:signedout') === '1';
   } catch {}
 
-  if (isSignedOut && !raw.startsWith('#/login')) {
-    raw = '#/login';
-  } else if (!isSignedOut && (raw === '#/login' || raw === '#/login/')) {
-    raw = '#/dashboard/overview';
+  if (isSignedOut && !raw.startsWith('/login')) {
+    raw = '/login';
+  } else if (!isSignedOut && (raw === '/login' || raw === '/login/')) {
+    raw = '/dashboard/overview';
   }
 
   const { name, params } = parseRoute(raw);
-  const canonicalHash = name === 'login' ? '#/login' : `#/${name}/${params.map(encodeURIComponent).join('/')}`;
+  const canonicalPath = name === 'login' ? '/login' : `/${name}/${params.map(encodeURIComponent).join('/')}`;
 
-  if (location.hash !== canonicalHash) {
-    history.replaceState(null, '', canonicalHash);
+  if (location.pathname !== canonicalPath || location.hash) {
+    history.replaceState(null, '', canonicalPath);
   }
 
   const currentEpoch = ++routeTransitionEpoch;
