@@ -26,11 +26,15 @@ export const checkLockout = async (email, ipAddress, userType = null) => {
     if (failedCount >= LOCKOUT_THRESHOLD) {
       const lastAttempt = new Date(rows[0].last_attempt);
       const unlockTime = new Date(lastAttempt.getTime() + LOCKOUT_WINDOW_MINUTES * 60 * 1000);
-      const remainingMinutes = Math.max(1, Math.ceil((unlockTime - new Date()) / (60 * 1000)));
+      const remainingMs = Math.max(0, unlockTime.getTime() - Date.now());
+      const remainingSeconds = Math.max(1, Math.ceil(remainingMs / 1000));
+      const remainingMinutes = Math.max(1, Math.ceil(remainingMs / (60 * 1000)));
 
       return {
         isLocked: true,
+        remainingSeconds,
         remainingMinutes,
+        unlockAt: unlockTime.toISOString(),
         message: `Account temporarily locked due to multiple failed attempts. Try again in ${remainingMinutes} minute(s).`
       };
     }

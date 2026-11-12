@@ -28,6 +28,16 @@ export const unifiedLogin = async (req, res) => {
   const cleanEmail = email.toLowerCase().trim();
 
   try {
+    // 0. Pre-emptive Lockout Check (protects against brute-force across all roles)
+    const lockout = await checkLockout(cleanEmail, ipAddress);
+    if (lockout.isLocked) {
+      return sendError(res, 429, lockout.message, null, {
+        remainingSeconds: lockout.remainingSeconds,
+        remainingMinutes: lockout.remainingMinutes,
+        unlockAt: lockout.unlockAt
+      });
+    }
+
     // 1. Check if email exists in admin_users
     const [admins] = await pool.query(
       `SELECT id, email, password_hash, first_name, last_name, phone, is_active FROM admin_users WHERE email = ? LIMIT 1;`,
@@ -36,10 +46,6 @@ export const unifiedLogin = async (req, res) => {
 
     if (admins.length > 0) {
       const admin = admins[0];
-      const lockout = await checkLockout(cleanEmail, ipAddress, 'SUPER_ADMIN');
-      if (lockout.isLocked) {
-        return sendError(res, 429, lockout.message);
-      }
 
       if (!admin.is_active) {
         return sendError(res, 403, 'Your Superadmin account has been deactivated.');
@@ -112,7 +118,11 @@ export const unifiedLogin = async (req, res) => {
       const user = staffs[0];
       const lockout = await checkLockout(cleanEmail, ipAddress, 'DASHBOARD_USER');
       if (lockout.isLocked) {
-        return sendError(res, 429, lockout.message);
+        return sendError(res, 429, lockout.message, null, {
+          remainingSeconds: lockout.remainingSeconds,
+          remainingMinutes: lockout.remainingMinutes,
+          unlockAt: lockout.unlockAt
+        });
       }
 
       if (!user.is_active) {
@@ -207,7 +217,11 @@ export const adminLogin = async (req, res) => {
     // 1. Check Brute-Force Lockout (isolated to Superadmin attempts)
     const lockout = await checkLockout(email, ipAddress, 'SUPER_ADMIN');
     if (lockout.isLocked) {
-      return sendError(res, 429, lockout.message);
+      return sendError(res, 429, lockout.message, null, {
+        remainingSeconds: lockout.remainingSeconds,
+        remainingMinutes: lockout.remainingMinutes,
+        unlockAt: lockout.unlockAt
+      });
     }
 
     // 2. Query admin_users
@@ -307,7 +321,11 @@ export const dashboardLogin = async (req, res) => {
     // 1. Check Brute-Force Lockout (isolated to Dashboard User attempts)
     const lockout = await checkLockout(email, ipAddress, 'DASHBOARD_USER');
     if (lockout.isLocked) {
-      return sendError(res, 429, lockout.message);
+      return sendError(res, 429, lockout.message, null, {
+        remainingSeconds: lockout.remainingSeconds,
+        remainingMinutes: lockout.remainingMinutes,
+        unlockAt: lockout.unlockAt
+      });
     }
 
     // 2. Query dashboard_users with Role info

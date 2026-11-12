@@ -10,6 +10,49 @@ import './login.css';
 let containerEl: HTMLElement | null = null;
 let lockoutTimerInterval: any = null;
 let remainingLockoutSeconds = 0;
+const LOCKOUT_STORAGE_KEY = 'Vels:lockout';
+
+function restoreLockoutStateIfActive(): boolean {
+  try {
+    const raw = sessionStorage.getItem(LOCKOUT_STORAGE_KEY);
+    if (!raw) return false;
+    const item = JSON.parse(raw);
+    if (!item || !item.unlockAt) {
+      sessionStorage.removeItem(LOCKOUT_STORAGE_KEY);
+      return false;
+    }
+    const unlockTime = new Date(item.unlockAt).getTime();
+    const now = Date.now();
+    const remaining = Math.max(0, Math.ceil((unlockTime - now) / 1000));
+    if (remaining <= 0) {
+      sessionStorage.removeItem(LOCKOUT_STORAGE_KEY);
+      return false;
+    }
+
+    const emailInput = document.querySelector('#login-email') as HTMLInputElement | null;
+    if (emailInput && item.email && !emailInput.value) {
+      emailInput.value = item.email;
+    }
+
+    const submitBtn = document.querySelector('#login-submit') as HTMLButtonElement | null;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Account Locked</span>`;
+    }
+
+    showLoginAlert(
+      'warning',
+      'Security Lockout (Too Many Attempts)',
+      item.message || `Account temporarily locked due to multiple failed attempts. Try again in ${Math.ceil(remaining / 60)} minute(s).`,
+      remaining,
+      item.unlockAt
+    );
+    return true;
+  } catch (err) {
+    sessionStorage.removeItem(LOCKOUT_STORAGE_KEY);
+    return false;
+  }
+}
 
 function renderLoginForm(): string {
   const currentTheme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
@@ -169,7 +212,8 @@ function showLoginAlert(
   type: 'danger' | 'warning',
   title: string,
   desc: string,
-  countdownSeconds?: number
+  countdownSeconds?: number,
+  unlockAt?: string
 ) {
   const alertEl = document.querySelector('#login-alert') as HTMLElement | null;
   const iconEl = document.querySelector('#login-alert-icon') as HTMLElement | null;
@@ -207,22 +251,36 @@ function showLoginAlert(
       </svg>
     `;
 
-    if (countdownSeconds && timerWrap && countdownEl) {
+    if (timerWrap && countdownEl && (countdownSeconds || unlockAt)) {
       timerWrap.style.display = 'flex';
-      remainingLockoutSeconds = countdownSeconds;
+
+      const calculateRemaining = (): number => {
+        if (unlockAt) {
+          const target = new Date(unlockAt).getTime();
+          return Math.max(0, Math.ceil((target - Date.now()) / 1000));
+        }
+        return remainingLockoutSeconds;
+      };
+
+      remainingLockoutSeconds = countdownSeconds ?? calculateRemaining();
 
       const updateTimerDisplay = () => {
-        const mins = Math.floor(remainingLockoutSeconds / 60);
-        const secs = remainingLockoutSeconds % 60;
+        const secsLeft = calculateRemaining();
+        remainingLockoutSeconds = secsLeft;
+        const mins = Math.floor(secsLeft / 60);
+        const secs = secsLeft % 60;
         countdownEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
       };
 
       updateTimerDisplay();
       lockoutTimerInterval = setInterval(() => {
-        remainingLockoutSeconds--;
-        if (remainingLockoutSeconds <= 0) {
+        const secsLeft = calculateRemaining();
+        if (secsLeft <= 0) {
           clearInterval(lockoutTimerInterval);
           lockoutTimerInterval = null;
+          try {
+            sessionStorage.removeItem(LOCKOUT_STORAGE_KEY);
+          } catch {}
           clearLoginAlert();
           const submitBtn = document.querySelector('#login-submit') as HTMLButtonElement | null;
           if (submitBtn) {
@@ -269,6 +327,11 @@ function clearLoginAlert() {
 
 async function handleLoginSubmit(e: Event) {
   e.preventDefault();
+
+  if (restoreLockoutStateIfActive()) {
+    return;
+  }
+
   const form = e.target as HTMLFormElement;
   const emailInput = form.querySelector('#login-email') as HTMLInputElement | null;
   const passInput = form.querySelector('#login-pass') as HTMLInputElement | null;
@@ -315,6 +378,10 @@ async function handleLoginSubmit(e: Event) {
   try {
     const res = await unifiedLogin(email, pass);
 
+    try {
+      sessionStorage.removeItem(LOCKOUT_STORAGE_KEY);
+    } catch {}
+
     submitBtn.classList.add('is-success');
     submitBtn.innerHTML = `<span>✓ Authenticated</span>`;
 
@@ -349,13 +416,31 @@ async function handleLoginSubmit(e: Event) {
     submitBtn.classList.remove('is-success');
 
     if (err instanceof ApiError && err.statusCode === 429) {
+      const data = err.data || {};
+      const seconds = typeof data.remainingSeconds === 'number'
+        ? data.remainingSeconds
+        : (typeof data.remainingMinutes === 'number' ? data.remainingMinutes * 60 : 900);
+      const unlockAt = data.unlockAt || new Date(Date.now() + seconds * 1000).toISOString();
+
+      try {
+        sessionStorage.setItem(
+          LOCKOUT_STORAGE_KEY,
+          JSON.stringify({
+            email,
+            unlockAt,
+            message: err.message
+          })
+        );
+      } catch {}
+
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<span>Account Locked</span>`;
       showLoginAlert(
         'warning',
         'Security Lockout (Too Many Attempts)',
-        err.message || 'Account temporarily locked due to too many failed attempts. Try again in 15 minutes.',
-        900
+        err.message || `Account temporarily locked due to multiple failed attempts. Try again in ${Math.ceil(seconds / 60)} minute(s).`,
+        seconds,
+        unlockAt
       );
     } else {
       submitBtn.disabled = false;
@@ -467,19 +552,22 @@ export const page = {
   },
   enter() {
     if (containerEl) {
-      const submitBtn = containerEl.querySelector('#login-submit') as HTMLButtonElement | null;
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('is-success');
-        submitBtn.innerHTML = `<span>Sign in</span>
-          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>`;
-      }
-      clearLoginAlert();
-      const emailInput = containerEl.querySelector('#login-email') as HTMLInputElement | null;
-      if (emailInput && !emailInput.value) {
-        emailInput.focus();
+      const isLocked = restoreLockoutStateIfActive();
+      if (!isLocked) {
+        const submitBtn = containerEl.querySelector('#login-submit') as HTMLButtonElement | null;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('is-success');
+          submitBtn.innerHTML = `<span>Sign in</span>
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>`;
+        }
+        clearLoginAlert();
+        const emailInput = containerEl.querySelector('#login-email') as HTMLInputElement | null;
+        if (emailInput && !emailInput.value) {
+          emailInput.focus();
+        }
       }
     }
   },
