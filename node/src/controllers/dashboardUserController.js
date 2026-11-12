@@ -186,9 +186,6 @@ export const createDashboardUser = async (req, res) => {
       isActive: true
     });
   } catch (err) {
-    if (err.code === 'ER_DUP_ENTRY' || err.errno === 1062) {
-      return sendError(res, 409, 'A dashboard user with this email address already exists.');
-    }
     console.error('Create Dashboard User Error:', err);
     return sendError(res, 500, 'Failed to create dashboard user.');
   }
