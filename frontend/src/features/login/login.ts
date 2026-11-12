@@ -22,7 +22,7 @@ function restoreLockoutStateIfActive(): boolean {
       return false;
     }
     const unlockTime = new Date(item.unlockAt).getTime();
-    const now = Date.now();
+    const now = new Date().getTime();
     const remaining = Math.max(0, Math.ceil((unlockTime - now) / 1000));
     if (remaining <= 0) {
       sessionStorage.removeItem(LOCKOUT_STORAGE_KEY);
@@ -257,7 +257,7 @@ function showLoginAlert(
       const calculateRemaining = (): number => {
         if (unlockAt) {
           const target = new Date(unlockAt).getTime();
-          return Math.max(0, Math.ceil((target - Date.now()) / 1000));
+          return Math.max(0, Math.ceil((target - new Date().getTime()) / 1000));
         }
         return remainingLockoutSeconds;
       };
@@ -420,7 +420,7 @@ async function handleLoginSubmit(e: Event) {
       const seconds = typeof data.remainingSeconds === 'number'
         ? data.remainingSeconds
         : (typeof data.remainingMinutes === 'number' ? data.remainingMinutes * 60 : 900);
-      const unlockAt = data.unlockAt || new Date(Date.now() + seconds * 1000).toISOString();
+      const unlockAt = data.unlockAt || new Date(new Date().getTime() + seconds * 1000).toISOString();
 
       try {
         sessionStorage.setItem(

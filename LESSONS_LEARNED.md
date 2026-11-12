@@ -124,3 +124,20 @@ This document records architectural decisions, potential production pitfalls ide
 ### 20. The Golden Rule of API Integration: Zero UI Layout Alteration
 - **Issue**: When connecting backend API logic to an existing UI, adding unstyled wrapper `div`s (e.g. `<div class="login-card__fields">`) or injecting decorative icons (`<svg class="field__ico">`) breaks parent CSS Grid rules, causes shrink-to-fit button regressions, and misaligns inputs.
 - **Resolution**: API integration must strictly respect the designer's existing DOM hierarchy and CSS class names. Only bind dynamic behavior (handlers, error state classes, disabled states) to existing elements without modifying the markup structure.
+
+---
+
+### 21. Server-Client Lockout Countdown Synchronization & Session Storage Persistence
+- **Issue**:
+  1. **Timer Discrepancy**: The backend calculated dynamic remaining minutes from the database timestamp (e.g., *"Try again in 11 minute(s)"*), but the frontend started a hardcoded 900-second (15:00) timer on every 429 response, causing a confusing visual contradiction.
+  2. **State Loss on Reload**: The lockout state was kept purely in transient JavaScript memory. Reloading the page (F5) cleared the alert and restored an active submit button, leaving users confused until their next submission failed again.
+- **Resolution**:
+  - Backend now returns structured data `{ remainingSeconds, remainingMinutes, unlockAt }` along with the 429 response.
+  - Frontend persists `{ email, unlockAt, message }` in `sessionStorage` (`Vels:lockout`).
+  - On page load (`mount` / `enter`), the app checks `sessionStorage` and calculates the real remaining seconds until `unlockAt`. If still active, the amber alert banner is immediately restored, countdown resumes seamlessly, and the submit button remains disabled (`Account Locked`). On timer expiration, the form automatically unlocks.
+
+---
+
+### 22. The Pitfall of `Date.now()` Monkeypatching in Legacy Mock-Driven Codebases
+- **Issue**: In `frontend/src/main.ts`, `Date.now` was monkeypatched (`Date.now = () => e() + t;`) to simulate "October 19, 2026" for mock dashboard telemetry and chart dates. When the lockout logic subtracted `Date.now()` from the server's real UTC timestamp `unlockAt` (November 12, 2026), it created a phantom 24-day (~34,895 minutes) offset!
+- **Resolution**: Switched to `new Date().getTime()` in client-side time calculations, which reads the true wall-clock time from the un-monkeypatched `Date` prototype constructor, completely neutralizing the simulation offset.

@@ -88,6 +88,11 @@
 - [x] Fixed Topbar Profile Desync: Dynamic user initials and role display in `#btn-me` matching live session data.
 - [x] Implemented GSAP Card Shake + Sleek Inline Danger Alert Banner for wrong credentials & validation errors (Q2 - Option A).
 - [x] Implemented Amber Security Lockout Box with live countdown timer and button disable for 429 status (Q3 - Both).
+- [x] Fixed Lockout Timer Discrepancy & State Loss on Page Reload:
+  - Synchronized remaining lockout seconds and `unlockAt` timestamp from backend MySQL `login_attempts` table.
+  - Persisted lockout state across page reloads via `sessionStorage` (`Vels:lockout`) with automatic countdown resumption and automatic form unlock on expiration.
+  - Fixed 24-day time offset caused by mock data `Date.now` monkeypatch in `main.ts` by using `new Date().getTime()`.
+  - Verified with Playwright end-to-end test (`test_lockout_sync_and_persistence.cjs`): 100% passing across reload and countdown.
 - [x] Implemented Button Micro-interaction (`✓ Authenticated`) + SweetAlert2 Emerald Agro Theme popup (Q4 - Option A + SweetAlert).
 - [x] Verified both Superadmin (`SUPER_ADMIN`) and Staff (`DASHBOARD_USER`) live login and logout flows in Playwright (100% passing).
 - [ ] Wire staff management (`src/features/settings/subtabs/team.ts`) to `/api/v1/admin/dashboard-users`.

@@ -54,3 +54,18 @@ npm run dev
 # Start backend in production mode
 npm start
 ```
+
+---
+
+## 5. ⏱️ Lockout Synchronization & State Persistence Protocol
+1. **Dynamic Backend Seconds Calculation**:
+   - The security service calculates the exact unlock timestamp: `unlockTime = lastAttempt + LOCKOUT_WINDOW_MINUTES`.
+   - On 429 response, the backend sends `{ remainingSeconds, remainingMinutes, unlockAt }` inside `data`.
+2. **Deterministic Frontend Session Persistence**:
+   - The frontend stores `{ email, unlockAt, message }` in `sessionStorage` (`Vels:lockout`).
+   - On page reload (`mount` / `enter`), `restoreLockoutStateIfActive()` recalculates remaining seconds using `new Date().getTime()`.
+   - If active, the countdown resumes smoothly and the submit button remains locked (`Account Locked`).
+   - If expired, `sessionStorage` entry is removed and form automatically re-enables.
+3. **Protection Against Time-Mock Monkeypatching**:
+   - Frontend must never rely on `Date.now()` when third-party or legacy code mocks time.
+   - Always use `new Date().getTime()` to ensure real-time synchronization with server UTC timestamps.
