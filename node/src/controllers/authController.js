@@ -451,7 +451,138 @@ export const logout = async (req, res) => {
  * Get Current Authenticated Profile
  */
 export const getMe = async (req, res) => {
+  const user = req.user;
+  const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+
   return sendSuccess(res, 200, 'Current profile retrieved.', {
-    user: req.user
+    user: {
+      id: user.id,
+      email: user.email,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      name: fullName || user.email.split('@')[0],
+      jobTitle: user.job_title || (user.user_type === 'SUPER_ADMIN' ? 'Super Administrator' : 'Operations Staff'),
+      phone: user.phone || '',
+      roleName: user.role_name || (user.user_type === 'SUPER_ADMIN' ? 'Super Administrator' : 'Staff'),
+      roleId: user.role_id || null,
+      userType: user.user_type,
+      permissions: user.permissions || [],
+      isActive: Boolean(user.is_active),
+      lastLoginAt: user.last_login_at,
+      createdAt: user.created_at
+    }
   });
+};
+
+/**
+ * Update Current Authenticated Profile
+ */
+export const updateMe = async (req, res) => {
+  const user = req.user;
+  const { firstName, lastName, name, phone, jobTitle, email } = req.body;
+
+  // Strict Security Validation: Work email is immutable and cannot be changed
+  if (email !== undefined && String(email).trim().toLowerCase() !== user.email.trim().toLowerCase()) {
+    return sendError(
+      res,
+      400,
+      'Work email cannot be modified for security reasons. Your email is your permanent account identity.'
+    );
+  }
+
+  let fName = firstName;
+  let lName = lastName;
+
+  // Split single 'name' if provided
+  if (name !== undefined && firstName === undefined && lastName === undefined) {
+    const parts = name.trim().split(/\s+/);
+    fName = parts[0] || '';
+    lName = parts.slice(1).join(' ') || '';
+  }
+
+  try {
+    const table = user.user_type === 'SUPER_ADMIN' ? 'admin_users' : 'dashboard_users';
+    const updates = [];
+    const params = [];
+
+    if (fName !== undefined) { updates.push('first_name = ?'); params.push(fName); }
+    if (lName !== undefined) { updates.push('last_name = ?'); params.push(lName); }
+    if (phone !== undefined) { updates.push('phone = ?'); params.push(phone); }
+    if (jobTitle !== undefined) { updates.push('job_title = ?'); params.push(jobTitle); }
+
+    if (updates.length > 0) {
+      params.push(user.id);
+      await pool.query(`UPDATE ${table} SET ${updates.join(', ')} WHERE id = ?;`, params);
+    }
+
+    const [rows] = await pool.query(
+      `SELECT id, email, first_name, last_name, phone, job_title, is_active, last_login_at, created_at 
+       FROM ${table} WHERE id = ? LIMIT 1;`,
+      [user.id]
+    );
+
+    const updated = rows[0];
+    const updatedFullName = `${updated.first_name || ''} ${updated.last_name || ''}`.trim();
+
+    const result = {
+      id: updated.id,
+      email: updated.email,
+      firstName: updated.first_name,
+      lastName: updated.last_name,
+      name: updatedFullName || updated.email.split('@')[0],
+      jobTitle: updated.job_title || (user.user_type === 'SUPER_ADMIN' ? 'Super Administrator' : 'Operations Staff'),
+      phone: updated.phone || '',
+      roleName: user.role_name || (user.user_type === 'SUPER_ADMIN' ? 'Super Administrator' : 'Staff'),
+      roleId: user.role_id || null,
+      userType: user.user_type,
+      permissions: user.permissions || [],
+      isActive: Boolean(updated.is_active),
+      lastLoginAt: updated.last_login_at,
+      createdAt: updated.created_at
+    };
+
+    return sendSuccess(res, 200, 'Profile updated successfully.', { user: result });
+  } catch (err) {
+    console.error('Update Profile Error:', err);
+    return sendError(res, 500, 'Failed to update user profile.');
+  }
+};
+
+/**
+ * Get Active Sessions for Current User
+ */
+export const getMySessions = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT id, user_agent, ip_address, created_at, expires_at,
+              CASE WHEN id = ? THEN TRUE ELSE FALSE END as is_current
+       FROM sessions
+       WHERE user_type = ? AND user_id = ? AND is_revoked = FALSE AND expires_at > NOW()
+       ORDER BY created_at DESC;`,
+      [req.user.session_id, req.user.user_type, req.user.id]
+    );
+
+    return sendSuccess(res, 200, 'Active sessions retrieved.', { sessions: rows });
+  } catch (err) {
+    console.error('Get Sessions Error:', err);
+    return sendError(res, 500, 'Failed to fetch active sessions.');
+  }
+};
+
+/**
+ * Revoke Other Active Sessions
+ */
+export const revokeOtherSessions = async (req, res) => {
+  try {
+    await pool.query(
+      `UPDATE sessions SET is_revoked = TRUE 
+       WHERE user_type = ? AND user_id = ? AND id != ? AND is_revoked = FALSE;`,
+      [req.user.user_type, req.user.id, req.user.session_id]
+    );
+
+    return sendSuccess(res, 200, 'Other active sessions signed out successfully.');
+  } catch (err) {
+    console.error('Revoke Sessions Error:', err);
+    return sendError(res, 500, 'Failed to revoke other sessions.');
+  }
 };

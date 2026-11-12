@@ -135,6 +135,33 @@ export async function logout(): Promise<void> {
 }
 
 export async function getMe(): Promise<UserProfile> {
-  const res = await request<UserProfile>('/auth/me');
-  return res.data;
+  const res = await request<{ user: any }>('/auth/me');
+  return res.data.user;
+}
+
+export async function updateProfile(data: {
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  jobTitle?: string;
+}): Promise<any> {
+  const res = await request<{ user: any }>('/auth/me', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+  const updatedUser = res.data.user;
+  try {
+    localStorage.setItem('Vels:active_user', JSON.stringify(updatedUser));
+  } catch {}
+  return updatedUser;
+}
+
+export async function getActiveSessions(): Promise<any[]> {
+  const res = await request<{ sessions: any[] }>('/auth/sessions');
+  return res.data.sessions;
+}
+
+export async function revokeOtherSessions(): Promise<void> {
+  await request('/auth/sessions/revoke-others', { method: 'POST' });
 }

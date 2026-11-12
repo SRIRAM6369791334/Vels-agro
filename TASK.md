@@ -101,6 +101,14 @@
   - Verified with Playwright test (`test_account_switching_lockout.cjs`): 100% passing.
 - [x] Implemented Button Micro-interaction (`✓ Authenticated`) + SweetAlert2 Emerald Agro Theme popup (Q4 - Option A + SweetAlert).
 - [x] Verified both Superadmin (`SUPER_ADMIN`) and Staff (`DASHBOARD_USER`) live login and logout flows in Playwright (100% passing).
+- [x] Created Integration Status Tracking Document: [INTEGRATION_STATUS.md](file:///e:/dashborad%20clone/INTEGRATION_STATUS.md) detailing live APIs, backend catalog, and settings pages breakdown.
+- [x] Integrated Account Settings (`http://localhost:5173/settings/account`):
+  - Removed password change section (`st-pass`) per admin panel requirements.
+  - Added MySQL migration `009_add_job_title_to_users.sql` adding `job_title` to `admin_users` and `dashboard_users`.
+  - Upgraded `GET /api/v1/auth/me` and built `PUT /api/v1/auth/me` to fetch and update live profile data.
+  - Built `GET /api/v1/auth/sessions` and `POST /api/v1/auth/sessions/revoke-others` connected to real MySQL sessions table.
+  - Added Privileges & Security card in Account settings displaying Account Tier, Assigned Role, and Encryption protocol.
+  - Verified 100% with Playwright test (`test_settings_account_live.cjs`).
 - [ ] Wire staff management (`src/features/settings/subtabs/team.ts`) to `/api/v1/admin/dashboard-users`.
 - [ ] Wire Roles matrix to `/api/v1/admin/roles`.
 

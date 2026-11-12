@@ -10,6 +10,9 @@ export interface FormFieldOptions {
   ph?: string;
   k?: string;
   wide?: boolean;
+  readonly?: boolean;
+  disabled?: boolean;
+  hint?: string;
 }
 
 export const SAVED_BADGE_HTML = `<span class="st-saved" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 13 4 4L19 7"/></svg>Saved</span>`;
@@ -21,8 +24,12 @@ export function renderFormField(options: FormFieldOptions): string {
   const dataKey = options.k ? `data-k="${options.k}"` : '';
   const inputType = options.type ?? 'text';
   const val = options.value ?? '';
+  const isReadonly = options.readonly ? ' readonly aria-readonly="true" tabindex="-1"' : '';
+  const isDisabled = options.disabled ? ' disabled' : '';
+  const readonlyClass = (options.readonly || options.disabled) ? ' st-in--readonly' : '';
+  const hintHtml = options.hint ? `<span class="st-field__hint">${escapeHtml(options.hint)}</span>` : '';
 
-  return `<label class="st-field${wideClass}"><span class="field__label">${escapeHtml(options.label)}</span><input class="st-in" name="${options.name}" type="${inputType}" value="${escapeHtml(val)}" ${autocomplete} ${placeholder} ${dataKey} /><span class="st-field__err" role="alert"></span></label>`;
+  return `<label class="st-field${wideClass}"><span class="field__label">${escapeHtml(options.label)}</span><input class="st-in${readonlyClass}" name="${options.name}" type="${inputType}" value="${escapeHtml(val)}" ${autocomplete} ${placeholder} ${dataKey}${isReadonly}${isDisabled} />${hintHtml}<span class="st-field__err" role="alert"></span></label>`;
 }
 
 export function renderSelectField(

@@ -147,3 +147,14 @@ This document records architectural decisions, potential production pitfalls ide
 ### 23. Account-Level Lockout vs Form-Level Lockout Isolation
 - **Issue**: When a staff user account is locked due to too many failed attempts, frontend logic previously disabled the submit button globally on the entire form. When a Superadmin or another staff user sat at the same workstation and changed the email input to an unlocked account (e.g. `admin@velsagro.com`), the submit button remained disabled (`Account Locked`) and the lockout alert remained stuck, preventing legitimate administrators from logging in.
 - **Resolution**: Lockout states must be mapped per individual account identity in storage (`Record<email, LockoutEntry>`). An `input` event listener on the email field dynamically re-evaluates whether the currently typed email is locked. If the user changes to an unlocked email (like Superadmin), the warning alert clears instantly and the submit button unlocks ("Sign in"). If they switch back to the locked email, the lockout box and countdown timer immediately re-assert.
+
+---
+
+### 24. Live Account Profile & Session Synchronisation Pattern
+- **Issue**: Settings Account subtab originally displayed hardcoded mockup data (`store.settings.me`, simulated sessions for "Vels Okafor", and an unused self-password change form). Furthermore, the database lacked a `job_title` column across `admin_users` and `dashboard_users`, preventing users from managing their organizational role.
+- **Resolution**:
+  - Removed obsolete password change card from frontend.
+  - Added MySQL migration `009_add_job_title_to_users.sql` adding `job_title` to both user tables.
+  - Implemented `PUT /api/v1/auth/me` to update name, job title, and phone number directly in MySQL.
+  - Replaced hardcoded session rows with live database sessions from `GET /api/v1/auth/sessions`, with one-click revocation via `POST /api/v1/auth/sessions/revoke-others`.
+  - Added Privileges & Security card displaying real-time Account Tier, Assigned Role, and Encryption protocol.

@@ -53,7 +53,8 @@ export const authenticate = async (req, res, next) => {
     // Fetch user details and permissions based on user_type
     if (session.user_type === 'SUPER_ADMIN') {
       const [admins] = await pool.query(
-        `SELECT id, email, first_name, last_name, is_active FROM admin_users WHERE id = ? LIMIT 1;`,
+        `SELECT id, email, first_name, last_name, phone, job_title, is_active, last_login_at, created_at 
+         FROM admin_users WHERE id = ? LIMIT 1;`,
         [session.user_id]
       );
 
@@ -71,7 +72,7 @@ export const authenticate = async (req, res, next) => {
     } else {
       // DASHBOARD_USER
       const [users] = await pool.query(
-        `SELECT u.id, u.email, u.first_name, u.last_name, u.role_id, u.is_active, r.name as role_name
+        `SELECT u.id, u.email, u.first_name, u.last_name, u.phone, u.job_title, u.role_id, u.is_active, u.last_login_at, u.created_at, r.name as role_name
          FROM dashboard_users u
          JOIN roles r ON u.role_id = r.id
          WHERE u.id = ? LIMIT 1;`,
