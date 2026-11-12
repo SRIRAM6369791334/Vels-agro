@@ -141,3 +141,9 @@ This document records architectural decisions, potential production pitfalls ide
 ### 22. The Pitfall of `Date.now()` Monkeypatching in Legacy Mock-Driven Codebases
 - **Issue**: In `frontend/src/main.ts`, `Date.now` was monkeypatched (`Date.now = () => e() + t;`) to simulate "October 19, 2026" for mock dashboard telemetry and chart dates. When the lockout logic subtracted `Date.now()` from the server's real UTC timestamp `unlockAt` (November 12, 2026), it created a phantom 24-day (~34,895 minutes) offset!
 - **Resolution**: Switched to `new Date().getTime()` in client-side time calculations, which reads the true wall-clock time from the un-monkeypatched `Date` prototype constructor, completely neutralizing the simulation offset.
+
+---
+
+### 23. Account-Level Lockout vs Form-Level Lockout Isolation
+- **Issue**: When a staff user account is locked due to too many failed attempts, frontend logic previously disabled the submit button globally on the entire form. When a Superadmin or another staff user sat at the same workstation and changed the email input to an unlocked account (e.g. `admin@velsagro.com`), the submit button remained disabled (`Account Locked`) and the lockout alert remained stuck, preventing legitimate administrators from logging in.
+- **Resolution**: Lockout states must be mapped per individual account identity in storage (`Record<email, LockoutEntry>`). An `input` event listener on the email field dynamically re-evaluates whether the currently typed email is locked. If the user changes to an unlocked email (like Superadmin), the warning alert clears instantly and the submit button unlocks ("Sign in"). If they switch back to the locked email, the lockout box and countdown timer immediately re-assert.

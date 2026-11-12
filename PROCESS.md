@@ -69,3 +69,6 @@ npm start
 3. **Protection Against Time-Mock Monkeypatching**:
    - Frontend must never rely on `Date.now()` when third-party or legacy code mocks time.
    - Always use `new Date().getTime()` to ensure real-time synchronization with server UTC timestamps.
+4. **Per-Account Isolation & Dynamic Email Switching**:
+   - Lockouts in `sessionStorage` must be stored as an email map (`Record<email, LockoutEntry>`).
+   - Typing into the email field immediately re-evaluates the lockout state for that specific email address. Switching to an unlocked account (such as Superadmin) immediately clears the alert banner and restores the active submit button (`Sign in`).

@@ -12,44 +12,94 @@ let lockoutTimerInterval: any = null;
 let remainingLockoutSeconds = 0;
 const LOCKOUT_STORAGE_KEY = 'Vels:lockout';
 
-function restoreLockoutStateIfActive(): boolean {
+interface LockoutEntry {
+  unlockAt: string;
+  message: string;
+}
+
+function getLockoutMap(): Record<string, LockoutEntry> {
   try {
     const raw = sessionStorage.getItem(LOCKOUT_STORAGE_KEY);
-    if (!raw) return false;
-    const item = JSON.parse(raw);
-    if (!item || !item.unlockAt) {
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (parsed.email && parsed.unlockAt) {
+      return { [parsed.email.toLowerCase().trim()]: { unlockAt: parsed.unlockAt, message: parsed.message } };
+    }
+    return parsed || {};
+  } catch {
+    return {};
+  }
+}
+
+function saveLockout(email: string, unlockAt: string, message: string) {
+  try {
+    const map = getLockoutMap();
+    map[email.toLowerCase().trim()] = { unlockAt, message };
+    sessionStorage.setItem(LOCKOUT_STORAGE_KEY, JSON.stringify(map));
+  } catch {}
+}
+
+function clearLockoutForEmail(email: string) {
+  try {
+    const map = getLockoutMap();
+    delete map[email.toLowerCase().trim()];
+    if (Object.keys(map).length === 0) {
       sessionStorage.removeItem(LOCKOUT_STORAGE_KEY);
-      return false;
+    } else {
+      sessionStorage.setItem(LOCKOUT_STORAGE_KEY, JSON.stringify(map));
     }
-    const unlockTime = new Date(item.unlockAt).getTime();
-    const now = new Date().getTime();
-    const remaining = Math.max(0, Math.ceil((unlockTime - now) / 1000));
-    if (remaining <= 0) {
-      sessionStorage.removeItem(LOCKOUT_STORAGE_KEY);
-      return false;
-    }
+  } catch {}
+}
 
-    const emailInput = document.querySelector('#login-email') as HTMLInputElement | null;
-    if (emailInput && item.email && !emailInput.value) {
-      emailInput.value = item.email;
-    }
+function checkLockoutForEmail(email: string): { isLocked: boolean; remaining: number; unlockAt?: string; message?: string } {
+  const clean = email.toLowerCase().trim();
+  if (!clean) return { isLocked: false, remaining: 0 };
+  const map = getLockoutMap();
+  const entry = map[clean];
+  if (!entry || !entry.unlockAt) return { isLocked: false, remaining: 0 };
 
-    const submitBtn = document.querySelector('#login-submit') as HTMLButtonElement | null;
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<span>Account Locked</span>`;
-    }
+  const unlockTime = new Date(entry.unlockAt).getTime();
+  const now = new Date().getTime();
+  const remaining = Math.max(0, Math.ceil((unlockTime - now) / 1000));
+  if (remaining <= 0) {
+    clearLockoutForEmail(clean);
+    return { isLocked: false, remaining: 0 };
+  }
+  return { isLocked: true, remaining, unlockAt: entry.unlockAt, message: entry.message };
+}
 
+function syncLockoutUiForCurrentEmail(): boolean {
+  const emailInput = document.querySelector('#login-email') as HTMLInputElement | null;
+  const submitBtn = document.querySelector('#login-submit') as HTMLButtonElement | null;
+  if (!emailInput || !submitBtn) return false;
+
+  const email = emailInput.value.trim();
+  const lockout = checkLockoutForEmail(email);
+
+  if (lockout.isLocked) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span>Account Locked</span>`;
     showLoginAlert(
       'warning',
       'Security Lockout (Too Many Attempts)',
-      item.message || `Account temporarily locked due to multiple failed attempts. Try again in ${Math.ceil(remaining / 60)} minute(s).`,
-      remaining,
-      item.unlockAt
+      lockout.message || `Account temporarily locked due to multiple failed attempts. Try again in ${Math.ceil(lockout.remaining / 60)} minute(s).`,
+      lockout.remaining,
+      lockout.unlockAt
     );
     return true;
-  } catch (err) {
-    sessionStorage.removeItem(LOCKOUT_STORAGE_KEY);
+  } else {
+    // Current email is NOT locked! Re-enable button and clear warning alert if it was a lockout alert!
+    const alertEl = document.querySelector('#login-alert') as HTMLElement | null;
+    if (alertEl && alertEl.classList.contains('login-alert--warning')) {
+      clearLoginAlert();
+    }
+    if (submitBtn.disabled && submitBtn.textContent?.includes('Account Locked')) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span>Sign in</span>
+        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>`;
+    }
     return false;
   }
 }
@@ -278,9 +328,12 @@ function showLoginAlert(
         if (secsLeft <= 0) {
           clearInterval(lockoutTimerInterval);
           lockoutTimerInterval = null;
-          try {
+          const emailInput = document.querySelector('#login-email') as HTMLInputElement | null;
+          if (emailInput && emailInput.value) {
+            clearLockoutForEmail(emailInput.value);
+          } else {
             sessionStorage.removeItem(LOCKOUT_STORAGE_KEY);
-          } catch {}
+          }
           clearLoginAlert();
           const submitBtn = document.querySelector('#login-submit') as HTMLButtonElement | null;
           if (submitBtn) {
@@ -328,10 +381,6 @@ function clearLoginAlert() {
 async function handleLoginSubmit(e: Event) {
   e.preventDefault();
 
-  if (restoreLockoutStateIfActive()) {
-    return;
-  }
-
   const form = e.target as HTMLFormElement;
   const emailInput = form.querySelector('#login-email') as HTMLInputElement | null;
   const passInput = form.querySelector('#login-pass') as HTMLInputElement | null;
@@ -341,6 +390,13 @@ async function handleLoginSubmit(e: Event) {
 
   const email = emailInput.value.trim();
   const pass = passInput.value.trim();
+
+  // Check lockout strictly for THIS email
+  const lockout = checkLockoutForEmail(email);
+  if (lockout.isLocked) {
+    syncLockoutUiForCurrentEmail();
+    return;
+  }
 
   clearLoginAlert();
 
@@ -378,9 +434,7 @@ async function handleLoginSubmit(e: Event) {
   try {
     const res = await unifiedLogin(email, pass);
 
-    try {
-      sessionStorage.removeItem(LOCKOUT_STORAGE_KEY);
-    } catch {}
+    clearLockoutForEmail(res.user?.email || email);
 
     submitBtn.classList.add('is-success');
     submitBtn.innerHTML = `<span>✓ Authenticated</span>`;
@@ -422,16 +476,7 @@ async function handleLoginSubmit(e: Event) {
         : (typeof data.remainingMinutes === 'number' ? data.remainingMinutes * 60 : 900);
       const unlockAt = data.unlockAt || new Date(new Date().getTime() + seconds * 1000).toISOString();
 
-      try {
-        sessionStorage.setItem(
-          LOCKOUT_STORAGE_KEY,
-          JSON.stringify({
-            email,
-            unlockAt,
-            message: err.message
-          })
-        );
-      } catch {}
+      saveLockout(email, unlockAt, err.message);
 
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<span>Account Locked</span>`;
@@ -524,6 +569,13 @@ export const page = {
       form.addEventListener('submit', handleLoginSubmit);
     }
 
+    const emailInput = el.querySelector('#login-email') as HTMLInputElement | null;
+    if (emailInput) {
+      emailInput.addEventListener('input', () => {
+        syncLockoutUiForCurrentEmail();
+      });
+    }
+
     const togglePassBtn = el.querySelector('#btn-toggle-pass') as HTMLButtonElement | null;
     const passInput = el.querySelector('#login-pass') as HTMLInputElement | null;
     if (togglePassBtn && passInput) {
@@ -552,9 +604,21 @@ export const page = {
   },
   enter() {
     if (containerEl) {
-      const isLocked = restoreLockoutStateIfActive();
+      const emailInput = containerEl.querySelector('#login-email') as HTMLInputElement | null;
+      const submitBtn = containerEl.querySelector('#login-submit') as HTMLButtonElement | null;
+
+      const map = getLockoutMap();
+      const lockedEmails = Object.keys(map);
+
+      let isLocked = false;
+      if (emailInput) {
+        if (!emailInput.value && lockedEmails.length > 0) {
+          emailInput.value = lockedEmails[0];
+        }
+        isLocked = syncLockoutUiForCurrentEmail();
+      }
+
       if (!isLocked) {
-        const submitBtn = containerEl.querySelector('#login-submit') as HTMLButtonElement | null;
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.classList.remove('is-success');
@@ -564,7 +628,6 @@ export const page = {
             </svg>`;
         }
         clearLoginAlert();
-        const emailInput = containerEl.querySelector('#login-email') as HTMLInputElement | null;
         if (emailInput && !emailInput.value) {
           emailInput.focus();
         }

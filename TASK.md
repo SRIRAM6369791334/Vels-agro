@@ -93,6 +93,12 @@
   - Persisted lockout state across page reloads via `sessionStorage` (`Vels:lockout`) with automatic countdown resumption and automatic form unlock on expiration.
   - Fixed 24-day time offset caused by mock data `Date.now` monkeypatch in `main.ts` by using `new Date().getTime()`.
   - Verified with Playwright end-to-end test (`test_lockout_sync_and_persistence.cjs`): 100% passing across reload and countdown.
+- [x] Fixed Account-Specific vs Form-Level Lockout UX:
+  - Isolated lockouts by individual email address in `sessionStorage` (`Vels:lockout` map).
+  - Wired `input` listener on `#login-email` to dynamically re-evaluate lockout state.
+  - When switching from a locked staff email to Superadmin (`admin@velsagro.com`), the amber alert immediately hides and the submit button unlocks (`Sign in`).
+  - When switching back to a locked email, the lockout box and countdown timer immediately re-assert.
+  - Verified with Playwright test (`test_account_switching_lockout.cjs`): 100% passing.
 - [x] Implemented Button Micro-interaction (`✓ Authenticated`) + SweetAlert2 Emerald Agro Theme popup (Q4 - Option A + SweetAlert).
 - [x] Verified both Superadmin (`SUPER_ADMIN`) and Staff (`DASHBOARD_USER`) live login and logout flows in Playwright (100% passing).
 - [ ] Wire staff management (`src/features/settings/subtabs/team.ts`) to `/api/v1/admin/dashboard-users`.
