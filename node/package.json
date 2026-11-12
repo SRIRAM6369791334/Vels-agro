@@ -9,7 +9,10 @@
     "dev": "nodemon server.js",
     "migrate": "node src/scripts/migrate.js",
     "test:api": "node src/scripts/test_apis.js",
-    "test:playwright": "node tests/playwright_api_chaos.cjs"
+    "test:playwright": "node tests/playwright_api_chaos.cjs",
+    "test:benchmark": "node tests/benchmark_speed.cjs",
+    "test:benchmark:all": "node tests/benchmark_all_apis.cjs",
+    "test:stress": "node tests/stress_100_logins.cjs"
   },
   "keywords": [],
   "author": "",

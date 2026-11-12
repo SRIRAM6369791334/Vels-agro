@@ -7,10 +7,13 @@ const dbConfig = {
   password: env.DB.PASSWORD,
   port: env.DB.PORT,
   waitForConnections: true,
-  connectionLimit: env.DB.CONNECTION_LIMIT,
-  queueLimit: 0,
+  connectionLimit: Math.max(env.DB.CONNECTION_LIMIT || 10, 25),
+  queueLimit: 1000, // Bounded queue: prevents out-of-memory heap explosion under massive spikes
+  connectTimeout: 10000, // 10 seconds connection timeout
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000,
+  maxIdle: 10,
+  idleTimeout: 60000,
   ...(env.DB.SSL && {
     ssl: {
       rejectUnauthorized: env.DB.SSL_REJECT_UNAUTHORIZED

@@ -118,6 +118,9 @@ export const createRole = async (req, res) => {
       permissionCount: Array.isArray(permission_ids) ? permission_ids.length : 0
     });
   } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY' || err.errno === 1062) {
+      return sendError(res, 409, `A role with the name '${name}' already exists.`);
+    }
     console.error('Create Role Error:', err);
     return sendError(res, 500, 'Failed to create role.');
   }
@@ -190,6 +193,9 @@ export const updateRole = async (req, res) => {
       description: updatedDesc
     });
   } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY' || err.errno === 1062) {
+      return sendError(res, 409, `A role with the name '${name}' already exists.`);
+    }
     console.error('Update Role Error:', err);
     return sendError(res, 500, 'Failed to update role.');
   }

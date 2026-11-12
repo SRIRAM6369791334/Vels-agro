@@ -1,3 +1,7 @@
+// 1. Optimize Libuv Threadpool for high-concurrency Crypto/Bcrypt operations
+// Must be set BEFORE importing crypto/bcrypt/fs
+process.env.UV_THREADPOOL_SIZE = process.env.UV_THREADPOOL_SIZE || '16';
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -17,13 +21,16 @@ import auditRoutes from './src/routes/auditRoutes.js';
 const app = express();
 const PORT = env.PORT;
 
-// 1. Gzip/Brotli Payload Compression (High speed, 70% smaller network size)
+// Trust reverse proxy (Nginx, Cloudflare, AWS ALB) for accurate client IP detection
+app.set('trust proxy', 1);
+
+// 2. Gzip/Brotli Payload Compression (High speed, 70% smaller network size)
 app.use(compression());
 
-// 2. Security Headers via Helmet
+// 3. Security Headers via Helmet
 app.use(helmet());
 
-// 2. Production CORS Configuration strictly from env
+// 4. Production CORS Configuration strictly from env
 const allowedOrigins = env.CLIENT_URL.split(',').map((origin) => origin.trim());
 
 app.use(
@@ -37,11 +44,25 @@ app.use(
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Idempotency-Key']
   })
 );
 
-// 3. Rate Limiting for API routes
+// 5. Tiered Rate Limiting:
+// A. Dedicated Auth Rate Limiter (Protects login from credential stuffing)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 150, // 150 login attempts per 15 min window per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    statusCode: 429,
+    message: 'Too many authentication attempts from this IP. Please try again after 15 minutes.'
+  }
+});
+
+// B. General API Limiter for Business Routes
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: env.RATE_LIMIT_MAX,
@@ -54,13 +75,14 @@ const apiLimiter = rateLimit({
   }
 });
 
-app.use('/api/', apiLimiter);
+app.use('/api/v1/auth', authLimiter);
+app.use('/api/v1/', apiLimiter);
 
-// 4. Body Parsers
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// 6. Hardened Body Parsers: 1MB limit prevents JSON memory-exhaustion payload bombs
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-// 5. Base Health & Root Routes
+// 7. Base Health & Root Routes
 app.get('/', (req, res) => {
   return sendSuccess(res, 200, 'API Server is up and running!', {
     environment: env.NODE_ENV,
@@ -89,26 +111,27 @@ app.get('/api/health', async (req, res) => {
   });
 });
 
-// 6. API v1 Routes Mounting
+// 8. API v1 Routes Mounting
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/admin/dashboard-users', dashboardUserRoutes);
 app.use('/api/v1/admin/roles', roleRoutes);
 app.use('/api/v1/admin', auditRoutes);
 
-// 7. 404 Route Not Found Handler
+// 9. 404 Route Not Found Handler
 app.use((req, res, next) => {
   return sendError(res, 404, `Resource not found at: ${req.method} ${req.originalUrl}`);
 });
 
-// 8. Global Error Handler Middleware
+// 10. Global Error Handler Middleware
 app.use((err, req, res, next) => {
-  // 1. Intercept malformed JSON syntax errors gracefully without exposing stack traces
+  // Intercept malformed JSON syntax errors gracefully without exposing stack traces
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    return sendError(
-      res,
-      400,
-      'Invalid JSON format in request body.'
-    );
+    return sendError(res, 400, 'Invalid JSON format in request body.');
+  }
+
+  // Intercept payload too large (413)
+  if (err.type === 'entity.too.large') {
+    return sendError(res, 413, 'Request payload exceeds the maximum allowed size (1MB).');
   }
 
   console.error('Unhandled Application Error:', err);
@@ -117,7 +140,7 @@ app.use((err, req, res, next) => {
   return sendError(res, statusCode, err.message || 'Internal Server Error');
 });
 
-// 9. Start Server
+// 11. Start Server with Hardened Socket Timeouts (Slowloris & Connection Leak Defense)
 const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`🚀 Server running on http://0.0.0.0:${PORT} [${env.NODE_ENV}]`);
   const dbConnected = await initDB();
@@ -126,7 +149,12 @@ const server = app.listen(PORT, '0.0.0.0', async () => {
   }
 });
 
-// 10. Graceful Shutdown
+// Slowloris and connection leak defense
+server.headersTimeout = 65000;
+server.requestTimeout = 30000;
+server.keepAliveTimeout = 61000;
+
+// 12. Graceful Shutdown & Unhandled Process Error Traps
 const handleShutdown = async (signal) => {
   console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
   server.close(async () => {
@@ -144,5 +172,13 @@ const handleShutdown = async (signal) => {
 
 process.on('SIGTERM', () => handleShutdown('SIGTERM'));
 process.on('SIGINT', () => handleShutdown('SIGINT'));
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🚨 [Anti-Crash] Unhandled Promise Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('🚨 [Anti-Crash] Uncaught Exception:', err);
+});
 
 export default app;

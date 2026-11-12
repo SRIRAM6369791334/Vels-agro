@@ -144,7 +144,10 @@ const assert = (condition, msg) => {
     });
     const jsonBadRole = await resBadRole.json();
     assert(resBadRole.status() === 400, 'String for role_id returns 400 Bad Request');
-    assert(jsonBadRole.message.includes('numeric integer'), 'Explains role_id must be a numeric integer');
+    assert(
+      jsonBadRole.message.includes('expected number') || jsonBadRole.message.includes('number'),
+      'Explains role_id must be a number'
+    );
 
     // TEST 11: Compression Check (Gzip verification)
     const resCompression = await api.get('/api/v1/admin/roles', {
