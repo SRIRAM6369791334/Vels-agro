@@ -56,121 +56,94 @@ function renderLoginForm(): string {
           <div class="login-card__mark" aria-hidden="true">
             <img src="/brand/vels_logo.svg" alt="Vels Agro Logo" class="login-card__logo" />
           </div>
-          <div class="login-card__badge">
-            <span class="login-card__badge-dot" aria-hidden="true"></span>
-            <span>Enterprise Gateway</span>
-          </div>
+          <span class="badge badge--good">
+            <i class="dot" aria-hidden="true"></i> Admin Portal
+          </span>
         </div>
 
-        <!-- Heading Group -->
+        <!-- Card Headline -->
         <div class="login-card__head">
-          <h1 class="login-card__title">Sign in to Vels Agro</h1>
-          <p class="login-card__subtitle">
-            Enter your administrative credentials to manage inventory, machinery & dealers
-          </p>
+          <h1 class="login-card__title">Welcome back to Vels</h1>
+          <p class="login-card__sub">Sign in to Vels Agro Machinery &amp; Parts stockroom</p>
         </div>
 
-        <!-- Input Fields -->
-        <div class="login-card__fields">
-          <!-- Work Email -->
-          <label class="field" for="login-email">
-            <span class="field__label">
-              <span>Work email</span>
-              <span class="field__req" aria-hidden="true">*</span>
-            </span>
-            <div class="field__control">
-              <svg class="ico field__ico" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="5" width="18" height="14" rx="2" />
-                <path d="m3 7 9 6 9-6" />
-              </svg>
-              <input
-                type="email"
-                id="login-email"
-                name="email"
-                class="field__input"
-                placeholder="name@velsagro.com"
-                autocomplete="username"
-                required
-              />
-            </div>
-          </label>
+        <!-- Work Email Field -->
+        <label class="field" for="login-email">
+          <span class="field__label">Work email</span>
+          <input
+            id="login-email"
+            type="email"
+            autocomplete="username"
+            placeholder="name@velsagro.com"
+            required
+            spellcheck="false"
+          />
+        </label>
 
-          <!-- Password -->
-          <label class="field" for="login-pass">
-            <div class="field__label-row">
-              <span class="field__label">
-                <span>Password</span>
-                <span class="field__req" aria-hidden="true">*</span>
-              </span>
-            </div>
-            <div class="field__control">
-              <svg class="ico field__ico" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="5" y="10.5" width="14" height="10" rx="2.5" />
-                <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
+        <!-- Password Field with View Eye Toggle -->
+        <label class="field" for="login-pass">
+          <span class="field__label">Password</span>
+          <div class="field__input-wrap">
+            <input
+              id="login-pass"
+              type="password"
+              autocomplete="current-password"
+              placeholder="••••••••••••"
+              required
+            />
+            <button
+              type="button"
+              class="field__eye-btn"
+              id="btn-toggle-pass"
+              aria-label="Show password"
+              title="Show password"
+            >
+              <svg class="ico ico--eye" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+                <circle cx="12" cy="12" r="2.8" />
               </svg>
-              <input
-                type="password"
-                id="login-pass"
-                name="password"
-                class="field__input field__input--pass"
-                placeholder="••••••••••••"
-                autocomplete="current-password"
-                required
-              />
-              <button
-                type="button"
-                class="field__eye-btn"
-                id="btn-toggle-pass"
-                aria-label="Show password"
-                title="Show password"
-              >
-                <svg class="ico ico--eye" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
-                  <circle cx="12" cy="12" r="2.8" />
-                </svg>
-                <svg class="ico ico--eye-off" viewBox="0 0 24 24" aria-hidden="true" style="display: none;">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 5c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                  <line x1="2" y1="2" x2="22" y2="22" />
-                </svg>
-              </button>
-            </div>
-          </label>
-
-          <!-- Security & Remember Me Row -->
-          <div class="login-card__row">
-            <label class="login-card__remember">
-              <input type="checkbox" id="login-remember" checked />
-              <span>Keep me signed in</span>
-            </label>
-            <span class="login-card__ssl">
-              <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="5" y="10.5" width="14" height="10" rx="2.5" />
-                <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
+              <svg class="ico ico--eye-off" viewBox="0 0 24 24" aria-hidden="true" style="display: none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 5c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                <line x1="2" y1="2" x2="22" y2="22" />
               </svg>
-              <span>SSL Secured</span>
-            </span>
+            </button>
           </div>
+        </label>
 
-          <!-- Dynamic Error & Lockout Alert Banner -->
-          <div class="login-alert" id="login-alert" role="alert" style="display: none;">
-            <div class="login-alert__icon" id="login-alert-icon"></div>
-            <div class="login-alert__content">
-              <strong class="login-alert__title" id="login-alert-title"></strong>
-              <p class="login-alert__desc" id="login-alert-desc"></p>
-              <div class="login-alert__timer" id="login-alert-timer" style="display: none;">
-                <span>Lockout expires in: </span><b id="lockout-countdown">15:00</b>
-              </div>
-            </div>
-          </div>
-
-          <!-- Action Button with Diagonal Shine Beam & Arrow Bounce -->
-          <button type="submit" class="btn btn--primary login-card__btn" id="login-submit">
-            <span>Sign in</span>
+        <!-- Security & Remember Me Row -->
+        <div class="login-card__row">
+          <label class="login-card__remember">
+            <input type="checkbox" id="login-remember" checked />
+            <span>Keep me signed in</span>
+          </label>
+          <span class="login-card__ssl">
             <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 12h14M12 5l7 7-7 7" />
+              <rect x="5" y="10.5" width="14" height="10" rx="2.5" />
+              <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
             </svg>
-          </button>
+            <span>SSL Secured</span>
+          </span>
         </div>
+
+        <!-- Dynamic Error & Lockout Alert Banner -->
+        <div class="login-alert" id="login-alert" role="alert" style="display: none;">
+          <div class="login-alert__icon" id="login-alert-icon"></div>
+          <div class="login-alert__content">
+            <strong class="login-alert__title" id="login-alert-title"></strong>
+            <p class="login-alert__desc" id="login-alert-desc"></p>
+            <div class="login-alert__timer" id="login-alert-timer" style="display: none;">
+              <span>Lockout expires in: </span><b id="lockout-countdown">15:00</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Button with Diagonal Shine Beam & Arrow Bounce -->
+        <button type="submit" class="btn btn--primary login-card__btn" id="login-submit">
+          <span>Sign in</span>
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </button>
 
         <!-- Card Trust Footer -->
         <div class="login-card__foot">
@@ -207,7 +180,6 @@ function showLoginAlert(
 
   if (!alertEl || !iconEl || !titleEl || !descEl) return;
 
-  // Clear previous intervals
   if (lockoutTimerInterval) {
     clearInterval(lockoutTimerInterval);
     lockoutTimerInterval = null;
@@ -228,7 +200,6 @@ function showLoginAlert(
     `;
     if (timerWrap) timerWrap.style.display = 'none';
   } else {
-    // Warning / Lockout
     iconEl.innerHTML = `
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <rect x="5" y="11" width="14" height="10" rx="2" />
@@ -268,7 +239,7 @@ function showLoginAlert(
     }
   }
 
-  // Trigger GSAP card shake animation (Q2 - Option A)
+  // GSAP card shake animation (Q2 - Option A)
   gsap.fromTo(
     '.login-card',
     { x: -9 },
@@ -310,7 +281,6 @@ async function handleLoginSubmit(e: Event) {
 
   clearLoginAlert();
 
-  // Basic client-side validation
   if (!email) {
     emailInput.classList.add('is-invalid');
     emailInput.focus();
@@ -339,19 +309,15 @@ async function handleLoginSubmit(e: Event) {
     return;
   }
 
-  // Visual loading feedback on button
   submitBtn.disabled = true;
   submitBtn.innerHTML = `<span>Verifying credentials...</span>`;
 
   try {
-    // Unified Smart Authentication Call (Q1 - Option C)
     const res = await unifiedLogin(email, pass);
 
-    // Micro-interaction on button (Q4 - Option A)
     submitBtn.classList.add('is-success');
     submitBtn.innerHTML = `<span>✓ Authenticated</span>`;
 
-    // SweetAlert2 notification with Agro Emerald Theme (Q4)
     const isDark = document.documentElement.dataset.theme === 'dark';
     await Swal.fire({
       title: 'Authentication Successful',
@@ -369,7 +335,6 @@ async function handleLoginSubmit(e: Event) {
       },
     });
 
-    // Smooth navigation to Dashboard Overview
     try {
       if (typeof (window as any).navigateTo === 'function') {
         (window as any).navigateTo('/dashboard/overview');
@@ -384,7 +349,6 @@ async function handleLoginSubmit(e: Event) {
     submitBtn.classList.remove('is-success');
 
     if (err instanceof ApiError && err.statusCode === 429) {
-      // Q3 - Both (Amber Lockout Box + Live Countdown Timer + Disabled Button)
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<span>Account Locked</span>`;
       showLoginAlert(
@@ -394,7 +358,6 @@ async function handleLoginSubmit(e: Event) {
         900
       );
     } else {
-      // Q2 - Option A (Card Shake + Red Banner Alert)
       submitBtn.disabled = false;
       submitBtn.innerHTML = `<span>Sign in</span>
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">

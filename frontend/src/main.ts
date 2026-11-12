@@ -4675,13 +4675,14 @@ async function sd(e = !1) {
   if (!raw || raw === '/' || raw === '') {
     raw = '/dashboard/overview';
   }
-  let isSignedOut = !1;
+  let isAuthenticated = !1;
   try {
-    isSignedOut = localStorage.getItem(`Vels:signedout`) === `1`;
+    let token = localStorage.getItem(`Vels:token`);
+    isAuthenticated = Boolean(token && token.length > 20);
   } catch {}
-  if (isSignedOut && !raw.startsWith(`/login`)) {
+  if (!isAuthenticated && !raw.startsWith(`/login`)) {
     raw = `/login`;
-  } else if (!isSignedOut && (raw === `/login` || raw === `/login/`)) {
+  } else if (isAuthenticated && (raw === `/login` || raw === `/login/`)) {
     raw = `/dashboard/overview`;
   }
   let { name: n, params: r } = Gu(raw);
@@ -4775,6 +4776,7 @@ async function sd(e = !1) {
       }
       window.scrollTo({ top: 0 });
       s.enter({ params: r, first: c, same: !1 });
+      if (n !== 'login') kd();
       if (o) o.dataset.entered = `1`;
       if (!e && o) io(`.head__title`, o)?.focus({ preventScroll: !0 });
     };
@@ -5230,9 +5232,21 @@ function Od() {
   return e < 12 ? `Good morning` : e < 18 ? `Good afternoon` : `Good evening`;
 }
 function kd() {
-  let e = X.settings.me;
-  G(`#btn-me`).innerHTML =
-    `${Oc(Qo, `md`)}<span class="me__txt"><small>${Od()}</small><b>${q(e.name)}</b></span>${Tc(`down`, `me__chev`)}`;
+  let activeUser: any = null;
+  try {
+    const raw = localStorage.getItem('Vels:active_user');
+    if (raw) activeUser = JSON.parse(raw);
+  } catch {}
+
+  let name = activeUser?.name || activeUser?.first_name || X.settings.me.name;
+  let role = activeUser?.role || (activeUser?.user_type === 'SUPER_ADMIN' ? 'Super Administrator' : 'Staff');
+  let initials = name.split(' ').map((p: string) => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'SA';
+
+  const btnMe = G('#btn-me');
+  if (btnMe) {
+    btnMe.innerHTML =
+      `<span class="avatar avatar--md" data-initials="${q(initials)}" aria-hidden="true">${q(initials)}</span><span class="me__txt"><small>${Od()} (${q(role)})</small><b>${q(name)}</b></span>${Tc('down', 'me__chev')}`;
+  }
 }
 (ms(`settings`, kd),
   ms(`team`, kd),
@@ -5322,8 +5336,20 @@ async function Nd() {
     await tl(`Sign out of Vels Agro?`, `You will be redirected to the admin login page.`, `Sign out`, !1)
   ) {
     try {
-      localStorage.setItem(`Vels:signedout`, `1`);
+      const token = localStorage.getItem('Vels:token');
+      if (token) {
+        fetch('/api/v1/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+          },
+        }).catch(() => {});
+      }
+      localStorage.removeItem(`Vels:token`);
       localStorage.removeItem(`Vels:active_user`);
+      localStorage.removeItem(`Vels:user_type`);
+      localStorage.setItem(`Vels:signedout`, `1`);
     } catch {}
     Kc();
     navigateTo(`/login`);
@@ -5468,11 +5494,12 @@ function Rd(e = !1) {
   xd(),
   _o(),
   (() => {
-  let isSignedOut = !1;
+  let isAuthenticated = !1;
   try {
-    isSignedOut = localStorage.getItem(`Vels:signedout`) === `1`;
+    let token = localStorage.getItem(`Vels:token`);
+    isAuthenticated = Boolean(token && token.length > 20);
   } catch {}
-  if (isSignedOut) {
+  if (!isAuthenticated) {
     if (location.pathname !== `/login`) history.replaceState(null, ``, `/login`);
   } else if (location.hash && location.hash.startsWith('#/')) {
     history.replaceState(null, ``, location.hash.replace(/^#/, ''));

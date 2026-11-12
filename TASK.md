@@ -82,11 +82,14 @@
 - [x] Verified route normalization and clean URL loading via Playwright headless browser.
 - [x] Enforced Zero Hardcoding Policy for Frontend: `frontend/.env` and `vite.config.js` (`const backendUrl = env.VITE_BACKEND_URL;` without fallback strings).
 - [x] Built robust API Client (`frontend/src/core/api/apiClient.ts`) reading strictly from `VITE_API_URL`.
-- [x] Built Unified Authentication Service (`src/core/api/authService.ts`) auto-resolving Super Admin vs Staff (Q1 - Option C).
+- [x] Built Unified Authentication Service (`src/core/api/authService.ts`) and Backend Gateway (`POST /api/v1/auth/login`) eliminating double-hits and false lockout logs.
+- [x] Fixed Critical Route Guard Bypass: Replaced inverted `Vels:signedout === '1'` check with strict token-based authentication guard (`Vels:token`).
+- [x] Fixed Logout & Server-Side Revocation: Wired Sign Out button to `POST /api/v1/auth/logout` and ensured `Vels:token` is purged.
+- [x] Fixed Topbar Profile Desync: Dynamic user initials and role display in `#btn-me` matching live session data.
 - [x] Implemented GSAP Card Shake + Sleek Inline Danger Alert Banner for wrong credentials & validation errors (Q2 - Option A).
 - [x] Implemented Amber Security Lockout Box with live countdown timer and button disable for 429 status (Q3 - Both).
 - [x] Implemented Button Micro-interaction (`✓ Authenticated`) + SweetAlert2 Emerald Agro Theme popup (Q4 - Option A + SweetAlert).
-- [x] Verified both Superadmin (`SUPER_ADMIN`) and Staff (`DASHBOARD_USER`) live login flows in Playwright (100% passing).
+- [x] Verified both Superadmin (`SUPER_ADMIN`) and Staff (`DASHBOARD_USER`) live login and logout flows in Playwright (100% passing).
 - [ ] Wire staff management (`src/features/settings/subtabs/team.ts`) to `/api/v1/admin/dashboard-users`.
 - [ ] Wire Roles matrix to `/api/v1/admin/roles`.
 

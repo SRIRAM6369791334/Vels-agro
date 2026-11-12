@@ -316,14 +316,15 @@ export async function executeRouteTransition(skipAnimation = false): Promise<voi
     raw = '/dashboard/overview';
   }
 
-  let isSignedOut = false;
+  let isAuthenticated = false;
   try {
-    isSignedOut = localStorage.getItem('Vels:signedout') === '1';
+    const token = localStorage.getItem('Vels:token');
+    isAuthenticated = Boolean(token && token.length > 20);
   } catch {}
 
-  if (isSignedOut && !raw.startsWith('/login')) {
+  if (!isAuthenticated && !raw.startsWith('/login')) {
     raw = '/login';
-  } else if (!isSignedOut && (raw === '/login' || raw === '/login/')) {
+  } else if (isAuthenticated && (raw === '/login' || raw === '/login/')) {
     raw = '/dashboard/overview';
   }
 

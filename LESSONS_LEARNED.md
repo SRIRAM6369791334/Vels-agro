@@ -106,3 +106,21 @@ This document records architectural decisions, potential production pitfalls ide
 ### 17. Unified Smart Authentication Gateways in Multi-Table Auth Schemas
 - **Issue**: When an enterprise system isolates Superadmins (`admin_users`) from Staff (`dashboard_users`) into distinct database tables and login endpoints, forcing users to manually select their role on the login UI degrades UX and introduces operational friction.
 - **Resolution**: Engineered a Unified Smart Auth Gateway (`src/core/api/authService.ts`) in the frontend. It transparently routes credentials to the appropriate endpoint, securely saves role and session tokens, and presents a cohesive, single-form login experience with SweetAlert2 notifications and GSAP micro-animations.
+
+---
+
+### 18. Inverted Boolean Route Guards & Fresh Visitor Auth Bypasses
+- **Issue**: Checking for a negative state flag (e.g. `localStorage.getItem('Vels:signedout') === '1'`) creates a catastrophic security hole for fresh visitors, incognito users, or cleared caches. Because `null === '1'` evaluates to `false`, the router treated unauthenticated visitors as logged in and routed them directly to protected dashboard views.
+- **Resolution**: Refactored the route guard across `main.ts` and `router.ts` to enforce a strict positive assertion: authentication requires the presence of a valid, non-empty JWT token (`Vels:token`). Any route access without this token immediately redirects to `/login`.
+
+---
+
+### 19. Full-Cycle Session Revocation Across Client and Database Layers
+- **Issue**: Client-side logout handlers often clear visual user state (`active_user`) while leaving raw JWT tokens in storage and failing to notify the server, leaving active tokens in the database `sessions` table.
+- **Resolution**: Implemented a complete revocation cycle in `main.ts` (`Nd()`): sends `POST /api/v1/auth/logout` with Bearer token to trigger database session invalidation (`is_revoked = 1`), purges all storage tokens, and redirects to login with historical back-navigation protection.
+
+---
+
+### 20. The Golden Rule of API Integration: Zero UI Layout Alteration
+- **Issue**: When connecting backend API logic to an existing UI, adding unstyled wrapper `div`s (e.g. `<div class="login-card__fields">`) or injecting decorative icons (`<svg class="field__ico">`) breaks parent CSS Grid rules, causes shrink-to-fit button regressions, and misaligns inputs.
+- **Resolution**: API integration must strictly respect the designer's existing DOM hierarchy and CSS class names. Only bind dynamic behavior (handlers, error state classes, disabled states) to existing elements without modifying the markup structure.
