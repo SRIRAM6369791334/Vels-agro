@@ -50,6 +50,7 @@ const STATUS_TONES: Record<string, [string, string]> = {
 };
 
 let searchQuery = '';
+let matrixPermQuery = '';
 let activeRoleFilter = 'all';
 
 // Live Matrix State (MySQL backed)
@@ -68,6 +69,16 @@ const MODULE_TITLES: Record<string, string> = {
   audit: 'Security & System Audit Logs',
 };
 
+const MODULE_ICONS: Record<string, string> = {
+  products: 'box',
+  orders: 'file',
+  customers: 'users',
+  warehouses: 'sidebar',
+  purchasing: 'card',
+  analytics: 'chart',
+  audit: 'shield',
+};
+
 export const getActiveMembersCount = (): number =>
   store.team.filter((m) => m.status !== 'invited').length;
 
@@ -78,7 +89,10 @@ export function renderTeamSubtab(): string {
   return `${renderPageHeader({
     eyebrow: 'Who works in Vels and what they can do',
     title: 'Team & roles',
-    actions: `<button type="button" class="btn btn--primary magnetic" data-k="tm-invite">${renderIcon('userPlus')}Invite teammate</button>`,
+    actions: `<div style="display:flex; align-items:center; gap:8px;">
+      <button type="button" class="btn btn--secondary magnetic" data-k="tm-top-new-role">${renderIcon('plus')}New Role</button>
+      <button type="button" class="btn btn--primary magnetic" data-k="tm-invite">${renderIcon('userPlus')}Invite teammate</button>
+    </div>`,
     stats: [
       {
         key: 'members',
@@ -111,44 +125,96 @@ export function renderTeamSubtab(): string {
       },
     ],
   })}
+
+  <!-- 1. Members Roster Table -->
   <section class="card st-members tcard" aria-labelledby="tm-t">
-    <header class="card__head"><div><h2 class="card__title" id="tm-t">Members</h2><p class="card__sub" data-k="tm-sub"></p></div>
-      <div class="card__tools"><label class="search">${renderIcon('search')}<input type="search" placeholder="Search people…" aria-label="Search people" data-k="tm-q" /></label></div></header>
-    <div class="toolbar"><div class="chips" data-k="tm-roles">${['all', ...ASSIGNABLE_ROLES].map((role) => `<button type="button" class="chip" data-role-f="${role}" aria-pressed="${role === activeRoleFilter}">${role === 'all' ? 'Everyone' : escapeHtml(ROLE_NAMES[role])} <b data-rn="${role}"></b></button>`).join('')}</div></div>
-    <div class="table-wrap"><table class="table table--stack st-mtable" style="--areas:'t x' 's p' 'r r'">
-      <thead><tr><th scope="col">Person</th><th scope="col">Works at</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
-      <tbody data-k="tm-rows"></tbody>
-    </table></div>
-  </section>
-  <div class="st-grid st-grid--team">
-    <section class="card st-perms tcard" aria-labelledby="tm-p-t">
-      <header class="card__head">
-        <div>
-          <h2 class="card__title" id="tm-p-t">What each role can do</h2>
-          <p class="card__sub">Dynamic role capabilities and permission matrix backed by MySQL</p>
-        </div>
-        <div class="card__tools" style="display:flex; align-items:center; gap:8px;">
-          <span class="st-dirty" data-k="tm-matrix-dirty" hidden style="margin-right:4px;">${renderIcon('edit')}Unsaved matrix changes</span>
-          <button type="button" class="btn btn--ghost btn--sm magnetic" data-k="tm-new-role">${renderIcon('userPlus')}New Role</button>
-          <button type="button" class="btn btn--primary btn--sm magnetic" data-k="tm-save-matrix" disabled>${renderIcon('check')}Save permissions</button>
-        </div>
-      </header>
-      <div class="table-wrap">
-        <table class="table st-matrix" data-k="tm-matrix-table">
-          <tbody data-k="tm-matrix-body">
-            <tr><td colspan="6" style="text-align:center; padding:28px; color:var(--muted);">Loading live permissions matrix from database...</td></tr>
-          </tbody>
-        </table>
+    <header class="card__head">
+      <div>
+        <h2 class="card__title" id="tm-t">Members</h2>
+        <p class="card__sub" data-k="tm-sub"></p>
       </div>
-    </section>
-    <section class="card st-seats" aria-labelledby="tm-s-t">
-      <header class="card__head"><div><h2 class="card__title" id="tm-s-t">Seats</h2><p class="card__sub" data-k="tm-plan"></p></div></header>
-      <div class="st-seats__fig"><b class="num" data-k="tm-used">0</b><span>of <b data-k="tm-cap"></b> seats in use</span></div>
-      <span class="meter st-seats__meter"><span class="meter__fill" data-k="tm-meter" style="--c:var(--pine)"></span><span class="meter__fill st-seats__inv" data-k="tm-meter-inv" style="--c:var(--sky)"></span></span>
-      <ul class="st-seats__key"><li><i class="dot" style="--c:var(--pine)"></i>Active and away</li><li><i class="dot" style="--c:var(--sky)"></i>Invited, not joined yet</li></ul>
-      <p class="st-seats__note" data-k="tm-note"></p>
-      <a class="btn btn--ghost btn--sm" href="/settings/billing">${renderIcon('card')}Change seats</a>
-    </section>
+      <div class="card__tools">
+        <label class="search">
+          ${renderIcon('search')}
+          <input type="search" placeholder="Search people by name, role or email…" aria-label="Search people" data-k="tm-q" />
+        </label>
+      </div>
+    </header>
+    <div class="toolbar">
+      <div class="chips" data-k="tm-roles">
+        ${['all', ...ASSIGNABLE_ROLES]
+          .map(
+            (role) =>
+              `<button type="button" class="chip" data-role-f="${role}" aria-pressed="${role === activeRoleFilter}">
+                ${role === 'all' ? 'Everyone' : escapeHtml(ROLE_NAMES[role])} <b data-rn="${role}"></b>
+              </button>`
+          )
+          .join('')}
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="table table--stack st-mtable" style="--areas:'t x' 's p' 'r r'">
+        <thead>
+          <tr>
+            <th scope="col">Person</th>
+            <th scope="col">Works at</th>
+            <th scope="col">Role</th>
+            <th scope="col">Status</th>
+            <th scope="col"><span class="sr">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody data-k="tm-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 2. Compact Capacity & Seats Summary Banner -->
+  <section class="card st-seats st-seats--compact" aria-labelledby="tm-s-t">
+    <div>
+      <h3 class="card__title" id="tm-s-t" style="font-size: var(--fs-base); margin-bottom: 2px;">Team Capacity &amp; License Seats</h3>
+      <p class="card__sub" data-k="tm-plan" style="margin: 0;"></p>
+    </div>
+    <div class="st-seats__fig">
+      <b class="num" data-k="tm-used" style="font-size: 1.4rem;">0</b>
+      <span style="font-size: var(--fs-sm); color: var(--muted);">of <b data-k="tm-cap"></b> active seats</span>
+    </div>
+    <span class="meter st-seats__meter" style="max-width: 240px; min-width: 140px;">
+      <span class="meter__fill" data-k="tm-meter" style="--c:var(--pine)"></span>
+      <span class="meter__fill st-seats__inv" data-k="tm-meter-inv" style="--c:var(--sky)"></span>
+    </span>
+    <a class="btn btn--ghost btn--sm" href="/settings/billing">${renderIcon('card')}Manage seats</a>
+  </section>
+
+  <!-- 3. Full-Width Interactive Roles & Permissions Matrix -->
+  <section class="card st-perms tcard" aria-labelledby="tm-p-t">
+    <header class="card__head" style="flex-wrap: wrap; gap: 14px;">
+      <div>
+        <h2 class="card__title" id="tm-p-t">Role Capabilities &amp; Permission Matrix</h2>
+        <p class="card__sub">Granular access control matrix synced live with MySQL database</p>
+      </div>
+      <div class="card__tools" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <label class="search" style="min-width: 220px;">
+          ${renderIcon('search')}
+          <input type="search" placeholder="Filter capabilities (e.g. order, stock)…" aria-label="Filter capabilities" data-k="tm-perm-q" />
+        </label>
+        <button type="button" class="btn btn--secondary btn--sm magnetic" data-k="tm-new-role">${renderIcon('plus')}New Role</button>
+        <button type="button" class="btn btn--primary btn--sm magnetic" data-k="tm-save-matrix" disabled>${renderIcon('check')}Save permissions</button>
+      </div>
+    </header>
+    <div class="table-wrap" style="max-height: 650px; overflow: auto; border-radius: 12px; border: 1px solid var(--line-2);">
+      <table class="table st-matrix" data-k="tm-matrix-table">
+        <tbody data-k="tm-matrix-body">
+          <tr><td colspan="7" style="text-align:center; padding:36px; color:var(--muted);">Loading live permissions matrix from database...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. Floating Action Bar for Unsaved Matrix Changes -->
+  <div class="st-floating-bar" data-k="tm-float-bar">
+    <span class="st-floating-bar__txt"><i class="st-floating-bar__dot"></i>Unsaved permission changes</span>
+    <button type="button" class="btn btn--ghost btn--sm" data-k="tm-discard-matrix">Discard</button>
+    <button type="button" class="btn btn--primary btn--sm" data-k="tm-float-save">${renderIcon('check')}Save changes</button>
   </div>`;
 }
 
@@ -158,10 +224,16 @@ function renderMemberRow(member: TeamMember, query: string): string {
   const isOwner = member.role === 'owner';
   const location = store.locations.find((l) => l.id === member.locId);
 
+  // Combine static roles with live MySQL roles
+  const roleOptions = (isOwner ? ROLES : ASSIGNABLE_ROLES).map((role) => ({
+    val: role,
+    label: ROLE_NAMES[role] || role,
+  }));
+
   return `<tr class="is-link" data-key="${member.id}" data-open="${member.id}">
     <td class="a-t"><span class="cell-person">${renderAvatar(member.id, 'md')}<span><b>${highlightSearchMatch(member.name, query)}${isMe ? ' <span class="st-this">You</span>' : ''}</b><small>${highlightSearchMatch(member.title, query)} · ${highlightSearchMatch(member.email, query)}</small></span></span></td>
     <td class="a-s" data-label="Works at">${escapeHtml(location?.name ?? '')}</td>
-    <td class="a-r"><select class="select st-role" data-role="${member.id}" aria-label="Role for ${escapeHtml(member.name)}" ${isMe || isOwner ? `disabled title="${isMe ? 'You can’t change your own role' : 'The owner’s role is fixed'}"` : ''}>${(isOwner ? ROLES : ASSIGNABLE_ROLES).map((role) => `<option value="${role}"${role === member.role ? ' selected' : ''}>${escapeHtml(ROLE_NAMES[role])}</option>`).join('')}</select></td>
+    <td class="a-r"><select class="select st-role" data-role="${member.id}" aria-label="Role for ${escapeHtml(member.name)}" ${isMe || isOwner ? `disabled title="${isMe ? 'You can’t change your own role' : 'The owner’s role is fixed'}"` : ''}>${roleOptions.map((opt) => `<option value="${opt.val}"${opt.val === member.role ? ' selected' : ''}>${escapeHtml(opt.label)}</option>`).join('')}</select></td>
     <td class="a-p">${renderPill(statusLabel, tone)}</td>
     <td class="a-x r">${member.status === 'invited' ? renderIconButton('send', `Resend invite to ${member.name}`, `data-resend="${member.id}"`, 'ibtn--sm') : ''}${isMe || isOwner ? '' : renderIconButton('trash', `Remove ${member.name}`, `data-remove="${member.id}"`, 'ibtn--sm')}</td>
   </tr>`;
@@ -226,7 +298,7 @@ export function updateSeatsSection(container: HTMLElement, animate = false): voi
 
   const planEl = queryOne<HTMLElement>('[data-k="tm-plan"]', container);
   if (planEl) {
-    planEl.textContent = `${billing.plan} plan · up to ${billing.seats} seats`;
+    planEl.textContent = `${billing.plan} plan · up to ${billing.seats} team seats`;
   }
 
   const meterEl = queryOne<HTMLElement>('[data-k="tm-meter"]', container);
@@ -247,17 +319,6 @@ export function updateSeatsSection(container: HTMLElement, animate = false): voi
       delay: motionDuration(animate ? 0.55 : 0),
       ease: 'power3.inOut',
     });
-  }
-
-  const freeSeats = billing.seats - used;
-  const noteEl = queryOne<HTMLElement>('[data-k="tm-note"]', container);
-  if (noteEl) {
-    noteEl.innerHTML =
-      freeSeats <= 0
-        ? `${renderIcon('alert')}<span>Every seat is taken — add seats before the next invite.</span>`
-        : freeSeats <= 2
-          ? `${renderIcon('info')}<span><b>${pluralize(freeSeats, 'seat')}</b> left. Invites don’t use a seat until they join.</span>`
-          : `${renderIcon('check')}<span><b>${pluralize(freeSeats, 'seat')}</b> free for new teammates.</span>`;
   }
 }
 
@@ -331,26 +392,42 @@ export function openMemberDrawer(memberId: string): void {
 
 function checkMatrixDirty(container: HTMLElement): void {
   let isDirty = false;
+  let changedRolesCount = 0;
+
   for (const role of liveRoles) {
     const initSet = initialRolePerms.get(role.id) || new Set();
     const currSet = currentRolePerms.get(role.id) || new Set();
-    if (initSet.size !== currSet.size) {
-      isDirty = true;
-      break;
-    }
-    for (const pid of currSet) {
-      if (!initSet.has(pid)) {
-        isDirty = true;
-        break;
+    let roleDiff = initSet.size !== currSet.size;
+    if (!roleDiff) {
+      for (const pid of currSet) {
+        if (!initSet.has(pid)) {
+          roleDiff = true;
+          break;
+        }
       }
     }
-    if (isDirty) break;
+    if (roleDiff) {
+      isDirty = true;
+      changedRolesCount++;
+    }
   }
 
   const saveBtn = queryOne<HTMLButtonElement>('[data-k="tm-save-matrix"]', container);
-  const dirtyBadge = queryOne<HTMLElement>('[data-k="tm-matrix-dirty"]', container);
+  const floatBar = queryOne<HTMLElement>('[data-k="tm-float-bar"]', container);
+  const floatTxt = floatBar?.querySelector<HTMLElement>('.st-floating-bar__txt');
+
   if (saveBtn) saveBtn.disabled = !isDirty;
-  if (dirtyBadge) dirtyBadge.hidden = !isDirty;
+
+  if (floatBar) {
+    if (isDirty) {
+      floatBar.classList.add('is-visible');
+      if (floatTxt) {
+        floatTxt.innerHTML = `<i class="st-floating-bar__dot"></i>Unsaved changes across ${pluralize(changedRolesCount, 'role')}`;
+      }
+    } else {
+      floatBar.classList.remove('is-visible');
+    }
+  }
 }
 
 function renderMatrixTable(container: HTMLElement): void {
@@ -358,7 +435,7 @@ function renderMatrixTable(container: HTMLElement): void {
   if (!table) return;
 
   if (liveRoles.length === 0 || livePermissions.length === 0) {
-    table.innerHTML = `<tbody><tr><td style="text-align:center; padding:24px; color:var(--muted);">No roles found in database.</td></tr></tbody>`;
+    table.innerHTML = `<tbody><tr><td colspan="7" style="text-align:center; padding:32px; color:var(--muted);">No roles found in database.</td></tr></tbody>`;
     return;
   }
 
@@ -368,14 +445,14 @@ function renderMatrixTable(container: HTMLElement): void {
       (role) => `
       <th scope="col" class="st-matrix__role" data-col="r-${role.id}">
         <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
-          <span>${escapeHtml(role.name)}</span>
+          <b style="font-size:var(--fs-sm);">${escapeHtml(role.name)}</b>
           ${
             !role.is_system
               ? `<button type="button" class="ibtn ibtn--xs st-role-del-btn" data-del-role="${role.id}" data-role-name="${escapeHtml(role.name)}" title="Delete custom role ${escapeHtml(role.name)}">${renderIcon('trash')}</button>`
               : ''
           }
         </div>
-        <small>${role.is_system ? 'System Role' : 'Custom Role'}</small>
+        <small>${role.is_system ? renderPill('System', 'slate') : renderPill('Custom', 'pine')}</small>
       </th>
     `
     )
@@ -384,15 +461,33 @@ function renderMatrixTable(container: HTMLElement): void {
   const theadHtml = `
     <thead>
       <tr>
-        <th scope="col" style="min-width: 220px; text-align: left;">Permission / Capability</th>
+        <th scope="col" style="min-width: 260px; text-align: left;">
+          <span>Permission Capability</span>
+        </th>
         ${headerColsHtml}
       </tr>
     </thead>
   `;
 
-  // 2. Group permissions by module
+  // 2. Filter permissions if query exists
+  const q = matrixPermQuery.trim().toLowerCase();
+  const filteredPerms = livePermissions.filter(
+    (p) => !q || (p.description || '').toLowerCase().includes(q) || p.code.toLowerCase().includes(q) || p.module.toLowerCase().includes(q)
+  );
+
+  if (filteredPerms.length === 0) {
+    table.innerHTML = `
+      ${theadHtml}
+      <tbody data-k="tm-matrix-body">
+        <tr><td colspan="${liveRoles.length + 1}" style="text-align:center; padding:36px; color:var(--muted);">No permissions match “${escapeHtml(matrixPermQuery)}”.</td></tr>
+      </tbody>
+    `;
+    return;
+  }
+
+  // Group permissions by module
   const moduleMap: Record<string, SystemPermission[]> = {};
-  livePermissions.forEach((p) => {
+  filteredPerms.forEach((p) => {
     if (!moduleMap[p.module]) moduleMap[p.module] = [];
     moduleMap[p.module].push(p);
   });
@@ -404,7 +499,12 @@ function renderMatrixTable(container: HTMLElement): void {
     const modTitle = MODULE_TITLES[mod] || mod.toUpperCase();
     tbodyRows.push(`
       <tr class="st-matrix__mod-head">
-        <th colspan="${liveRoles.length + 1}">${escapeHtml(modTitle)}</th>
+        <th colspan="${liveRoles.length + 1}">
+          <span style="display:inline-flex; align-items:center; gap:6px;">
+            ${renderIcon(MODULE_ICONS[mod] || 'shield')}
+            ${escapeHtml(modTitle)}
+          </span>
+        </th>
       </tr>
     `);
 
@@ -425,8 +525,8 @@ function renderMatrixTable(container: HTMLElement): void {
       tbodyRows.push(`
         <tr>
           <th scope="row">
-            <b>${escapeHtml(perm.description || perm.code)}</b>
-            <small style="display:block; font-size:var(--fs-2xs); color:var(--muted);">${escapeHtml(perm.code)}</small>
+            <b>${q ? highlightSearchMatch(perm.description || perm.code, q) : escapeHtml(perm.description || perm.code)}</b>
+            <small style="display:block; font-size:var(--fs-2xs); color:var(--muted);">${q ? highlightSearchMatch(perm.code, q) : escapeHtml(perm.code)}</small>
           </th>
           ${roleCellsHtml}
         </tr>
@@ -464,7 +564,7 @@ export async function loadLiveMatrix(container: HTMLElement): Promise<void> {
     console.warn('Failed to load live roles matrix from backend:', err);
     const tbody = queryOne<HTMLElement>('[data-k="tm-matrix-body"]', container);
     if (tbody) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--bad);">Failed to load roles from backend. Please verify your connection.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--bad);">Failed to load roles from backend. Please verify your connection.</td></tr>`;
     }
   }
 }
@@ -480,15 +580,24 @@ function openCreateRoleModal(container: HTMLElement): void {
   const permsChecklistHtml = Object.entries(moduleMap)
     .map(
       ([mod, perms]) => `
-      <div style="margin-bottom: 12px;">
-        <b style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px;">${escapeHtml(MODULE_TITLES[mod] || mod)}</b>
+      <div style="margin-bottom: 14px;" data-module-block="${mod}">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 6px;">
+          <b style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--muted); display:inline-flex; align-items:center; gap:6px;">
+            ${renderIcon(MODULE_ICONS[mod] || 'shield')}
+            ${escapeHtml(MODULE_TITLES[mod] || mod)}
+          </b>
+          <button type="button" class="btn btn--ghost btn--xs" data-mod-toggle="${mod}">Select all</button>
+        </div>
         <div class="st-perm-modal-grid">
           ${perms
             .map(
               (p) => `
             <label class="st-perm-modal-item">
-              <input type="checkbox" name="role_perms" value="${p.id}" />
-              <span><b>${escapeHtml(p.description || p.code)}</b><small style="display:block; color:var(--muted); font-size:var(--fs-2xs);">${escapeHtml(p.code)}</small></span>
+              <input type="checkbox" name="role_perms" value="${p.id}" data-mod="${p.module}" />
+              <span>
+                <b>${escapeHtml(p.description || p.code)}</b>
+                <small style="display:block; color:var(--muted); font-size:var(--fs-2xs);">${escapeHtml(p.code)}</small>
+              </span>
             </label>
           `
             )
@@ -500,22 +609,38 @@ function openCreateRoleModal(container: HTMLElement): void {
     .join('');
 
   const modalHtml = `
-    <form id="create-role-form" style="display: grid; gap: 14px;">
-      <label class="st-field">
-        <span class="field__label">Role Name *</span>
-        <input class="st-in" name="name" type="text" placeholder="e.g. Quality Auditor" required autofocus />
-      </label>
-      <label class="st-field">
-        <span class="field__label">Description</span>
-        <input class="st-in" name="description" type="text" placeholder="Short description of responsibilities" />
-      </label>
+    <form id="create-role-form" style="display: grid; gap: 14px; max-width: 680px;">
+      <div class="st-preset-bar">
+        <span style="font-size: var(--fs-xs); font-weight:700; color:var(--muted); margin-right: 4px;">Quick Presets:</span>
+        <button type="button" class="st-preset-btn" data-preset="all">⭐ Full Access (16)</button>
+        <button type="button" class="st-preset-btn" data-preset="operations">📦 Operations &amp; Stock</button>
+        <button type="button" class="st-preset-btn" data-preset="sales">🛒 Sales &amp; Orders</button>
+        <button type="button" class="st-preset-btn" data-preset="auditor">🔍 Auditor (Read-Only)</button>
+        <button type="button" class="st-preset-btn" data-preset="clear" style="color:var(--bad);">✖ Clear</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <label class="st-field">
+          <span class="field__label">Role Name *</span>
+          <input class="st-in" name="name" type="text" placeholder="e.g. Quality Auditor" required autofocus />
+        </label>
+        <label class="st-field">
+          <span class="field__label">Description</span>
+          <input class="st-in" name="description" type="text" placeholder="Summary of role duties" />
+        </label>
+      </div>
+
       <div class="st-field">
-        <span class="field__label">Assign Initial Permissions</span>
-        <div style="border: 1px solid var(--line-2); border-radius: 12px; padding: 12px; background: var(--surface);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 4px;">
+          <span class="field__label">Configure Module Permissions</span>
+          <small data-k="perm-count" style="font-weight:700; color:var(--primary);">0 of ${livePermissions.length} selected</small>
+        </div>
+        <div style="border: 1px solid var(--line-2); border-radius: 12px; padding: 14px; background: var(--surface); max-height: 380px; overflow-y: auto;">
           ${permsChecklistHtml}
         </div>
       </div>
-      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
         <button type="button" class="btn btn--ghost btn--sm" data-action="cancel">Cancel</button>
         <button type="submit" class="btn btn--primary btn--sm" data-action="submit">${renderIcon('check')}Create Role</button>
       </div>
@@ -524,14 +649,64 @@ function openCreateRoleModal(container: HTMLElement): void {
 
   openModal(modalHtml, {
     title: 'Create New Custom Role',
-    sub: 'Define a new role and configure its system privileges in MySQL',
+    sub: 'Define a tailored team role with granular permissions stored in MySQL',
     onMount: (dialog) => {
+      const form = dialog.querySelector<HTMLFormElement>('#create-role-form');
+      if (!form) return;
+
+      const updateCount = () => {
+        const checked = form.querySelectorAll<HTMLInputElement>('input[name="role_perms"]:checked').length;
+        const countEl = dialog.querySelector<HTMLElement>('[data-k="perm-count"]');
+        if (countEl) countEl.textContent = `${checked} of ${livePermissions.length} selected`;
+      };
+
+      form.addEventListener('change', updateCount);
+
+      // Presets
+      dialog.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const preset = btn.dataset.preset;
+          const checkboxes = Array.from(form.querySelectorAll<HTMLInputElement>('input[name="role_perms"]'));
+
+          checkboxes.forEach((cb) => {
+            const mod = cb.dataset.mod || '';
+            const val = cb.closest('label')?.querySelector('small')?.textContent || '';
+
+            if (preset === 'all') cb.checked = true;
+            else if (preset === 'clear') cb.checked = false;
+            else if (preset === 'operations') {
+              cb.checked = ['products', 'warehouses', 'purchasing'].includes(mod);
+            } else if (preset === 'sales') {
+              cb.checked = ['orders', 'customers'].includes(mod);
+            } else if (preset === 'auditor') {
+              cb.checked = val.endsWith('.view') || mod === 'analytics' || mod === 'audit';
+            }
+          });
+
+          updateCount();
+        });
+      });
+
+      // Module Select All toggles
+      dialog.querySelectorAll<HTMLButtonElement>('[data-mod-toggle]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const mod = btn.dataset.modToggle;
+          const block = dialog.querySelector(`[data-module-block="${mod}"]`);
+          if (block) {
+            const cbs = Array.from(block.querySelectorAll<HTMLInputElement>('input[name="role_perms"]'));
+            const allChecked = cbs.every((cb) => cb.checked);
+            cbs.forEach((cb) => (cb.checked = !allChecked));
+            btn.textContent = allChecked ? 'Select all' : 'Deselect all';
+            updateCount();
+          }
+        });
+      });
+
       dialog.querySelector('[data-action="cancel"]')?.addEventListener('click', () => {
         closeModal();
       });
 
-      const form = dialog.querySelector<HTMLFormElement>('#create-role-form');
-      form?.addEventListener('submit', async (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const nameInput = form.elements.namedItem('name') as HTMLInputElement;
         const descInput = form.elements.namedItem('description') as HTMLInputElement;
@@ -588,12 +763,28 @@ export function initTeamSubtab(container: HTMLElement): void {
     openInviteTeammateModal(target);
   });
 
-  // Search input
+  // Top New Role Button
+  queryOne<HTMLElement>('[data-k="tm-top-new-role"]', container)?.addEventListener('click', (e) => {
+    const target = e.currentTarget as HTMLElement;
+    playHaptic(target);
+    openCreateRoleModal(container);
+  });
+
+  // Search input for team members
   const searchInput = queryOne<HTMLInputElement>('[data-k="tm-q"]', container);
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       searchQuery = (e.target as HTMLInputElement).value;
       updateMembersTable(container, true);
+    });
+  }
+
+  // Filter input for matrix permissions
+  const matrixSearchInput = queryOne<HTMLInputElement>('[data-k="tm-perm-q"]', container);
+  if (matrixSearchInput) {
+    matrixSearchInput.addEventListener('input', (e) => {
+      matrixPermQuery = (e.target as HTMLInputElement).value;
+      renderMatrixTable(container);
     });
   }
 
@@ -610,7 +801,7 @@ export function initTeamSubtab(container: HTMLElement): void {
     }
   });
 
-  // Member role select dropdown
+  // Member role select dropdown & matrix checkbox toggle
   container.addEventListener('change', (e) => {
     const target = e.target as HTMLElement;
 
@@ -638,47 +829,64 @@ export function initTeamSubtab(container: HTMLElement): void {
     }
   });
 
-  // Save Permissions Matrix Button
-  queryOne<HTMLButtonElement>('[data-k="tm-save-matrix"]', container)?.addEventListener(
-    'click',
-    async (e) => {
-      const btn = e.currentTarget as HTMLButtonElement;
-      playHaptic(btn);
-      btn.disabled = true;
-      btn.innerHTML = `<span>Saving...</span>`;
+  // Save Permissions Matrix Button (Top Header & Floating Bar)
+  const saveMatrixHandler = async () => {
+    const saveBtn = queryOne<HTMLButtonElement>('[data-k="tm-save-matrix"]', container);
+    const floatSaveBtn = queryOne<HTMLButtonElement>('[data-k="tm-float-save"]', container);
 
-      try {
-        for (const role of liveRoles) {
-          const initSet = initialRolePerms.get(role.id) || new Set();
-          const currSet = currentRolePerms.get(role.id) || new Set();
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span>Saving...</span>`;
+    }
+    if (floatSaveBtn) {
+      floatSaveBtn.disabled = true;
+      floatSaveBtn.innerHTML = `<span>Saving...</span>`;
+    }
 
-          let changed = initSet.size !== currSet.size;
-          if (!changed) {
-            for (const pid of currSet) {
-              if (!initSet.has(pid)) {
-                changed = true;
-                break;
-              }
+    try {
+      for (const role of liveRoles) {
+        const initSet = initialRolePerms.get(role.id) || new Set();
+        const currSet = currentRolePerms.get(role.id) || new Set();
+
+        let changed = initSet.size !== currSet.size;
+        if (!changed) {
+          for (const pid of currSet) {
+            if (!initSet.has(pid)) {
+              changed = true;
+              break;
             }
-          }
-
-          if (changed) {
-            await updateRole(role.id, {
-              permission_ids: Array.from(currSet),
-            });
           }
         }
 
-        showToast('Permissions updated and persisted to database', { ico: 'check' });
-        await loadLiveMatrix(container);
-      } catch (err: any) {
-        showToast(err?.message || 'Failed to update permissions', { ico: 'close' });
-        checkMatrixDirty(container);
+        if (changed) {
+          await updateRole(role.id, {
+            permission_ids: Array.from(currSet),
+          });
+        }
       }
-    }
-  );
 
-  // Create Role Button
+      showToast('Permissions updated and persisted to database', { ico: 'check' });
+      await loadLiveMatrix(container);
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to update permissions', { ico: 'close' });
+      checkMatrixDirty(container);
+    }
+  };
+
+  queryOne<HTMLButtonElement>('[data-k="tm-save-matrix"]', container)?.addEventListener('click', saveMatrixHandler);
+  queryOne<HTMLButtonElement>('[data-k="tm-float-save"]', container)?.addEventListener('click', saveMatrixHandler);
+
+  // Discard changes
+  queryOne<HTMLButtonElement>('[data-k="tm-discard-matrix"]', container)?.addEventListener('click', () => {
+    liveRoles.forEach((role) => {
+      const initSet = initialRolePerms.get(role.id) || new Set();
+      currentRolePerms.set(role.id, new Set(initSet));
+    });
+    renderMatrixTable(container);
+    showToast('Unsaved changes discarded', { ico: 'close' });
+  });
+
+  // Create Role Button in matrix header
   queryOne<HTMLElement>('[data-k="tm-new-role"]', container)?.addEventListener('click', (e) => {
     const target = e.currentTarget as HTMLElement;
     playHaptic(target);
